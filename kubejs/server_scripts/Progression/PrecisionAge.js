@@ -1,0 +1,777 @@
+ServerEvents.recipes(event => {
+
+// Shapeless
+
+    event.shapeless(
+        'kubejs:quality_tool_handle',
+        [
+            '2x farmersdelight:canvas',
+            'createaddition:iron_wire',
+            'minecraft:stick'
+        ]
+    ).id('cwi:crafting_table/quality_tool_handle_manual_only')
+
+    event.shapeless(
+        'create:nixie_tube',
+        [
+            '2x create:electron_tube'
+        ]
+    ).id('cwi:crafting_table/nixie_tube_manual_only')
+
+    event.shapeless(
+        'kubejs:handle',
+        [
+            '2x #cwi:rubbers',
+            'kubejs:quality_tool_handle'
+        ]
+    ).id('cwi:crafting_table/handle_manual_only')
+
+    event.shapeless(
+        'createmetallurgy:foundry_basin',
+        [
+            'createmetallurgy:refractory_mortar',
+            'create:basin'
+        ]
+    ).id('cwi:crafting_table/foundry_basin_manual_only')
+
+    event.shapeless(
+        'kubejs:unfinished_control_chip',
+        [
+            'tfmg:screwdriver',
+            'createdieselgenerators:hammer',
+            'kubejs:small_hammer',
+            'kubejs:sticky_resin',
+            'kubejs:brass_circuit_board',
+            'create:electron_tube'
+        ]
+    )
+    .damageIngredient('createdieselgenerators:hammer', 1)
+    .damageIngredient('tfmg:screwdriver', 3)
+    .damageIngredient('kubejs:small_hammer', 3)
+    .id('cwi:crafting_table/unfinished_control_chip_manual_only')
+
+// Shaped
+
+    event.shaped(
+        'tfmg:brass_mechanical_pump',
+        [
+            'ABC'
+        ],
+        {
+            A: 'kubejs:andesite_bearing',
+            B: 'tfmg:brass_pipe',
+            C: 'create:propeller'
+        }
+    )
+
+    event.shaped(
+        'create:crafter_slot_cover',
+        [
+            'ABA'
+        ],
+        {
+            A: 'create:brass_nugget',
+            B: 'create:brass_sheet'
+        }
+    )
+
+    event.shaped(
+        'vintageimprovements:helve_hammer_slot_cover',
+        [
+            '  A',
+            ' B ',
+            'A  '
+        ],
+        {
+            A: 'create:brass_nugget',
+            B: 'create:brass_sheet'
+        }
+    )
+
+    event.shaped(
+        'create_connected:inventory_access_port',
+        [
+            'AB',
+            'CD'
+        ],
+        {
+            A: 'kubejs:integrated_electron_tube',
+            B: 'create:brass_sheet',
+            C: 'kubejs:precise_machine',
+            D: 'create:brass_funnel'
+        }
+    )
+
+    event.shaped(
+        'kubejs:rubber_hand',
+        [
+            'A',
+            'B'
+        ],
+        {
+            A: '#cwi:rubbers',
+            B: 'create:andesite_alloy'
+        }
+    )
+
+    event.shaped(
+        'create:deployer',
+        [
+            'A',
+            'B',
+            'C'
+        ],
+        {
+            A: 'create_connected:control_chip',
+            B: 'create:brass_casing',
+            C: 'kubejs:rubber_hand'
+        }
+    )
+
+    event.shaped(
+        'create:brass_funnel',
+        [
+            'A',
+            'B',
+            'C'
+        ],
+        {
+            A: 'create_connected:control_chip',
+            B: 'create:brass_sheet',
+            C: '#cwi:rubbers'
+        }
+    )
+
+    event.shaped(
+        '2x create:brass_tunnel',
+        [
+            'AD',
+            'BB',
+            'CC'
+        ],
+        {
+            A: 'create_connected:control_chip',
+            B: 'create:brass_sheet',
+            C: '#cwi:rubbers',
+            D: 'create:electron_tube'
+        }
+    )
+
+    event.shaped(
+        'create:elevator_pulley',
+        [
+            'A',
+            'B',
+            'C'
+        ],
+        {
+            A: 'kubejs:precise_machine',
+            B: '#cwi:rubber_blocks',
+            C: 'create:sturdy_sheet'
+        }
+    )
+
+    event.shaped(
+        'create:smart_chute',
+        [
+            'A',
+            'B',
+            'C'
+        ],
+        {
+            A: 'create:brass_sheet',
+            B: 'create:chute',
+            C: 'create_connected:control_chip'
+        }
+    )
+
+    event.shaped(
+        '3x create:mechanical_crafter',
+        [
+            'A',
+            'B',
+            'C'
+        ],
+        {
+            A: 'create_connected:control_chip',
+            B: 'kubejs:precise_machine',
+            C: 'create:brass_casing'
+        }
+    )
+
+    event.shaped(
+        'vintageimprovements:vibrating_table',
+        [
+            'ABA',
+            'ACA'
+        ],
+        {
+            A: 'kubejs:iron_spring',
+            B: 'kubejs:andesite_bearing',
+            C: 'kubejs:andesite_machine'
+        }
+    )
+
+    event.shaped(
+        'create_connected:inventory_bridge',
+        [
+            'ABA'
+        ],
+        {
+            A: 'create_connected:inventory_access_port',
+            B: 'create:brass_casing'
+        }
+    )
+
+    event.shaped(
+        'create:mechanical_drill',
+        [
+            'A',
+            'B',
+            'C'
+        ],
+        {
+            A: 'kubejs:industrial_iron_drill_head',
+            B: 'kubejs:andesite_machine',
+            C: 'kubejs:industrial_casing'
+        }
+    )
+
+    event.shaped(
+        'createdieselgenerators:canister',
+        [
+            'CAC',
+            'CBC',
+            'CAC'
+        ],
+        {
+            A: 'create:andesite_alloy',
+            B: 'create:fluid_tank',
+            C: 'create:iron_sheet'
+        }
+    )
+
+    event.shaped(
+        'createdieselgenerators:oil_barrel',
+        [
+            'A',
+            'B',
+            'A'
+        ],
+        {
+            A: 'create:iron_sheet',
+            B: 'create:fluid_tank'
+        }
+    )
+
+    event.shaped(
+        'ratatouille:oven',
+        [
+            'A',
+            'B',
+            'A'
+        ],
+        {
+            A: 'kubejs:industrial_iron_sheet',
+            B: 'create:fluid_tank'
+        }
+    )
+
+    event.shaped(
+        'vintageimprovements:spring_coiling_machine_wheel',
+        [
+            ' A ',
+            'ABA',
+            ' A '
+        ],
+        {
+            A: 'kubejs:bronze_sheet',
+            B: 'create:gearshift'
+        }
+    )
+
+    event.shaped(
+        'create:electron_tube',
+        [
+            'A',
+            'B'
+        ],
+        {
+            A: 'create:polished_rose_quartz',
+            B: 'create:brass_sheet'
+        }
+    )
+
+    if (Platform.isLoaded('naturescompass')) {
+        event.shaped(
+            'naturescompass:naturescompass',
+            [
+                'ABA',
+                'CDC',
+                'AEA'
+            ],
+            {
+                A: 'create:brass_sheet',
+                B: 'create_connected:control_chip',
+                C: 'kubejs:integrated_electron_tube',
+                D: 'create:precision_mechanism',
+                E: 'create:brass_ingot'
+            }
+        )
+    }
+
+    event.shaped(
+        'createmetallurgy:casting_table',
+        [
+            'AAA',
+            'A A'
+        ],
+        {
+            A: 'kubejs:andesite_alloy_sheet'
+        }
+    )
+
+    event.shaped(
+        'createmetallurgy:foundry_basin',
+        [
+            'ABA',
+            'AAA'
+        ],
+        {
+            A: 'create:andesite_alloy',
+            B: 'createmetallurgy:refractory_mortar'
+        }
+    )
+
+    event.shaped(
+        'create:content_observer',
+        [
+            'ABC'
+        ],
+        {
+            A: 'kubejs:integrated_electron_tube',
+            B: 'kubejs:precise_machine',
+            C: 'create:attribute_filter'
+        }
+    )
+
+    event.shaped(
+        'rubberworks:compressor',
+        [
+            'A  ',
+            'BDC',
+            'AEA'
+        ],
+        {
+            A: 'kubejs:industrial_iron_sheet',
+            B: 'create:fluid_pipe',
+            C: 'kubejs:industrial_iron_ingot',
+            D: 'create:crushing_wheel',
+            E: 'kubejs:industrial_casing'
+        }
+    )
+
+    event.shaped(
+        'createmetallurgy:faucet',
+        [
+            'ABA',
+            ' A '
+        ],
+        {
+            A: 'kubejs:industrial_iron_sheet',
+            B: 'kubejs:industrial_iron_ingot'
+        }
+    )
+
+// Filling
+
+    event.recipes.create.filling('create:rose_quartz', [Fluid.of('kubejs:redstone_acid', 500), 'minecraft:quartz'])
+    event.recipes.create.filling('create_connected:control_chip', [Fluid.of('kubejs:redstone_acid', 125), 'kubejs:unfinished_control_chip'])
+
+// Mixing
+
+    event.recipes.create.mixing(Fluid.of('kubejs:redstone_acid', 500), [AddFluid('500 #cwi:water'), '4x minecraft:redstone'])
+    event.recipes.create.mixing('kubejs:heated_powdered_obsidian', [Fluid.of('minecraft:lava', 500), 'create:powdered_obsidian']).superheated()
+    event.recipes.create.mixing('3x createmetallurgy:refractory_mortar_ball', [AddFluid('100 #cwi:water'), 'minecraft:sand', 'kubejs:limestone_powder', 'minecraft:clay_ball']).heated()
+
+// Compacting
+
+    event.recipes.create.compacting('kubejs:clay_disk', 'minecraft:clay_ball')
+    event.recipes.create.compacting('kubejs:heated_iron_ingot', 'minecraft:iron_ingot').superheated()
+
+// Mechanical Crafting
+
+    if (Platform.isLoaded('naturescompass')) {
+        event.recipes.create.mechanical_crafting(
+            'create_power_loader:brass_chunk_loader',
+            [
+                'EAE',
+                'ABA',
+                'CDC'
+            ],
+            {
+                A: '#cwi:glass1',
+                B: 'naturescompass:naturescompass',
+                C: 'create:brass_casing',
+                D: 'kubejs:precise_machine',
+                E: 'create:brass_sheet'
+            }
+        )
+    }
+
+    event.recipes.create.mechanical_crafting('createmetallurgy:foundry_mixer', [
+            'A',
+            'B',
+            'C'
+        ], {
+            A: 'kubejs:precise_machine',
+            B: 'kubejs:industrial_casing',
+            C: 'createmetallurgy:sturdy_whisk'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting('vintageimprovements:lathe', [
+            ' GAF ',
+            'DECBD',
+            '  AF '
+        ], {
+            A: 'kubejs:industrial_iron_spring',
+            B: 'kubejs:industrial_casing',
+            C: 'kubejs:precise_machine',
+            D: 'create:brass_sheet',
+            E: 'kubejs:industrial_iron_blade',
+            F: 'kubejs:industrial_iron_sheet',
+            G: 'create_connected:control_chip'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(Item.of('create_sa:portable_drill').enchant('minecraft:efficiency', 3), [
+            'AA   ',
+            'DEFCB'
+        ], {
+            A: 'kubejs:handle',
+            B: 'kubejs:industrial_iron_drill_head',
+            C: 'kubejs:steam_apparatus',
+            D: 'kubejs:industrial_casing',
+            E: 'kubejs:precise_machine',
+            F: 'createdieselgenerators:engine_piston'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting('create_sa:block_picker', [
+            'AA   ',
+            'DEDCB'
+        ], {
+            A: 'kubejs:handle',
+            B: 'create_sa:copper_magnet',
+            C: 'minecraft:copper_block',
+            D: 'create:copper_casing',
+            E: 'kubejs:precise_machine'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting('create_sa:grapplin_whisk', [
+            ' A ',
+            'BCB',
+            'DDD',
+            'DDD',
+            ' E '
+        ], {
+            A: 'kubejs:handle',
+            B: 'createaddition:zinc_sheet',
+            C: 'create:precision_mechanism',
+            D: 'create:minecart_coupling',
+            E: 'create:whisk'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'create_sa:brass_jetpack_chestplate',
+        [
+            'ABCBA',
+            'DEFED',
+            ' BGB '
+        ],
+        {
+            A: 'kubejs:steam_apparatus',
+            B: 'kubejs:bronze_ingot',
+            C: 'create_connected:control_chip',
+            D: 'create:encased_fan',
+            E: 'createdieselgenerators:engine_piston',
+            F: 'kubejs:precise_machine',
+            G: 'kubejs:andesite_machine'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'create_sa:brass_exoskeleton_chestplate',
+        [
+            'DABAD',
+            'CAEAC',
+            'GAFAG'
+        ],
+        {
+            A: 'kubejs:bronze_ingot',
+            B: 'create:flywheel',
+            C: 'kubejs:industrial_iron_ingot',
+            D: 'kubejs:steam_apparatus',
+            E: 'kubejs:precise_machine',
+            F: 'kubejs:andesite_machine',
+            G: 'createdieselgenerators:engine_piston'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'create_sa:creative_filling_tank',
+        [
+            'ABA',
+            'BCB',
+            'ABA'
+        ],
+        {
+            A: 'create:sturdy_sheet',
+            B: 'kubejs:industrial_iron_ingot',
+            C: '#cwi:glass1'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'vintageimprovements:spring_coiling_machine',
+        [
+            'GBC',
+            'ADA',
+            'FEF'
+        ],
+        {
+            A: 'kubejs:industrial_iron_ingot',
+            B: 'kubejs:industrial_iron_blade',
+            C: 'vintageimprovements:spring_coiling_machine_wheel',
+            D: 'kubejs:precise_machine',
+            E: 'kubejs:industrial_casing',
+            F: 'create:brass_sheet',
+            G: 'create_connected:control_chip'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'kubejs:robot_hand',
+        [
+            '  A',
+            'BC ',
+            'DB '
+        ],
+        {
+            A: 'kubejs:industrial_iron_sheet',
+            B: 'createaddition:brass_rod',
+            C: 'kubejs:industrial_iron_ingot',
+            D: 'create_connected:control_chip'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'kubejs:robot_pipette',
+        [
+            ' BA',
+            ' CB',
+            'D  '
+        ],
+        {
+            A: 'create_connected:control_chip',
+            B: 'create:copper_sheet',
+            C: '#cwi:rubbers',
+            D: 'create:fluid_pipe'
+        }
+    )
+
+// Sequenced Assembly
+
+    event.recipes.create.sequenced_assembly(
+        '3x create:track',
+        'kubejs:industrial_iron_sheet',
+        [
+            event.recipes.create.deploying('create:incomplete_track', ['create:incomplete_track', 'kubejs:bronze_rod']),
+            event.recipes.create.pressing('create:incomplete_track', 'create:incomplete_track'),
+            event.recipes.create.pressing('create:incomplete_track', 'create:incomplete_track')
+        ]
+    )
+    .transitionalItem('create:incomplete_track')
+    .loops(2)
+
+
+    event.recipes.create.sequenced_assembly(
+        '3x create:track',
+        'create:sturdy_sheet',
+        [
+            event.recipes.create.deploying('create:incomplete_track', ['create:incomplete_track', 'kubejs:bronze_rod']),
+            event.recipes.create.pressing('create:incomplete_track', 'create:incomplete_track'),
+            event.recipes.create.pressing('create:incomplete_track', 'create:incomplete_track')
+        ]
+    )
+    .transitionalItem('create:incomplete_track')
+    .loops(2)
+
+    event.recipes.create.sequenced_assembly(
+        'create:sturdy_sheet',
+        'kubejs:heated_powdered_obsidian',
+        [
+            rolling(event, AddItem('create:unprocessed_obsidian_sheet'), AddItem('create:unprocessed_obsidian_sheet')),
+            event.recipes.create.pressing('create:unprocessed_obsidian_sheet', 'create:unprocessed_obsidian_sheet'),
+            event.recipes.create.filling('create:unprocessed_obsidian_sheet', ['create:unprocessed_obsidian_sheet', AddFluid('500 #cwi:water')])
+        ]
+    )
+    .transitionalItem('create:unprocessed_obsidian_sheet')
+    .loops(3)
+
+    event.recipes.create.sequenced_assembly(
+        'kubejs:quality_sealed_wood',
+        'kubejs:polished_sealed_wood',
+        [
+            event.recipes.create.pressing('kubejs:incomplete_quality_sealed_wood', 'kubejs:incomplete_quality_sealed_wood'),
+            event.recipes.create.pressing('kubejs:incomplete_quality_sealed_wood', 'kubejs:incomplete_quality_sealed_wood'),
+            event.recipes.create.pressing('kubejs:incomplete_quality_sealed_wood', 'kubejs:incomplete_quality_sealed_wood')
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_quality_sealed_wood')
+    .loops(1)
+
+    event.recipes.create.sequenced_assembly(
+        'create_connected:control_chip',
+        'create:brass_sheet',
+        [
+            event.recipes.create.cutting('kubejs:incomplete_control_chip', 'kubejs:incomplete_control_chip'),
+            event.recipes.create.deploying('kubejs:incomplete_control_chip', ['kubejs:incomplete_control_chip', 'create:electron_tube']),
+            event.recipes.create.filling('kubejs:incomplete_control_chip', ['kubejs:incomplete_control_chip', Fluid.of('kubejs:molten_sticky_resin', 25)]),
+            event.recipes.create.filling('kubejs:incomplete_control_chip', ['kubejs:incomplete_control_chip', Fluid.of('kubejs:redstone_acid', 100)])
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_control_chip')
+    .loops(1)
+
+    event.recipes.create.sequenced_assembly(
+        [
+            CreateItem.of(Item.of('create:precision_mechanism'), 0.9),
+            CreateItem.of(Item.of('create:brass_ingot'), 0.05),
+            CreateItem.of(Item.of('kubejs:brass_powder'), 0.02),
+            CreateItem.of(Item.of('create:brass_nugget'), 0.03)
+        ],
+        'create:brass_sheet',
+        [
+            event.recipes.create.deploying('create:incomplete_precision_mechanism', ['create:incomplete_precision_mechanism', 'kubejs:brass_wire']),
+            event.recipes.create.deploying('create:incomplete_precision_mechanism', ['create:incomplete_precision_mechanism', 'create:brass_nugget']),
+            event.recipes.create.deploying('create:incomplete_precision_mechanism', ['create:incomplete_precision_mechanism', 'tfmg:screwdriver'])
+        ]
+    )
+    .transitionalItem('create:incomplete_precision_mechanism')
+    .loops(3)
+
+    event.recipes.create.sequenced_assembly(
+        [
+            CreateItem.of(Item.of('kubejs:steam_apparatus'), 0.9),
+            CreateItem.of(Item.of('kubejs:bronze_ingot'), 0.05),
+            CreateItem.of(Item.of('kubejs:bronze_powder'), 0.02),
+            CreateItem.of(Item.of('kubejs:bronze_nugget'), 0.03)
+        ],
+        'kubejs:bronze_sheet',
+        [
+            event.recipes.create.deploying('kubejs:incomplete_steam_apparatus', ['kubejs:incomplete_steam_apparatus', 'kubejs:bronze_wire']),
+            event.recipes.create.deploying('kubejs:incomplete_steam_apparatus', ['kubejs:incomplete_steam_apparatus', 'kubejs:bronze_rod']),
+            event.recipes.create.deploying('kubejs:incomplete_steam_apparatus', ['kubejs:incomplete_steam_apparatus', 'createdieselgenerators:engine_piston']),
+            event.recipes.create.deploying('kubejs:incomplete_steam_apparatus', ['kubejs:incomplete_steam_apparatus', 'tfmg:screwdriver'])
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_steam_apparatus')
+    .loops(2)
+
+    event.recipes.create.sequenced_assembly(
+        'kubejs:precise_machine',
+        'create:brass_casing',
+        [
+            event.recipes.create.deploying('kubejs:incomplete_precise_machine', ['kubejs:incomplete_precise_machine', 'create:precision_mechanism']),
+            event.recipes.create.filling('kubejs:incomplete_precise_machine', ['kubejs:incomplete_precise_machine', Fluid.of('kubejs:redstone_acid', 250)]),
+            event.recipes.create.deploying('kubejs:incomplete_precise_machine', ['kubejs:incomplete_precise_machine', 'create:electron_tube']),
+            event.recipes.create.deploying('kubejs:incomplete_precise_machine', ['kubejs:incomplete_precise_machine', 'tfmg:screwdriver'])
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_precise_machine')
+    .loops(1)
+
+    event.recipes.create.sequenced_assembly(
+        'kubejs:industrial_iron_ingot',
+        'kubejs:heated_iron_ingot',
+        [
+            event.recipes.create.pressing('kubejs:incomplete_industrial_iron_ingot', 'kubejs:incomplete_industrial_iron_ingot'),
+            event.recipes.create.pressing('kubejs:incomplete_industrial_iron_ingot', 'kubejs:incomplete_industrial_iron_ingot'),
+            event.recipes.create.filling('kubejs:incomplete_industrial_iron_ingot', ['kubejs:incomplete_industrial_iron_ingot', AddFluid('500 #cwi:water')])
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_industrial_iron_ingot')
+    .loops(3)
+
+    event.recipes.create.sequenced_assembly(
+        'kubejs:industrial_iron_blade',
+        'kubejs:heated_iron_ingot',
+        [
+            rolling(event, AddItem('kubejs:incomplete_industrial_iron_blade'), AddItem('kubejs:incomplete_industrial_iron_blade')),
+            event.recipes.create.cutting('kubejs:incomplete_industrial_iron_blade', 'kubejs:incomplete_industrial_iron_blade'),
+            event.recipes.create.pressing('kubejs:incomplete_industrial_iron_blade', 'kubejs:incomplete_industrial_iron_blade'),
+            event.recipes.create.filling('kubejs:incomplete_industrial_iron_blade', ['kubejs:incomplete_industrial_iron_blade', AddFluid('500 #cwi:water')]),
+            polishing(event, 3, AddItem('kubejs:incomplete_industrial_iron_blade'), [AddItem('kubejs:incomplete_industrial_iron_blade')], 60)
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_industrial_iron_blade')
+    .loops(3)
+
+    event.recipes.create.sequenced_assembly(
+        'kubejs:mechanical_arm_base',
+        'kubejs:precise_machine',
+        [
+            event.recipes.create.deploying('kubejs:incomplete_mechanical_arm_base', ['kubejs:incomplete_mechanical_arm_base', 'create_connected:control_chip']),
+            event.recipes.create.deploying('kubejs:incomplete_mechanical_arm_base', ['kubejs:incomplete_mechanical_arm_base', 'kubejs:integrated_electron_tube']),
+            event.recipes.create.deploying('kubejs:incomplete_mechanical_arm_base', ['kubejs:incomplete_mechanical_arm_base', 'tfmg:screwdriver']),
+            event.recipes.create.filling('kubejs:incomplete_mechanical_arm_base', ['kubejs:incomplete_mechanical_arm_base', Fluid.of('kubejs:molten_sticky_resin', 100)])
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_mechanical_arm_base')
+    .loops(1)
+
+    event.recipes.create.sequenced_assembly(
+        'kubejs:integrated_electron_tube',
+        'create:brass_sheet',
+        [
+            event.recipes.create.deploying('kubejs:incomplete_integrated_electron_tube', ['kubejs:incomplete_integrated_electron_tube', 'create:electron_tube']),
+            event.recipes.create.deploying('kubejs:incomplete_integrated_electron_tube', ['kubejs:incomplete_integrated_electron_tube', 'create:electron_tube']),
+            event.recipes.create.deploying('kubejs:incomplete_integrated_electron_tube', ['kubejs:incomplete_integrated_electron_tube', 'tfmg:screwdriver']),
+            event.recipes.create.filling('kubejs:incomplete_integrated_electron_tube', ['kubejs:incomplete_integrated_electron_tube', Fluid.of('kubejs:molten_sticky_resin', 100)])
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_integrated_electron_tube')
+    .loops(2)
+
+    event.recipes.create.sequenced_assembly(
+        '6x createdieselgenerators:distillation_controller',
+        'createaddition:straw',
+        [
+            event.recipes.create.deploying('kubejs:incomplete_distillation_controller', ['kubejs:incomplete_distillation_controller', 'kubejs:integrated_electron_tube']),
+            event.recipes.create.deploying('kubejs:incomplete_distillation_controller', ['kubejs:incomplete_distillation_controller', 'minecraft:clock']),
+            event.recipes.create.deploying('kubejs:incomplete_distillation_controller', ['kubejs:incomplete_distillation_controller', 'tfmg:screwdriver']),
+            event.recipes.create.filling('kubejs:incomplete_distillation_controller', ['kubejs:incomplete_distillation_controller', Fluid.of('kubejs:molten_sticky_resin', 100)])
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_distillation_controller')
+    .loops(1)
+
+    event.recipes.create.sequenced_assembly(
+        'createaddition:straw',
+        'tfmg:brass_pipe',
+        [
+            event.recipes.create.deploying('kubejs:incomplete_fluid_combustion_module', ['kubejs:incomplete_fluid_combustion_module', 'create:brass_sheet']),
+            event.recipes.create.deploying('kubejs:incomplete_fluid_combustion_module', ['kubejs:incomplete_fluid_combustion_module', 'create_connected:control_chip']),
+            event.recipes.create.deploying('kubejs:incomplete_fluid_combustion_module', ['kubejs:incomplete_fluid_combustion_module', 'create:precision_mechanism']),
+            event.recipes.create.deploying('kubejs:incomplete_fluid_combustion_module', ['kubejs:incomplete_fluid_combustion_module', 'tfmg:screwdriver']),
+            event.recipes.create.filling('kubejs:incomplete_fluid_combustion_module', ['kubejs:incomplete_fluid_combustion_module', Fluid.of('kubejs:molten_sticky_resin', 100)])
+        ]
+    )
+    .transitionalItem('kubejs:incomplete_fluid_combustion_module')
+    .loops(1)
+
+})

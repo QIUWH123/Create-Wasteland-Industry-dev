@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "kubejs:block/stones/mossy_phyllite_top",
+    "bottom": "kubejs:block/stones/phyllite_top",
+    "side": "kubejs:block/stones/mossy_phyllite"
+  }
+}

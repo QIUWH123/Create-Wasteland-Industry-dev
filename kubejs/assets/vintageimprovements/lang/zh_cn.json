@@ -1,0 +1,22 @@
+{
+  "item.vintage.vanadium_sheet": "钒板",
+  "item.vintage.vanadium_nugget": "钒粒",
+  "item.vintage.vanadium_ingot": "钒锭",
+  "block.vintage.vanadium_block": "钒块",
+  "block.vintage.belt_grinder": "带式研磨机",
+  "block.vintage.spring_coiling_machine": "弹簧卷绕机",
+  "block.vintage.vacuum_chamber": "压缩机",
+  "block.vintage.vibrating_table": "振动台",
+  "block.vintage.centrifuge": "离心机",
+  "block.vintage.curving_press": "弯曲压机",
+  "block.vintage.helve_hammer": "重型锤",
+  "block.vintage.lathe": "车床",
+  "block.vintage.laser": "激光切割机",
+  "trim_material.vintage.vanadium": "钒材质",
+  "trim_material.vintage.brass": "黄铜材质",
+  "trim_material.vintage.andesite": "安山合金材质",
+  "trim_material.vintage.rose_quartz": "玫瑰石英材质",
+  "trim_material.vintage.shadow": "暗影钢材质",
+  "trim_material.vintage.radiance": "精炼光辉材质",
+  "trim_material.vintage.zinc": "锌材质"
+}

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      { "model": "kubejs:block/ores/sphalerite0", "weight": 1 },
+      { "model": "kubejs:block/ores/sphalerite1", "weight": 1 },
+      { "model": "kubejs:block/ores/sphalerite2", "weight": 1 },
+      { "model": "kubejs:block/ores/sphalerite3", "weight": 1 }
+    ]
+  }
+}

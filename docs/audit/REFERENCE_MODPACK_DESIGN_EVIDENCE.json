@@ -1,0 +1,46 @@
+{
+  "_porting": {
+    "transferred_on": "2026-10-27",
+    "source_instance": "CWI 1.20.1",
+    "target_instance": "CWI 1.21.1",
+    "source_document": "docs/audit/REFERENCE_MODPACK_DESIGN_EVIDENCE.json",
+    "source_file_sha256": "e4a479b48d9f9aaabf12f59f985e22d25127f31fb43cae2a9ecad79474a5b2f5",
+    "evidence_scope": "All original fields below retain observations from the original 1.20.1 CWI review and named external-game or archive snapshots. Original dates, versions, hashes, counts, source paths, and qualifications are preserved.",
+    "historical_status_fields": "Original fields named current, current_checks, implemented, passes, or similar refer only to their reviewed 1.20.1 revision, including superseded revisions. They are not target validation.",
+    "historical_paths": "Paths in the original payload identify the old CWI tree or the named archive. They are not claims that matching files exist in the target.",
+    "runtime_validation_performed_for_port": false,
+    "target_limitations": "No client scripts or MBD2 machine scripts; quests, worldgen, and structures not yet ported. Historical layouts and their bills are not ported schematics. The server hammer interaction is omitted. Registry/recipe presence is not proof of live operation.",
+    "retained_decisions": "No new schematics, no firebox revival or restored furnace diagnostic, no retired-duplicate conversion/tag bridges; KubeJS sulfur powder and native TFMG air/asphalt/concrete remain the selected identities."
+  },
+  "review_date": "2026-10-25",
+  "method": "Static archive review; scripts were read or parsed but not executed; no gameplay or performance test.",
+  "archives": [
+    {"filename": "CABIN-2.1.7-curseforge.zip", "sha256": "b051fe6bf77b20c1334fa29a25748d1c153e55e011a94db498ad92d8be9c5f2b", "minecraft": "1.20.1", "loader": "Forge 47.4.10", "files": 1004, "quests": 486, "kubejs_scripts": 104},
+    {"filename": "DeceasedCraft_Beta-5.10.17.zip", "sha256": "870ca9d83b05d9aaa3be032c0b741f46349acf8a8561666f93cf96b30645eb61", "manifest_version": "5.10.16", "minecraft": "1.20.1", "loader": "Forge 47.4.0", "files": 5873, "quests": 801, "kubejs_scripts": 108, "npc_dialog_records": 130, "trader_offers": 149},
+    {"filename": "Desolate Planet-1.8.6.0.zip", "sha256": "68938abeaa41641402f641ba3381526da0a834076d9575405a31a2110ce0e7be", "minecraft": "1.20.1", "loader": "Forge 47.4.20", "files": 2734, "hqm_quests": 144, "kubejs_server_scripts": 70, "kubejs_startup_scripts": 23, "kubejs_client_scripts": 11, "openloader_files": 1258, "nbt_structures": 329},
+    {"filename": "The-Legend-Of-2900-1.3.2.zip", "sha256": "19171065fc079d90909b65ac5357567c4b9e94c3a6bf7f8f69632c3b11906f0a", "minecraft": "1.20.1", "loader": "Forge 47.3.12", "files": 3837, "quests": 353, "kubejs_scripts": 41},
+    {"filename": "The-Winter-Rescue-0.6.0-rc8.zip", "sha256": "5c08be481325d402e8dfbb4244b095e10ea06bb7469768aab191a72a488e9a16", "minecraft": "1.20.1", "loader": "Forge 47.4.0", "files": 1434, "quests": 402, "kubejs_scripts": 83, "research_definitions": 79}
+  ],
+  "source_anchors": [
+    {"pack": "CABIN", "path": "overrides/kubejs/server_scripts/", "supports": "kinetic bootstrap, repeated mechanisms, material circulation, byproduct routing, and optional silicon experiment"},
+    {"pack": "CABIN", "path": "overrides/config/ftbquests/", "supports": "operating guidance, optional quest framing, and stock-control notes"},
+    {"pack": "DeceasedCraft", "path": "overrides/config/hordes-common.toml", "supports": "15-day per-player horde interval, pause behavior, infection, and multiplayer scaling"},
+    {"pack": "DeceasedCraft", "path": "overrides/kubejs/server_scripts/recipes/deceasedcraft/", "supports": "ammunition, cure, repair, and material routes"},
+    {"pack": "DeceasedCraft", "path": "overrides/customnpcs/", "supports": "NPC dialogs, quests, clones, and trader offers"},
+    {"pack": "Desolate Planet", "path": "overrides/config/hqm/", "supports": "MAT quest sets and optional short/long Create guide"},
+    {"pack": "Desolate Planet", "path": "overrides/config/openloader/data/", "supports": "starter structures and authored world content"},
+    {"pack": "Desolate Planet", "path": "overrides/kubejs/server_scripts/ and overrides/kubejs/startup_scripts/", "supports": "machine-frame, PCB, power, and survival customizations"},
+    {"pack": "Legend of 2900", "path": "overrides/kubejs/startup_scripts/chaos_deploy.js", "supports": "world-seeded optional Chaos Deploying behavior"},
+    {"pack": "Legend of 2900", "path": "overrides/kubejs/data/survial_island/recipes/chaos_deploying/creative_motor.json", "supports": "six-loop, 16% product / 84% scrap outcome"},
+    {"pack": "Legend of 2900", "path": "overrides/kubejs/server_scripts/ore_processing.js and steel.js", "supports": "acid yield exceptions and 12-loop steel pressing"},
+    {"pack": "Legend of 2900", "path": "overrides/config/create-server.toml", "supports": "3,000-block hose-pulley threshold and ALLOW_ALL bottomless-fluid mode"},
+    {"pack": "Winter Rescue", "path": "overrides/config/fhscenario/ and overrides/config/ftbquests/", "supports": "protected tutorial/skip opening, survival sequencing, and forecasted threat"},
+    {"pack": "Winter Rescue", "path": "overrides/config/fhresearch/ and overrides/kubejs/", "supports": "prototype/recovery research, heat progression, and upgrade tradeoffs"}
+  ],
+  "limits": [
+    "Exports reference native mod jars that are not included.",
+    "No fresh-world run, multiplayer run, seed search, throughput measurement, or performance test was performed.",
+    "Native machine serializers, loot generated by missing jars, and all binary assets were not exhaustively audited.",
+    "Archive text is evidence, not instructions to execute."
+  ]
+}

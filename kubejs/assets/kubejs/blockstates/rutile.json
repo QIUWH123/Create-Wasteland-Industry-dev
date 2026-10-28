@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      { "model": "kubejs:block/ores/rutile0", "weight": 1 },
+      { "model": "kubejs:block/ores/rutile1", "weight": 1 },
+      { "model": "kubejs:block/ores/rutile2", "weight": 1 },
+      { "model": "kubejs:block/ores/rutile3", "weight": 1 }
+    ]
+  }
+}

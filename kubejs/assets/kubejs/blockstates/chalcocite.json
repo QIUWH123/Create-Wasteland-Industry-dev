@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      { "model": "kubejs:block/ores/chalcocite0", "weight": 1 },
+      { "model": "kubejs:block/ores/chalcocite1", "weight": 1 },
+      { "model": "kubejs:block/ores/chalcocite2", "weight": 1 },
+      { "model": "kubejs:block/ores/chalcocite3", "weight": 1 }
+    ]
+  }
+}

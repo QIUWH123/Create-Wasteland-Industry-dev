@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "kubejs:block/stones/mossy_phyllite",
+    "side": "kubejs:block/stones/mossy_phyllite",
+    "top": "kubejs:block/crystalized_phyllite_top",
+    "bottom": "kubejs:block/stones/phyllite_top"
+  }
+}

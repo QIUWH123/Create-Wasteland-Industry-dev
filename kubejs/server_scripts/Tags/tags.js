@@ -1,0 +1,550 @@
+// RecipeInputReplacements
+ServerEvents.recipes(event => {
+    event.replaceInput({input: 'createdeco:industrial_iron_ingot'}, 'createdeco:industrial_iron_ingot', 'kubejs:industrial_iron_ingot')
+    event.replaceInput({input: 'createdeco:industrial_iron_sheet'}, 'createdeco:industrial_iron_sheet', 'kubejs:industrial_iron_sheet')
+    event.replaceInput({input: 'createdeco:industrial_iron_nugget'}, 'createdeco:industrial_iron_nugget', 'kubejs:industrial_iron_nugget')
+    event.replaceInput({input: 'createdeco:andesite_sheet'}, 'createdeco:andesite_sheet', 'kubejs:andesite_alloy_sheet')
+    event.replaceInput({input: 'createdeco:zinc_sheet'}, 'createdeco:zinc_sheet', 'createaddition:zinc_sheet')
+    event.replaceInput({input: 'minecraft:string'}, 'minecraft:string', '#cwi:string')
+    event.replaceInput({input: 'minecraft:leather'}, 'minecraft:leather', '#cwi:leathers')
+    event.replaceInput({input: 'minecraft:feather'}, 'minecraft:feather', '#cwi:feathers')
+
+    Object.values(global.materialTypes).forEach(material => {
+        event.replaceInput({input: `#forge:ingots/${material.id}`}, `#forge:ingots/${material.id}`, material.items.ingot)
+        event.replaceInput({input: `#forge:plates/${material.id}`}, `#forge:plates/${material.id}`, material.items.sheet)
+        event.replaceInput({input: `#forge:nuggets/${material.id}`}, `#forge:nuggets/${material.id}`, material.items.nugget)
+        event.replaceInput({input: `#forge:dusts/${material.id}`}, `#forge:dusts/${material.id}`, material.items.powder)
+        event.replaceInput({input: `#forge:storage_blocks/${material.id}`}, `#forge:storage_blocks/${material.id}`, material.items.block)
+    })
+})
+
+const hasAccessories = Platform.isLoaded('accessories')
+const hasAdAstra = Platform.isLoaded('ad_astra')
+const hasBiomancy = Platform.isLoaded('biomancy')
+const hasClangingHowl = Platform.isLoaded('clanginghowl')
+
+
+// ItemTagRemoval
+ServerEvents.tags('item', event => {
+    if (hasAccessories) event.removeAll('accessories:back')
+    if (hasAdAstra) {
+        event.removeAll('ad_astra:iron_plates')
+        event.removeAll('ad_astra:iron_rods')
+        event.removeAll('ad_astra:steel_blocks')
+        event.removeAll('ad_astra:steel_ingots')
+        event.removeAll('ad_astra:steel_nuggets')
+        event.removeAll('ad_astra:steel_rods')
+        event.removeAll('ad_astra:steel_plates')
+    }
+    event.removeAll('tfmg:spools')
+    event.removeAll('ae2:quartz_sword')
+    event.removeAll('ae2:quartz_axe')
+    event.removeAll('ae2:quartz_pickaxe')
+    event.removeAll('ae2:quartz_shovel')
+    event.removeAll('ae2:quartz_hoe')
+    event.removeAll('ae2:quartz_wrench')
+    event.removeAll('create:crushed_raw_materials')
+    event.removeAll('ae2:metal_ingots')
+    event.removeAll('create:create_ingots')
+    event.removeAll('vintageimprovements:small_springs')
+    event.removeAll('vintageimprovements:springs')
+    event.removeAll('createaddition:spools')
+    event.removeAll('createmetallurgy:graphite_molds')
+})
+
+// BlockTagRemoval
+ServerEvents.tags('block', event => {
+    if (hasAdAstra) event.removeAll('ad_astra:steel_blocks')
+})
+
+// FluidTagRemoval
+ServerEvents.tags('fluid', event => {
+    event.removeAll('tfmg:blast_stove_fuel')
+    if (hasAdAstra) event.removeAll('ad_astra:oil')
+    event.removeAll('forge:crude_oil')
+    event.removeAll('create:bottomless/deny')
+    event.removeAll('forge:molten_material')
+    event.removeAll('forge:plantoil')
+    event.removeAll('forge:diesel')
+    event.removeAll('forge:gasoline')
+    // Keep the pack's TFMG gasoline as engine fuel while excluding
+    // Create Diesel Generators' separate gasoline fluid.
+    event.add('forge:gasoline', ['kubejs:gasoline'])
+    event.add('forge:diesel', ['kubejs:diesel'])
+    event.add('tfmg:gasoline', ['kubejs:gasoline'])
+    event.add('tfmg:diesel', ['kubejs:diesel'])
+    event.add('tfmg:naphtha', ['kubejs:naphtha'])
+    event.add('tfmg:kerosene', ['kubejs:kerosene'])
+    event.add('tfmg:lpg', ['kubejs:lpg'])
+    event.add('tfmg:blast_stove_fuel', ['kubejs:creosote'])
+    event.add('tfmg:crude_oil', ['tfmg:crude_oil'])
+    event.add('tfmg:heavy_oil', ['tfmg:heavy_oil'])
+    event.removeAll('c:water')
+    event.removeAll('minecraft:water')
+})
+
+// CobbledStones
+const cobbledStones = [
+    'minecraft:cobblestone',
+    'minecraft:cobbled_deepslate',
+    'kubejs:cobbled_andesite',
+    'kubejs:cobbled_diorite',
+    'kubejs:cobbled_granite',
+    'kubejs:cobbled_schist',
+    'kubejs:cobbled_gneiss',
+    'kubejs:cobbled_rhyolite',
+    'kubejs:cobbled_shale',
+    'kubejs:cobbled_basalt',
+    'kubejs:cobbled_phyllite',
+    'kubejs:cobbled_darkslate',
+    'kubejs:cobbled_claystone',
+    'kubejs:cobbled_quartzite',
+    'kubejs:cobbled_conglomerate'
+]
+
+if (hasAdAstra) {
+    cobbledStones.push(
+        'ad_astra:moon_cobblestone',
+        'ad_astra:glacio_cobblestone',
+        'ad_astra:mars_cobblestone',
+        'ad_astra:mercury_cobblestone'
+    )
+}
+
+// MoltenHotFluids
+const moltenHotFluids = [
+    'kubejs:molten_aluminum',
+    'kubejs:molten_vanadium',
+    'kubejs:molten_tin',
+    'kubejs:molten_silver',
+    'kubejs:molten_andesite_alloy',
+    'kubejs:molten_zinc',
+    'kubejs:molten_gold',
+    'kubejs:molten_iron',
+    'kubejs:molten_pig_iron',
+    'kubejs:molten_undeoxidized_steel',
+    'kubejs:molten_cast_iron',
+    'kubejs:molten_copper',
+    'kubejs:molten_brass',
+    'kubejs:molten_lead',
+    'kubejs:molten_cobalt',
+    'kubejs:molten_nickel',
+    'kubejs:molten_constantan',
+    'kubejs:molten_bronze',
+    'kubejs:molten_electrum',
+    'kubejs:molten_slag',
+    'kubejs:liquid_silicon',
+    'kubejs:molten_glass'
+]
+
+// WaterFluids
+const waterFluids = [
+    'minecraft:water',
+    'minecraft:flowing_water'
+]
+
+// ItemTagAdditions
+ServerEvents.tags('item', event => {
+
+// ChemicalSprayer
+    event.add('cwi:chemical_sprayer', ['createdieselgenerators:chemical_sprayer', 'createdieselgenerators:chemical_sprayer_lighter'])
+
+// WrenchTools
+    if (hasClangingHowl) {
+        event.add('forge:tools/wrench', 'clanginghowl:industrial_adjustable_wrench')
+        event.add('create:chain_rideable', 'clanginghowl:industrial_adjustable_wrench')
+    }
+
+// CuttingKnives
+    event.add('forge:tools', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
+    event.add('forge:tools/knives', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
+    event.add('farmersdelight:tools/knives', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
+    event.add('farmersdelight:straw_harvesters', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
+    event.add('minecraft:breaks_decorated_pots', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
+
+// CurvingHeads
+    event.add('vintageimprovements:curving_heads', [
+        '#cwi:ingots',
+        '#cwi:sheets',
+        '#cwi:nuggets',
+        '#cwi:powders',
+        '#cwi:wires',
+        '#cwi:rods',
+        '#cwi:blocks',
+        'kubejs:rubber_block',
+        'kubejs:industrial_rubber_block',
+        'kubejs:capping_head'
+    ])
+
+// Molds
+    event.add('ratatouille:mold', [
+        'kubejs:forming_fabric'
+    ])
+
+// StringMaterials
+    event.add('cwi:string', [
+        'tfmg:synthetic_string',
+        'minecraft:string'
+    ])
+    if (hasBiomancy) event.add('cwi:string', 'biomancy:mob_sinew')
+
+// RubberBlock
+    event.add('cwi:rubber_blocks', ['kubejs:rubber_block', 'kubejs:industrial_rubber_block'])
+
+// CoalPowders
+    event.add('cwi:coal_powders', ['kubejs:charcoal_powder', 'kubejs:coal_powder', 'tfmg:coal_coke_dust'])
+
+// CharcoalItems
+    event.add('cwi:charcoals', ['minecraft:charcoal', 'kubejs:charcoal_powder'])
+
+// CoalItems
+    event.add('cwi:coals', ['minecraft:coal', 'kubejs:coal_powder'])
+
+// RubberSheets
+    event.add('cwi:rubbers', ['tfmg:rubber_sheet', 'kubejs:rubber'])
+
+// FeatherMaterials
+    event.add('cwi:feathers', ['kubejs:synthetic_feather', 'minecraft:feather'])
+
+// LeatherMaterials
+    event.add('cwi:leathers', ['tfmg:synthetic_leather', 'minecraft:leather'])
+
+// BasicMaterials
+    event.add('cwi:basic_materials', ['kubejs:sulfur_powder', 'kubejs:limestone_powder', 'kubejs:caustic_soda_powder'])
+
+// DeoxidizerPowders
+    event.add('cwi:deoxidizer', [
+        'kubejs:silicon_powder',
+        'kubejs:aluminum_powder',
+        'kubejs:magnesium_powder'
+    ])
+
+// StickyMaterials
+    event.add('cwi:sticky_materials', ['kubejs:sticky_resin', 'minecraft:slime_ball'])
+
+// RemoveIronPlate
+    if (hasAdAstra) event.remove('forge:plates/iron', 'ad_astra:iron_plate')
+
+// SteelComponentCleanup
+    if (hasAdAstra) {
+        event.remove('forge:rods/steel', 'ad_astra:steel_rod')
+        event.remove('forge:plates/steel', 'ad_astra:steel_plate')
+        event.remove('forge:nuggets/steel', 'ad_astra:steel_nugget')
+        event.remove('forge:ingots/steel', 'ad_astra:steel_ingot')
+    }
+    event.remove('forge:ingots/steel', 'createmetallurgy:steel_ingot')
+    event.remove('forge:storage_blocks/steel', 'createmetallurgy:steel_block')
+    if (hasAdAstra) event.remove('forge:storage_blocks/steel', 'ad_astra:steel_block')
+
+// CobbledStonesTag
+    event.add('cwi:cobbled_stones', cobbledStones)
+
+    event.removeAll('minecraft:stone_crafting_materials')
+    event.add('minecraft:stone_crafting_materials', cobbledStones)
+
+    event.removeAll('minecraft:stone_tool_materials')
+    event.add('minecraft:stone_tool_materials', cobbledStones)
+
+// HotItems
+    event.add('cwi:hot_items', [
+        'minecraft:lava_bucket',
+        'minecraft:magma_block',
+        'minecraft:blaze_rod',
+        'minecraft:blaze_powder',
+        '#cwi:moltens',
+        'kubejs:heated_powdered_obsidian',
+        'kubejs:heated_iron_ingot',
+        'kubejs:heated_industrial_iron_ingot'
+    ])
+    event.add('cwi:moltens', 'kubejs:liquid_silicon_bucket')
+
+// Neurotoxin
+
+    event.add('cwi:neurotoxin', [
+        'tfmg:lead_ingot',
+        'tfmg:lead_sheet',
+        'tfmg:lead_nugget',
+        'kubejs:lead_rod',
+        'kubejs:lead_powder',
+        'kubejs:lead_spring',
+        'kubejs:lead_wire',
+        'kubejs:lead_sword',
+        'kubejs:lead_axe',
+        'kubejs:lead_pickaxe',
+        'kubejs:lead_shovel',
+        'kubejs:lead_hoe',
+        'minecraft:lead_hammer'
+    ])
+
+    event.add('cwi:neurotoxin_lv2', [
+        'kubejs:lead_sword',
+        'kubejs:lead_axe',
+        'kubejs:lead_pickaxe',
+        'kubejs:lead_shovel',
+        'kubejs:lead_hoe',
+        'minecraft:lead_hammer'
+    ])
+
+    event.add('cwi:waxes', [
+        'minecraft:honeycomb',
+        'kubejs:lead_axe'
+    ])
+
+// GlassTiers
+    event.add('cwi:glass1', ['minecraft:glass', 'kubejs:tempered_glass'])
+    event.add('cwi:glass2', ['kubejs:tempered_glass'])
+    event.add('cwi:glass3', [])
+
+// Normal Logs
+    const itemLogs = event.get('minecraft:logs').getObjectIds()
+    event.add('cwi:normal_logs', itemLogs)
+})
+
+// BlockTagAdditions
+ServerEvents.tags('block', event => {
+
+// Normal Block Logs
+    const blockLogs = event.get('minecraft:logs').getObjectIds()
+    event.add('cwi:normal_logs', blockLogs)
+
+// SoulFireBases
+    event.add('minecraft:soul_fire_base_blocks', [
+        'minecraft:reinforced_deepslate',
+        'minecraft:sculk',
+        'minecraft:sculk_catalyst'
+    ])
+
+// Bedrocks
+    event.add('cwi:bedrocks', [
+        'minecraft:bedrock',
+        'kubejs:eruptive_bedrock'
+    ])
+
+// PassiveBoilerHeaters
+
+    event.remove('create:passive_boiler_heaters', 'create:blaze_burner')
+
+// WindmillSails
+    event.removeAll('create:windmill_sails')
+    event.add('create:windmill_sails', 'create:white_sail')
+
+// WrenchPickupBlocks
+    event.add('create:wrench_pickup', [
+        'kubejs:rusted_heavy_machinery_casing',
+        'kubejs:rusted_industrial_aluminum_casing',
+        'kubejs:sealed_wood',
+        'kubejs:polished_sealed_wood',
+        'kubejs:quality_sealed_wood',
+        'kubejs:incomplete_quality_sealed_wood',
+        'kubejs:andesite_machine',
+        'kubejs:precise_machine',
+        'kubejs:industrial_casing',
+        'kubejs:stainless_steel_casing',
+        'kubejs:incomplete_precise_machine',
+        'kubejs:incomplete_mechanical_arm_base',
+        'kubejs:incomplete_diesel_engine',
+        'kubejs:incomplete_large_diesel_engine',
+        'kubejs:incomplete_huge_diesel_engine',
+        'kubejs:incomplete_heavy_machinery_casing',
+        'kubejs:incomplete_blast_furnace_reinforcement'
+    ])
+
+// DeepslateOreReplaceables
+    event.add('minecraft:deepslate_ore_replaceables', [
+        'kubejs:gneiss',
+        'kubejs:schist',
+        'minecraft:cobbled_deepslate',
+        'kubejs:cobbled_schist',
+        'kubejs:cobbled_gneiss',
+        'kubejs:gneiss_gravel',
+        'kubejs:schist_gravel',
+        'kubejs:deepslate_gravel'
+    ])
+
+// StoneOreReplaceables
+    event.add('minecraft:stone_ore_replaceables', [
+        'kubejs:shale',
+        'kubejs:rhyolite',
+        'minecraft:andesite',
+        'minecraft:granite',
+        'minecraft:diorite',
+        'minecraft:cobblestone',
+        'kubejs:cobbled_rhyolite',
+        'kubejs:cobbled_andesite',
+        'kubejs:cobbled_diorite',
+        'kubejs:cobbled_granite',
+        'kubejs:cobbled_shale',
+        'kubejs:shale_gravel',
+        'kubejs:rhyolite_gravel',
+        'kubejs:granite_gravel',
+        'kubejs:diorite_gravel',
+        'kubejs:andesite_gravel'
+    ])
+
+// CarverReplaceables
+    event.add('minecraft:overworld_carver_replaceables', [
+        '#minecraft:base_stone_overworld',
+        '#minecraft:terracotta',
+        '#minecraft:iron_ores',
+        '#minecraft:copper_ores',
+        'minecraft:water',
+        'minecraft:sandstone',
+        'minecraft:red_sandstone',
+        'minecraft:calcite',
+        'minecraft:packed_ice',
+        'minecraft:raw_iron_block',
+        'minecraft:raw_copper_block',
+        'kubejs:depleted_dirt',
+        'kubejs:ashen_depleted_dirt'
+    ])
+
+// AridGroundBlocks
+    event.add('kubejs:arid_ground', ['#minecraft:stone_ore_replaceables', '#minecraft:deepslate_ore_replaceables'])
+
+// GrimeGroundBlocks
+    event.add('kubejs:grime_ground', ['#minecraft:stone_ore_replaceables', '#minecraft:deepslate_ore_replaceables'])
+
+// CobbledStonesBlockTag
+    event.add('cwi:cobbled_stones', cobbledStones)
+
+// DepletedDirt
+    event.add('minecraft:dead_bush_may_place_on', ['kubejs:depleted_dirt', 'kubejs:ashen_depleted_dirt'])
+    event.add('minecraft:sculk_replaceable_world_gen', ['kubejs:depleted_dirt', 'kubejs:ashen_depleted_dirt'])
+    event.add('minecraft:moss_replaceable', ['kubejs:depleted_dirt', 'kubejs:ashen_depleted_dirt'])
+    event.add('minecraft:depleted_dirt', ['kubejs:depleted_dirt', 'kubejs:ashen_depleted_dirt'])
+
+// SteelArmorBlocks
+    event.add('minecraft:wither_immune', [
+        'kubejs:steel_armor_safe',
+        'kubejs:steel_armor_block',
+        'kubejs:steel_armor_penetrated'
+    ])
+    event.add('minecraft:dragon_immune', [
+        'kubejs:steel_armor_safe',
+        'kubejs:steel_armor_block',
+        'kubejs:steel_armor_penetrated'
+    ])
+    event.add('create:non_movable', [
+        'kubejs:steel_armor_safe',
+        'kubejs:steel_armor_block',
+        'kubejs:steel_armor_penetrated'
+    ])
+    event.add('forge:relocation_not_supported', [
+        'kubejs:steel_armor_safe',
+        'kubejs:steel_armor_block',
+        'kubejs:steel_armor_penetrated'
+    ])
+    event.add('minecraft:geode_invalid_blocks', [
+        'kubejs:steel_armor_safe',
+        'kubejs:steel_armor_block',
+        'kubejs:steel_armor_penetrated'
+    ])
+
+// FluidContainers
+    event.add('cwi:fluid_container', [
+        'create:fluid_tank',
+        'tfmg:aluminum_fluid_tank',
+        'tfmg:cast_iron_fluid_tank',
+        'tfmg:steel_fluid_tank',
+        'ratatouille:compost_tower',
+        'createdieselgenerators:oil_barrel',
+        'fluid:smart_gutter_outlet',
+        'fluid:gutter_outlet',
+        'fluid:fluid_atomizer',
+        'create_connected:fluid_vessel'
+    ])
+})
+
+// MiningToolTags
+ServerEvents.tags('block', event => {
+
+// PickaxeMineable
+    event.remove('minecraft:mineable/axe', 'minecraft:crafting_table')
+    event.add('minecraft:mineable/pickaxe', [
+        'minecraft:crafting_table',
+        'tfmg:rebar_block',
+        'tfmg:rebar_floor',
+        'tfmg:rebar_wall',
+        'tfmg:rebar_pile',
+        'tfmg:rebar_stairs',
+        'tfmg:rebar_pillar'
+    ])
+
+// AxeMineable
+    event.add('minecraft:mineable/axe', 'kubejs:dead_leaves')
+
+})
+
+// FluidTagAdditions
+ServerEvents.tags('fluid', event => {
+
+// WaterVariants
+    event.add('cwi:water', [
+        'minecraft:water',
+        'kubejs:distilled_water'
+    ])
+
+    event.add('c:water', waterFluids)
+    event.add('minecraft:water', waterFluids)
+
+// FuelFluids
+    event.add('create_sa:fuel_fluid', [
+        'createdieselgenerators:plant_oil',
+        'createdieselgenerators:biodiesel'
+    ])
+
+    event.add('create_sa:water_fluid', 'kubejs:distilled_water')
+
+// MoltenHotFluidTag
+    event.add('kubejs:molten_hot', moltenHotFluids)
+    event.add('cwi:moltens', 'kubejs:liquid_silicon')
+
+// AcidFluids
+    event.add('kubejs:acid', [
+        'kubejs:redstone_acid', 'kubejs:concentrated_sulfuric_acid', 'kubejs:nitric_acid',
+        'kubejs:muriatic_acid', 'kubejs:acetic_acid', 'kubejs:propionic_acid',
+        'kubejs:lactic_acid', 'kubejs:wood_vinegar', 'kubejs:humic_acid_slurry',
+        'kubejs:chromatic_waste', 'kubejs:sulfuric_acid'
+    ])
+
+// BaseFluids
+    event.add('kubejs:base', [
+        'kubejs:caustic_soda', 'kubejs:ammonia_solution', 'kubejs:sodium_carbonate_solution'
+    ])
+
+// OrganicSolvents
+    event.add('kubejs:organic_solvent', [
+        'kubejs:methanol', 'kubejs:acetone', 'kubejs:benzene', 'kubejs:toluene',
+        'kubejs:xylene', 'kubejs:epichlorohydrin',
+        'kubejs:phenol', 'kubejs:cyclohexane', 'kubejs:cyclohexanol',
+        'kubejs:paraffin_oil', 'kubejs:cracked_paraffin_oil', 'kubejs:reformate',
+        'kubejs:aromatic_mix', 'kubejs:condensed_cracked_propane',
+        'kubejs:synthetic_ester_base_oil', 'kubejs:epoxy_resin',
+        'kubejs:vinyl_chloride_monomer', 'kubejs:pan_precursor',
+        'kubejs:hexamethylenediamine_solution', 'kubejs:adipic_acid_solution',
+        'kubejs:condensed_natural_gas', 'kubejs:condensed_cracked_naphtha',
+        'kubejs:condensed_cracked_ethane',
+        'kubejs:molten_polyethylene',
+        'kubejs:molten_polypropylene',
+        'kubejs:molten_polyvinyl_chloride'
+    ])
+
+// NormalFluids
+    event.add('kubejs:normal_fluids', [
+        'kubejs:salt_solution', 'kubejs:raw_brine', 'kubejs:nitrate_solution', 'kubejs:alkaline_brine',
+        'kubejs:silicate_solution', 'kubejs:distilled_water', 'kubejs:nitrogen_fertilizer',
+        'kubejs:wheat_juice', 'kubejs:syrup', 'kubejs:origin_blood',
+        'kubejs:molten_slime', 'kubejs:molten_rubber', 'kubejs:molten_sticky_resin'
+    ])
+
+// GaseousFluids
+    event.add('kubejs:gas', [
+        'kubejs:oxygen', 'kubejs:nitrogen', 'kubejs:nitrogen_dioxide',
+        'kubejs:ammonia', 'kubejs:chlorine', 'kubejs:natural_gas',
+        'kubejs:argon', 'kubejs:helium', 'kubejs:hydrogen_sulfide',
+        'kubejs:sulfur_dioxide', 'kubejs:steam', 'kubejs:ethane',
+        'kubejs:cracked_ethane', 'kubejs:cracked_propane', 'kubejs:cracked_naphtha',
+        'kubejs:purified_natural_gas', 'kubejs:methane', 'kubejs:syngas',
+        'kubejs:benzene', 'kubejs:toluene', 'kubejs:xylene'
+    ])
+})

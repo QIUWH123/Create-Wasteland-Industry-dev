@@ -1,0 +1,11 @@
+{
+  "values": [
+    "kubejs:quartzite",
+    "kubejs:conglomerate",
+    "kubejs:quartzite_deepslate",
+    "minecraft:packed_mud",
+    "minecraft:magma_block",
+    "kubejs:phyllite",
+    "kubejs:mossy_phyllite"
+  ]
+}

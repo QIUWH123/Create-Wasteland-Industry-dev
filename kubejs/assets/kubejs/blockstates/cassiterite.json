@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      { "model": "kubejs:block/ores/cassiterite0", "weight": 1 },
+      { "model": "kubejs:block/ores/cassiterite1", "weight": 1 },
+      { "model": "kubejs:block/ores/cassiterite2", "weight": 1 },
+      { "model": "kubejs:block/ores/cassiterite3", "weight": 1 }
+    ]
+  }
+}

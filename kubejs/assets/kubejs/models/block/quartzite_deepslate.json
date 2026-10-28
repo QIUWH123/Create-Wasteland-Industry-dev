@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "minecraft:block/deepslate_top",
+    "side": "kubejs:block/stones/quartzite_deepslate",
+    "top": "kubejs:block/stones/quartzite_deepslate_top",
+    "particle": "minecraft:block/deepslate_top"
+  }
+}

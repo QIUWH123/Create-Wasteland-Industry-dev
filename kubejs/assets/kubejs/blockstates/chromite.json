@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      { "model": "kubejs:block/ores/chromite0", "weight": 1 },
+      { "model": "kubejs:block/ores/chromite1", "weight": 1 },
+      { "model": "kubejs:block/ores/chromite2", "weight": 1 },
+      { "model": "kubejs:block/ores/chromite3", "weight": 1 }
+    ]
+  }
+}

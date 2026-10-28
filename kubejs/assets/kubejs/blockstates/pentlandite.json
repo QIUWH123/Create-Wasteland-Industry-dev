@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "": [
+      { "model": "kubejs:block/ores/pentlandite0", "weight": 1 },
+      { "model": "kubejs:block/ores/pentlandite1", "weight": 1 },
+      { "model": "kubejs:block/ores/pentlandite2", "weight": 1 },
+      { "model": "kubejs:block/ores/pentlandite3", "weight": 1 }
+    ]
+  }
+}

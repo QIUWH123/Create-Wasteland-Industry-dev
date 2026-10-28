@@ -1,0 +1,90 @@
+PlayerEvents.loggedIn(event => {
+    const { player, server } = event
+    for (let i = 0; i < global.debugUserName.length; i++) {
+        if (player.username === global.debugUserName[i]) {
+            player.tell('------------------------')
+            player.tell('交互:')
+            player.tell('物品右键 => 显示手上物品信息')
+            player.tell('方块右键 => 显示指向方块信息')
+            player.tell('------------------------')
+            player.tell('聊天栏:')
+            player.tell('-ki => 清除所有世界中掉落物')
+            player.tell('-ke => 清除玩家以外所有实体')
+            player.tell('-eg => 给予玩家常用药水效果')
+            player.tell('-ec => 清除玩家所有药水效果')
+        }
+    }
+    if (player.username === "Liaux_awa") {
+        player.tell('还记得那些东西不能用吗 ^w^')
+    }
+})
+
+ItemEvents.rightClicked((event) => {
+    let {item, player} = event
+
+    for (let i = 0; i < global.debugUserName.length; i++) {
+        if (player.mainHandItem.id === item.id &&
+            player.crouching &&
+            item.id !== "minecraft:air" &&
+            player.username === global.debugUserName[i]) {
+            player.runCommandSilent("kubejs hand")
+        }
+    }
+})
+
+PlayerEvents.chat((event) => {
+    let {player, message, server} = event
+
+    for (let i = 0; i < global.debugUserName.length; i++) {
+        if (player.username === global.debugUserName[i]) {
+            if (message.trim().equalsIgnoreCase("-ki")) {
+                server.runCommandSilent("kill @e[type=item]")
+                server.tell('All Dropped Items Have Been Cleared')
+                event.cancel()
+            }
+
+            if (message.trim().equalsIgnoreCase("-eg")) {
+                player.runCommandSilent("effect give @s minecraft:night_vision infinite 255 true")
+                player.runCommandSilent("effect give @s minecraft:strength infinite 255 true")
+                player.runCommandSilent("effect give @s minecraft:resistance infinite 255 true")
+                server.tell('Effect Give')
+                event.cancel()
+            }
+
+            if (message.trim().equalsIgnoreCase("-ec")) {
+                player.runCommandSilent("effect clear")
+                server.tell('Effect Clear')
+                event.cancel()
+            }
+
+            if (message.trim().equalsIgnoreCase("-ke")) {
+                server.runCommandSilent("kill @e[type=!player]")
+                server.tell('All Players Have Been Cleared')
+                event.cancel()
+            }
+        }
+    }
+})
+
+BlockEvents.rightClicked((event) => {
+    let { player } = event
+
+    let id = event.getBlock().getId()
+    let blockState = event.getBlock().getBlockState()
+    let pos = event.getBlock().getPos()
+    let blockHardness = blockState.getDestroySpeed(event.getLevel(), pos)
+    let blockResistance = blockState.getBlock().getExplosionResistance()
+
+    for (let i = 0; i < global.debugUserName.length; i++) {
+        if (
+            event.hand !== "MAIN_HAND" &&
+            player.crouching &&
+            player.username === global.debugUserName[i]
+        ) {
+            player.tell(Text.of(`ID: ${id}`))
+            player.tell(Text.of(`Pos: ${pos.getX()}, ${pos.getY()}, ${pos.getZ()}`))
+            player.tell(Text.of(`Hardness: ${blockHardness}`))
+            player.tell(Text.of(`Resistance: ${blockResistance}`))
+        }
+    }
+})

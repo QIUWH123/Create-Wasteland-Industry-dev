@@ -1,0 +1,266 @@
+# Recipe And Process Realism Audit
+
+## Port Applicability — 1.21.1
+
+Transferred from the CWI 1.20.1 documentation on 27 October 2026. The retained
+review below preserves its detailed chemistry, engineering arguments, accepted
+abstractions, and rejected proposals. Its recipe counts, installed-JAR checks,
+line references, captured registrations, and test results are **historical
+1.20.1 evidence**, including wording such as “current”, “implemented”, and “now”.
+They are not a loaded-recipe audit or playtest of this target instance.
+
+The target script checks below confirm selected retained code only. MBD2 machine
+scripts/definitions, quests, CWI worldgen and structures are not ported. Old
+blast-furnace, incubator and mixing-vessel claims do not establish functioning
+machines here. Use [the current API reference](kubejs.md) and
+[development standards](DEVELOPMENT_STANDARDS.md) before adapting old examples.
+
+### Retained Decisions And Current Script Checks
+
+| Topic | 1.21.1 Source Check Or Standing Decision |
+| --- | --- |
+| Reaction and separation quantities | [Chemistry.js](../kubejs/server_scripts/Recipes/Chemistry.js) retains 500 mB benzene in both reviewed routes, 200 mB hydrogen/methane in toluene hydrodealkylation, 400 mB aromatic gas outputs and 400 mB xylene feed. These checks do not prove the target recipes load or run. |
+| Natural-gas scrubber | The same script retains 1,000 natural gas + 100 caustic soda → 900 purified gas + 50 sodium carbonate solution + 50 distilled water, with explicit `cwi:vat_machine_recipe/natural_gas_scrubbing`, plus 125 mB solution → soda recovery. |
+| Spring material value | [Metallurgy.js](../kubejs/server_scripts/Recipes/Metallurgy.js) retains the 45 mB spring branch shared by ordinary/bulk melting generation. |
+| Bearing and resin | [MechanicalAge.js](../kubejs/server_scripts/Progression/MechanicalAge.js) retains the shaft-based bearing recipe. [Geology.js](../kubejs/server_scripts/Recipes/Geology.js) retains resin → rubber and tree sapping, with no rubber → resin reversal. |
+| Glass additives | [Glass.js](../kubejs/server_scripts/Recipes/ProcessingLine.js/Glass.js) intentionally returns soda and limestone. Do not implement the consumption proposal below. Its nitrate recovery is behind the absent Biomancy dependency; retained source is not proof of an available recovery route. |
+| Scientific simplifications | The nitrate-bath, leaching and alcohol-treatment abstractions were accepted by the author. Historical objections are context, not an instruction to change them. |
+| First steel | The author requires the blast furnace and rejects using the steel-gated industrial mixer/blade as the bootstrap machine. The [steel document](STEEL_PRODUCTION_DESIGN.md) is historical; do not recreate machines or rejected furnace additions during this port. |
+| Retired identities | Keep KubeJS sulfur, TFMG air, and TFMG liquid asphalt/concrete. Preserve the current crude/heavy-oil IDs; other migrated fluids use their existing KubeJS IDs. Old `tfmg:` IDs in the review/evidence are historical, not replacement instructions. Do not restore hot-air production, furnace gas, molten plastic, duplicate conversion bridges, firebox additions or culture revival routes. |
+| Native resource evidence | The five native recipes were excluded following the author's confirmation that they had been removed. Their JAR resources and `excluded_static: false` fields in [the evidence](audit/NATIVE_RECIPE_EVIDENCE.json) are old inventory data, not proof they are active now. |
+| Supply proposals | The lake-generation settings, brine-renewal proposal, dripstone mechanism and rates below were not verified against the 1.21.1 environment. The source `createAttributes().convertToSource(true)` advice is a 1.20.1 API finding; consult the current fluid API instead. No new schematics are authorized. |
+
+The chemistry accounting convention remains separate from physical realism:
+retain registered phases, define separate IDs before changing state, use the
+stated gas/liquid units, define solid units and mixture composition when needed,
+and check recipe quantities independently of a balanced reference equation.
+Do not turn every simplified yield or omitted industrial stage into a bug.
+
+## Retained Review — CWI 1.20.1
+
+
+Baseline: 2026-10-05; glass-supply checks refined 2026-10-06. Natural gas CO₂ scrubbing, reaction quantities, aromatic separation accounting, and spring melting were corrected on 2026-10-07 as documented below. Other correction proposals remain unimplemented.
+
+## Scope and standard
+
+The detailed review covers the custom recipe scripts in `server_scripts/Recipes`, all four progression scripts, the custom multiblock processes, the material/ore maps and fluid registrations that generate those recipes, and relevant interaction conversions. Native industrial recipes were inspected from the installed mod jars alongside the scripted removals. The inventory contains 9,683 recipe JSON resources; an approximate static removal filter excludes 4,425. Those numbers describe resources, **not the recipes actually loaded in a world**. Compatibility conditions, tags, duplicate resource IDs, and more complex scripted filters can change the loaded set. Native resources were inventoried across the jars; detailed scientific review concentrated on industrial conversions and machine construction, rather than individually certifying every decorative or food recipe. No additional recipe resources were found in the top-level datapack/resourcepack scan.
+
+This is a source audit, not a Minecraft runtime audit or a guarantee that every retained native recipe is active. A loaded recipe export would be needed to settle that last boundary. The report distinguishes established process errors, internal data conflicts, and cases that depend on design intent. Simplified yields, shared intermediate components, accelerated processing, omitted ancillary equipment, and fictional materials are not automatically mistakes.
+
+Inline source references below identify the 1.20.1 snapshot, not current target line locations. Historical native evidence is in [NATIVE_RECIPE_EVIDENCE.json](audit/NATIVE_RECIPE_EVIDENCE.json), with the original recipe IDs and jar names.
+
+## Implemented Quantity Corrections
+
+The owner approved correcting the benzene, toluene, and spring quantities on 7 October 2026 and requested another check against the current rules. That check also confirmed two physical-separation accounting errors. All six rows below are **implemented**.
+
+| Finding | Implemented Change | Reason And Gameplay Effect |
+| --- | --- | --- |
+| D01: Benzene hydrogenation | Chemistry.js:623 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L623`): benzene input **250 → 500 mB**. Full batch: 500 mB benzene + 1,500 mB hydrogen → 250 mB cyclohexane. | Gas and liquid units now give 250 mol benzene + 750 mol hydrogen → 250 mol cyclohexane, matching C₆H₆ + 3H₂ → C₆H₁₂. Benzene consumption doubles. |
+| D02: Cumene aggregate route | Chemistry.js:710 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L710`): benzene input **250 → 500 mB**. Other quantities retained. | Each reacting gas and each liquid product now represents 250 mol, matching C₆H₆ + C₃H₆ + O₂ → C₆H₆O + C₃H₆O. Benzene consumption doubles. |
+| D03: Toluene hydrodealkylation | Chemistry.js:985 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L985`): hydrogen and methane **400 → 200 mB** each. Toluene and benzene retained at 200 mB. | All four gases represent 100 mol, matching C₇H₈ + H₂ → C₆H₆ + CH₄. Hydrogen demand and methane output halve. |
+| Spring material duplication | Metallurgy.js:51 (1.20.1 source: `kubejs/server_scripts/Recipes/Metallurgy.js#L51`): added springs to the **45 mB** branch for ordinary and bulk melting. | A spring made from one 45 mB wire/rod no longer returns 90 mB. All 25 eligible spring materials use the corrected amount; assembly costs retained. |
+| Aromatic separation | Chemistry.js:341 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L341`): xylene, toluene, and benzene outputs **200 → 400 mB** each. Liquid mixture feed retained at 600 mB. | Physical separation now preserves 600 mol instead of losing half the represented molecules. Equal product proportions retained. |
+| Xylene isomer separation | Chemistry.js:353 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L353`): gas feed **200 → 400 mB**; liquid outputs retained at 75/50/75 mB. | Feed and products each represent 200 mol. Increasing feed avoids fractional output amounts. The combined separation-process abstraction is retained. |
+
+Installed Rhino, actual material globals, and the existing CWI helpers captured 999 registrations before and after this batch. Exactly five chemistry registrations and 50 spring-melting registrations changed; the remaining 944 were identical. All three reaction atom balances, both separation mole balances, both spring-melting routes, returned catalysts, processing times, heat requirements, and vat requirements were checked. `git diff --check` passed. This is script/registration validation; live reload and machine operation still require an in-game check. These recipes use generated IDs, so changing their contents can regenerate IDs; no explicit IDs were changed.
+
+## Current Strict Review List
+
+The owner requested clear contradictions and excluded ordinary gameplay simplifications. The narrowed list is resolved for this batch; the decisions below record what was changed or intentionally retained. The broader baseline tables preserve the original review evidence, but are not a list of mandatory edits.
+
+| Finding | Decision |
+| --- | --- |
+| Bearing construction (1.20.1 source: `kubejs/server_scripts/Progression/MechanicalAge.js#L484`) | Replaced the cogwheel with `create:shaft` in the four-sheet shaped route. The existing lathe route remains available. |
+| Resin and rubber conversion (1.20.1 source: `kubejs/server_scripts/Recipes/Geology.js#L21`) | Removed the heated rubber → sticky resin reversal. Sticky resin → rubber and resin sapping remain. |
+| Spent nitrate bath (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Glass.js#L5`) | Kept the new saltpeter plus cobbled-stone recovery as a gameplay abstraction. It provides a reusable bath output without claiming a complete potassium/sodium separation. |
+| Glass additives (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Glass.js#L3`) | Kept soda and limestone returned by the glass-batch recipe so early glass remains practical to automate. |
+| Acid leaching and alcohol treatment | Accepted as gameplay wording/process abstractions; no code change requested. |
+
+The five inherited native recipes are excluded following the owner's confirmation that they were removed.
+
+Glass supply is a separate coordinated design note below. The earlier proposal to consume soda and carbonate additives was not adopted; the current recipe returns them so ordinary glass remains practical to automate. The initial mineral route is verified from recipes; the renewable dripstone layout still needs a working harvest design and playtest.
+
+Do not include iron `mp`, alloy ratios, polymer catalysts, wet ore extraction, or glass annealing in this first batch. Those require progression, material-identity, or production-line decisions. In particular, changing iron `mp` from 1443 to 1811 would change generated processing times even though no current tooltip presents that field as a physical melting point.
+
+## Implemented Natural Gas Correction
+
+The scrubber now models a feed containing **10 mol% CO₂**; the remaining gas passes through. This retains its original 1,000 mB input and 900 mB purified-gas yield. It implements CO₂ + 2 NaOH → Na₂CO₃ + H₂O, replacing the unsupported sodium-chloride and free-CO₂ outputs.
+
+| Operation | Implemented Recipe |
+| --- | --- |
+| CO₂ absorption in the existing vat | 1,000 mB natural gas + 100 mB caustic soda → 900 mB purified natural gas + 50 mB sodium carbonate solution + 50 mB distilled water. Existing allowed vats, no required attachments, and 200-tick duration are retained. |
+| Heated soda recovery in a Create basin | 125 mB sodium carbonate solution → 1 soda powder. |
+
+Gas uses 2 mB/mol. Caustic soda and the newly registered liquid `kubejs:sodium_carbonate_solution` count dissolved solute at 1 mB/mol; carrier water and recovery evaporation are implicit, consistent with the existing solution recipes. One soda powder represents 125 mol Na₂CO₃ in this recovery. The reacting quantities are therefore 50 mol CO₂ + 100 mol NaOH → 50 mol Na₂CO₃ + 50 mol water, while 450 mol of the gas mixture pass through unchanged. These are pack accounting units, not physical solution volumes or concentrations.
+
+The changed scrubber now has the explicit ID `cwi:vat_machine_recipe/natural_gas_scrubbing`, replacing its former generated ID `tfmg:kjs/74hgvq8t0a5z3xvgncq2jaejn`. The new recovery uses `cwi:mixing/soda_powder_from_sodium_carbonate_solution`. English and Chinese fluid/container names and the alkaline-fluid tag were added; existing thin-fluid textures and container assets are reused.
+
+This correction models CO₂ absorption only. H₂S removal and complete helium tracking are not implemented by this step; the separate helium-depleted gas still has no downstream recipe. It does not establish a full molecular composition for every natural-gas stream.
+
+Validation: installed Rhino registers 85 chemistry recipes, with one changed scrubber and one added recovery; all other 83 captured recipes are unchanged. New-fluid registration and asset references, reaction atom accounting, soda recovery accounting, language JSON, vat input/output limits, and `git diff --check` were checked. A full restart is required for the new fluid registration; live recipe reload and machine operation still need an in-game check.
+
+## Baseline Process Findings
+
+Historical review candidates follow. Use the current strict list above when selecting work; inclusion here does not override the owner's acceptance of gameplay simplifications.
+
+| ID | Current recipe / source | Why it is wrong as real chemistry or engineering | Correction direction to review |
+| --- | --- | --- | --- |
+| R01 | Glass.js:5 (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Glass.js#L5`), also the vat route at line 55: heat mixed potassium/sodium nitrate back into pure saltpeter. | Ion exchange transfers potassium into glass and sodium into the bath. Heating alone cannot replace the missing potassium or remove sodium; excessive heating can decompose nitrates. | Replenish potassium salt and represent a purge/separation, or consume the bath as a gameplay simplification. |
+| R02 | Glass.js:3 (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Glass.js#L3`): sand, soda and limestone produce a glass batch while returning all the soda and limestone. | Sodium and calcium become constituents of soda-lime glass. These inputs are not reusable catalysts. | Establish simple early supply and proportionate consumption together; see the proposed supply design below. Removing the returned additives alone is incomplete. |
+| R03 | Ore.js:74 (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Ore.js#L74`), also line 92: vibration/centrifugation yields elemental sulfur from sulfide ores. | Physical concentration can separate mineral grains, but cannot turn chemically bound sulfide sulfur into elemental sulfur. This affects chalcocite, pentlandite, galena and cooperite through the shared map. | Output a sulfide concentrate; recover sulfur through an appropriate chemical route. Native sulfur-bearing deposits are a different case. |
+| R04 | Ore.js:123 (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Ore.js#L123`) and line 146: sulfuric-acid treatment or washing leach residue yields metal powder/nuggets. | Leaching generally transfers metal into solution as ions. Washing does not reduce those ions to metal. Magnesite is a particularly clear example: acid produces a magnesium salt, not magnesium metal. | Keep leach solutions/concentrates distinct from elemental metal, then use reduction, cementation or electrolysis as appropriate. |
+| R05 | Ore.js:185 (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Ore.js#L185`) and OreCrushing.js:44 (1.20.1 source: `kubejs/server_scripts/Recipes/OreCrushing.js#L44`): generic smelting produces magnesium/lithium metal from refined minerals, precipitated crystals or raw lithium powder. | The ordinary furnace route suitable as an abstraction for some ores does not describe these reactive metals. Magnesium needs a suitable reduction process or molten-salt electrolysis; lithium metal is normally obtained by molten-salt electrolysis. A metal powder already extracted elsewhere can legitimately be remelted. | Give these ores a distinct extraction endpoint. Do not apply this objection indiscriminately to copper, tin or iron. Aluminum is already excluded by `outPutMaterial`; it is not an affected output of this generator. |
+| R06 (fixed) | Original natural-gas scrubber yielded free CO₂ and `salt_solution`; current correction (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L384`) yields sodium carbonate solution and water. | The former sodium-chloride output had no chlorine source. Caustic CO₂ absorption produces carbonate/bicarbonate rather than releasing the absorbed gas. | Implemented the CO₂-only carbonate route and soda recovery above. |
+| R07 | Chemistry.js:680 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L680`), also line 692: PVC polymerization uses reusable sulfur/copper catalyst, with zinc powder as an accelerator. | These recipes do not represent a conventional PVC radical-initiation system. Copper/zinc/sulfur mixtures are not interchangeable with peroxide or azo initiators; elemental zinc is not an organozinc catalyst. | Choose a suitable initiator or explicitly designate a fictional catalyst. Preserve the separate EDC → vinyl-chloride monomer route, which is conceptually sound. |
+| R08 | Chemistry.js:636 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L636`) and line 648: zinc speeds polyethylene production; propylene becomes polypropylene through heating/mixing alone. | Elemental zinc is not the usual PE initiation/catalyst system. Useful conventional stereoregular PP needs a suitable coordination catalyst. Omitting pressure from a PE radical route can be a gameplay abstraction; assigning the wrong explicit catalyst is a different issue. | Select a coherent radical or coordination route. An initiator can be abstracted without teaching that bare zinc performs its role. |
+| R09 | IndustrialAge.js:395 (1.20.1 source: `kubejs/server_scripts/Progression/IndustrialAge.js#L395`): roll, press, water-quench and polish heated industrial iron into cast iron. | This sequence resembles wrought-metal working/heat treatment. Ordinary cast iron is a high-carbon casting material, generally too brittle for this rolling sequence; quenching does not create its carbon content. The earlier coke-bearing preparation does not make rolling a suitable cast-iron production method. | Melt/carburize and cast the material. Keep the intended progression position, rather than replacing it with equipment that needs steel. |
+| R10 | Metallurgy.js:71 (1.20.1 source: `kubejs/server_scripts/Recipes/Metallurgy.js#L71`): the shared generator rolls cast iron into rods/wires and coils springs. | Young's modulus below a threshold does not imply ductility. Cast iron is a clear failure of this rule. Lead and lithium also receive spring recipes even though they are poor ordinary engineering spring materials because of low usable elastic strength/creep. | Define rolling/drawing/spring suitability separately, with explicit material exceptions. Merely increasing `stiffness` would misstate the material property. |
+| R11 | IndustrialAge.js:239 (1.20.1 source: `kubejs/server_scripts/Progression/IndustrialAge.js#L239`): unheated limestone/clay mixing produces cement. | This produces a raw mixture, not ordinary Portland cement. Carbonate decomposition and clinker formation require firing; the clinker is then ground. Clay plus uncalcined limestone alone is not the equivalent hydraulic binder. | Add a firing/grinding stage, or rename the intermediate as a raw cement mix. |
+| R12 | Geology.js:21 (1.20.1 source: `kubejs/server_scripts/Recipes/Geology.js#L21`) and line 46: compact tree resin into rubber, then heat rubber back into sticky resin. | Tree resin and rubber latex are chemically different. Natural rubber is principally polyisoprene; resin is not simply its liquid precursor. Vulcanized rubber cannot be reversibly melted back to the original sap/resin. | Separate resin/latex, or explicitly make this a fictional reversible elastomer. A whole petrochemical line is not necessary just to resolve the naming. |
+| R13 | MicrobesCulture.js:7 (1.20.1 source: `kubejs/server_scripts/Recipes/MicrobesCulture.js#L7`), with FanCatalyst.js:15 (1.20.1 source: `kubejs/server_scripts/Recipes/FanCatalyst.js#L15`): an ethanol fan produces a sterile Petri dish. | Alcohol disinfects but does not reliably destroy bacterial spores. Calling the result sterile overstates what this treatment achieves. | Use a genuine sterilization treatment, or call the result disinfected if that is the intended gameplay operation. |
+| R14 | Global.js:795 (1.20.1 source: `kubejs/startup_scripts/Preload/Global.js#L795`) and Metallurgy.js:23 (1.20.1 source: `kubejs/server_scripts/Recipes/Metallurgy.js#L23`): ordinary PBI gets a 700 K melting point and the same remelting/casting routes as PE. | Conventional aromatic polybenzimidazole is not ordinarily processed as a freely flowing melt at this temperature. Its heat resistance does not mean it behaves like a low-temperature melt-processable plastic. Specialized PBI derivatives/blends are a different case. | Use an appropriate solution, powder-consolidation or other forming abstraction, or identify a fictional melt-processable derivative. |
+
+## Formula, composition and numerical conflicts
+
+These are distinct from demanding physically accurate bucket volumes. The pack can use arbitrary fluid units, but an explicitly declared mole convention must be internally consistent.
+
+| ID | Evidence | Finding |
+| --- | --- | --- |
+| D01 (fixed) | Chemistry.js:623 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L623`) | Benzene was counted as liquid despite being registered as gas. Increasing feed to 500 mB balances C₆H₆ + 3H₂ → C₆H₁₂ under the existing units. |
+| D02 (fixed) | Chemistry.js:710 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L710`) | The cumene route had the same half-sized benzene input. Increasing feed to 500 mB balances C₆H₆ + C₃H₆ + O₂ → C₆H₆O + C₃H₆O. |
+| D03 (fixed) | Chemistry.js:985 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L985`) | Reducing hydrogen and methane to 200 mB each balances C₇H₈ + H₂ → C₆H₆ + CH₄. Catalyst suitability remains a separate question. |
+| D04 | Global.js:403 (1.20.1 source: `kubejs/startup_scripts/Preload/Global.js#L403`), CompoundMixing.js:26 (1.20.1 source: `kubejs/server_scripts/Recipes/CompoundMixing.js#L26`), BasicRecipe.js:415 (1.20.1 source: `kubejs/server_scripts/Recipes/BasicRecipe.js#L415`) | Constantan is labelled Cu₃Ni and produced with a 3:1 copper/nickel recipe. Conventional constantan is approximately 55% Cu / 45% Ni by mass. Neither interpreting Cu₃Ni as atomic ratio nor reading 3:1 as mass ratio describes that composition. Use a closer recipe ratio or identify this as a different Cu–Ni alloy. |
+| D05 | Global.js:375 (1.20.1 source: `kubejs/startup_scripts/Preload/Global.js#L375`), CompoundMixing.js:13 (1.20.1 source: `kubejs/server_scripts/Recipes/CompoundMixing.js#L13`), BasicRecipe.js:416 (1.20.1 source: `kubejs/server_scripts/Recipes/BasicRecipe.js#L416`) | Bronze uses 3:1 Cu/Sn in powder recipes but 4:1 in molten recipes. Real bronze has variable composition, so neither ratio alone is a universally incorrect formula. The problem is presenting one fixed composition while using two different recipe ratios without explanation. |
+| D06 | Global.js:361 (1.20.1 source: `kubejs/startup_scripts/Preload/Global.js#L361`), plus the other alloy entries; tooltips.js:7 (1.20.1 source: `kubejs/client_scripts/tooltips.js#L7`) | CuZn, Cu₃Sn, Au₃Ag and Fe₃₂Cr₈Ni₄Mo are displayed as formulas. Alloys usually need a composition/grade description, not a universal molecular formula. Steel/cast iron shown simply as Fe also hides their defining carbon content. These could be pack-specific composition shorthand if clearly labelled that way. The PE, PP, PVC and conventional PBI repeat formulas themselves were not found to be wrong. |
+| D07 | Global.js:546 (1.20.1 source: `kubejs/startup_scripts/Preload/Global.js#L546`) | `mp` largely follows Kelvin values elsewhere (Al 933, Cu 1358, Sn 505). Iron at 1443 is inconsistent with pure iron's approximately 1811 K / 1538°C melting point. The field controls recipe timing and heat categories, so it can be a balancing parameter; it should not simultaneously be presented as a real melting point. The identity of industrial iron remains undefined, so its number is not classified as a proven property error. |
+| D08 | Global.js:785 (1.20.1 source: `kubejs/startup_scripts/Preload/Global.js#L785`) | PVC at `mp: 330` means about 57°C if the field is Kelvin. This is not a credible universal PVC melting point. Amorphous PVC has formulation-dependent softening/glass-transition and processing behavior, with thermal degradation constraints. Keep a separate gameplay processing parameter if needed. |
+
+## Engineering concerns that depend on intent
+
+| ID | Source | Interpretation to resolve |
+| --- | --- | --- |
+| E01 | Glass.js:23 (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Glass.js#L23`), also line 37 | Both ordinary glass and ion-exchanged glass finish through water quenching. Ordinary glass usually needs annealing; thermal tempering normally uses a controlled air quench, while chemical strengthening creates surface compression through ion exchange. Rapid liquid quenching can be used in particular circumstances, so it is not universally impossible. The current line conflates three different treatments and should not be explained as their standard industrial route. |
+| E02 | Chemistry.js:269 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L269`) | The distillation tower splits mixed xylene into clean ortho/meta/para fractions. Ortho separation is feasible, but para/meta are difficult to separate by ordinary distillation because their boiling points are extremely close. Para enrichment commonly uses adsorption or crystallization. Treat this tower as a combined separation plant if that is intentional; do not teach simple distillation as the whole method. |
+| E03 (pig-iron charge fixed) | BlastFurnace.js:185 (1.20.1 source: `kubejs/server_scripts/Multiblocked2/BlastFurnace.js#L185`), subsequent pig-iron recipes | Quartz-to-silicon still uses the furnace's coke fuel as the implicit carbon reductant. Pig-iron recipes now also consume one `tfmg:coal_coke_dust` charge alongside the ore and limestone. This represents carbon reduction/carburization; the separate coke-filtered fuel slot remains the furnace heat source. |
+| E04 | BlastFurnace.js:275 (1.20.1 source: `kubejs/server_scripts/Multiblocked2/BlastFurnace.js#L275`) | The same multiblock performs oxidizing air/oxygen steel refining after reducing blast-furnace work. A conventional reducing blast furnace is not a steel converter. The script already identifies a separate refining-mode abstraction and places silicon deoxidation after the blow conceptually. This is an intentional reuse to honor the requirement to use the existing blast furnace; retain that distinction in explanations. |
+| E05 | MixingVessel.js:35 (1.20.1 source: `kubejs/server_scripts/Multiblocked2/MixingVessel.js#L35`) | Nickel plus NaOH becomes nickel catalyst. If this means Raney nickel, it lacks the Ni–Al alloy whose aluminum is leached out. If it means cleaning/activating existing nickel powder, that is a different, potentially acceptable abstraction. The separate Ni + alumina recipe represents a supported catalyst; alumina is not interchangeable with metallic aluminum in Raney preparation. Clarify which catalyst this item represents. |
+| E06 | Ore.js:155 (1.20.1 source: `kubejs/server_scripts/Recipes/ProcessingLine.js/Ore.js#L155`) | Adding only water turns leach solution into purified solution. Dilution can influence precipitation or hydrolysis for particular ions under suitable conditions, but it is not a general selective purification operation for all these ores. Give the operation a specific intended impurity-removal mechanism or label the step as dilution. |
+| E07 | Chemistry.js:312 (1.20.1 source: `kubejs/server_scripts/Recipes/Chemistry.js#L312`) and line 487 | Blue ice alone liquefies natural gas and air. Ordinary water ice does not reach the cryogenic temperatures needed for methane-rich LNG or liquid air. Acceptable if blue ice is deliberately a fictional cryogenic coolant; inaccurate if described as ordinary ice cooling. Naphtha condensation has a different temperature requirement and should not automatically receive the same objection. |
+| E08 | MechanicalAge.js:485 (1.20.1 source: `kubejs/server_scripts/Progression/MechanicalAge.js#L485`) | An andesite bearing contains a cogwheel, whereas the lathe alternative at BasicRecipe.js:308 needs only an alloy ingot. A plain bearing supports rotation; it does not inherently need a gear. The cogwheel is questionable unless the item represents a combined bearing/drive unit or is a deliberate crafting substitute. |
+| E09 | IndustrialAge.js:128 (1.20.1 source: `kubejs/server_scripts/Progression/IndustrialAge.js#L128`) | Steel chemical-vat construction includes two geared steel mechanisms. A passive tank does not inherently need these; an integrated pump or valve actuator could justify them. Mixing is a separate TFMG attachment, so an assumed built-in mixer is not a sufficient explanation. This is a component-role question, not proof that gears are forbidden in vats. |
+| E10 | MechanicalAge.js:36 (1.20.1 source: `kubejs/server_scripts/Progression/MechanicalAge.js#L36`) | An encased chain drive is made from casing and rubber, with no explicit metal chain. This reads more naturally as a belt transmission. Keep it if the internal metal drive is abstracted by the casing or if the recipe is deliberately a cheap transmission gate; avoid describing rubber itself as the chain. |
+| E11 | MicrobesCulture.js:5 (1.20.1 source: `kubejs/server_scripts/Recipes/MicrobesCulture.js#L5`) | The Petri dish is mostly brass, with a glass pane added afterward. Direct contact with copper-bearing brass can inhibit microbes. A glass-lined culture surface with an external brass frame resolves this concern. The recipe alone cannot settle the contact geometry. |
+| E12 | MicrobesRecipe.js:810 (1.20.1 source: `kubejs/server_scripts/Recipes/MicrobesRecipe.js#L810`), line 869 and line 1070 | Heated microbial syngas/methanol production merges live biology with thermochemical/catalytic processes. Ammonia → nitrate by `nitrofix_rhizobium` is nitrification, not nitrogen fixation. Engineered fictional organisms can justify these abilities; ordinary Rhizobium/real microbial explanations cannot. Atmospheric nitrogen/oxygen can be implicit, so a missing gas input by itself is not proof of elemental creation. |
+
+## Inherited Native Recipes Excluded
+
+The owner confirmed on 7 October 2026 that the five inherited recipes previously listed here were already removed. They are excluded from current findings and correction work. Their original jar resources remain in the historical [native evidence](audit/NATIVE_RECIPE_EVIDENCE.json); jar presence and older exports do not establish current loaded availability. This batch added no removal filters.
+
+## Processes that do not warrant a realism correction from this audit
+
+- The declared-unit overall Haber reaction, Ostwald nitric-acid route, Deacon HCl-to-chlorine route, adipic acid/adiponitrile/HMDA reactions, bisphenol-A formation, aggregate epichlorohydrin route, ethylene-glycol route and PET condensation are broadly coherent at the reaction level. Omitting intermediate vessels, solvent handling, pressure regulation or heat recovery does not alone invalidate their net chemistry.
+- Alloy powders can represent a blended precursor rather than an already homogeneous alloy. Their later melting is a sensible abstraction. Fluid quantities for metallurgical recipes need not mean atomic ratios unless explicitly declared that way.
+- Bearings/propellers in mechanical pumps, drive gears in mixers and centrifuges, plate/casing frames, reflux/transfer pumps for distillation, and lubrication in mechanical assemblies have plausible roles. A shared machine module is not inherently an unnecessary ingredient.
+- The steel-gated industrial mixer and its blade are not an appropriate bootstrap steel-production machine. This audit does not propose moving first steel into either one.
+- A Stirling engine can operate from external heat without consuming water. A component named steam apparatus does not by itself prove the engine is functioning as a steam engine.
+- Aluminum can be a p-type silicon dopant. Sulfur can act as a deep donor in silicon, so it would be incorrect to say sulfur can never produce n-type behavior. The native recipes simplify fabrication rather than prove the dopant polarity wrong.
+- Ore host-rock associations and probabilistic byproducts can model mixed deposits; they are not mineral molecular formulas. Fictional/redstone electronics, enchanted upgrades, metal apples, Nature's Compass and resource-renewal recipes have an established gameplay/fantasy role.
+- The resin/rubber and glass findings concern named real materials and specific mechanisms. They do not imply that every vanilla transformation needs an industrial simulation.
+
+## Other source inconsistency, outside the realism verdict
+
+The spring conversion cycle was corrected on 7 October 2026: Metallurgy.js:51 (1.20.1 source: `kubejs/server_scripts/Recipes/Metallurgy.js#L51`) now gives springs the same 45 mB melt value as their wire/rod input, for both ordinary and bulk melting. This fixes material duplication independently of whether each material is suitable for a real spring.
+
+## Review coverage by production area
+
+| Area | Reviewed source | Result |
+| --- | --- | --- |
+| Ore preparation/extraction | OreCrushing, ProcessingLine.js/Ore, productionMaps, outPutMaterial | Physical preparation is coherent; sulfide splitting and generic wet/thermal extraction need material-specific treatment. |
+| Metals/alloys/steel | CompoundMixing, Metallurgy, BasicRecipe alloy routes, IndustrialAge, BlastFurnace, material registry | Cast-iron forming, reactive-metal extraction, carbon/reductant accounting and composition labels are the main concerns. |
+| Petrochemicals/polymers | Entire Chemistry script, fluid phase tables, MixingVessel | CO₂ scrubbing, three reaction quantity errors, and both aromatic separation balances were corrected on 7 October. Remaining catalyst/composition questions are outside the current quantity batch. |
+| Glass/paper | Glass, GlassFix, Paper | The nitrate-bath recovery and returned additives are accepted gameplay abstractions. Paper's refining, wet-web forming, pressing and drying have plausible roles; fermentation-based initial pulping is a simplified biological process rather than a fully specified industrial method. |
+| Biology/cultures | Entire MicrobesRecipe, MicrobesCulture, Incubator and culture registration | Ethanol treatment is retained as a gameplay disinfection abstraction. Engineered microbial abilities require lore/design interpretation. |
+| Machines/components | MechanicalAge, PrecisionAge, IndustrialAge, ElectricAge, native industrial construction | No blanket problem with gears. The bearing's alternate shaft recipe now avoids an unnecessary cogwheel dependency; passive-vat and chain-drive component meanings remain design abstractions. |
+| Other conversions | Geology, Stones, Lychee, HammerRecipe, recycle/compost, foods, tools/upgrades, mod integration scripts and relevant interactions | The resin reversal was removed; most remaining conversions are assembly, recycling or explicit gameplay/fantasy abstractions. |
+
+## Proposed early soda and carbonate supply
+
+Design requested 5 October 2026; dependency and growth checks refined 6 October 2026. The additive-consumption variant was not adopted because it would make early glass automation unnecessarily difficult. The current glass-batch recipe intentionally returns soda and limestone; the renewable supply notes below remain a proposal for optional input replenishment, not a required replacement.
+
+### Existing resources and progression
+
+- Soda already has a worldgen source. Alkaline lakes (1.20.1 source: `kubejs/data/cwi/worldgen/configured_feature/structures/alkaline_lake.json`) contain `kubejs:alkaline_brine` and have calcite barriers. A previous conversational answer missed this source by looking for recipe producers.
+- Surface placement (1.20.1 source: `kubejs/data/cwi/worldgen/placed_feature/structures/alkaline_lake_surface.json`) uses rarity 300; underground placement (1.20.1 source: `kubejs/data/cwi/worldgen/placed_feature/structures/alkaline_lake_underground.json`) uses rarity 40 and additional terrain filters. Neither number guarantees a lake in the corresponding number of chunks.
+- Existing evaporation (1.20.1 source: `kubejs/server_scripts/Recipes/MicrobesRecipe.js#L71`) consumes 500 mB alkaline brine and produces one soda powder, two salt, and stone powder at ordinary heat. Its basin variant needs a basin lid, not a mechanical mixer or culture. This abstracts separation and drying of the mixed dissolved salts.
+- The basin lid (1.20.1 source: `kubejs/server_scripts/Progression/MechanicalAge.js#L363`) uses three andesite-alloy sheets and a clock. The clock needs gold and redstone, so this is mechanical-stage access rather than immediate starter access. Basin, burner, pump, pipes, bearings, and the required iron-rod rolling equipment have routes without glass or steel. The bulk fermenter needs a fluid tank containing glass, so it is an expansion option after the first glass has been made.
+- Installed Create Diesel Generators bytecode confirms that the closed lid operates directly above a basin without rotational drive and enforces the recipe's heat through Create's basin matcher. Pipes can feed the basin; arrange item extraction from its side because the burner occupies the space underneath. The complete setup still needs a live test.
+- Existing milling (1.20.1 source: `kubejs/server_scripts/Recipes/Stones.js#L8`) gives both limestone and calcite three corresponding powders plus a 75% chance of a fourth. Limestone is a host rock in numerous ore deposits; calcite is also obtainable around the brine lakes.
+- The pack's dripstone caves (1.20.1 source: `kubejs/data/cwi/worldgen/biome/dripstone_caves.json`) include vanilla dripstone features. The precision-stage drill and deployer should not be required for the initial renewable carbonate route.
+
+### Recommended supply design
+
+| Supply | Proposed operation | Player setup |
+| --- | --- | --- |
+| Soda | Keep 500 mB alkaline brine → 1 soda + existing byproducts, at ordinary heat. | Bucket initially; then pump/pipe feed to a heated basin with lid and automatic item extraction. A glass tank is optional. |
+| Initial carbonate | Keep the existing limestone and calcite milling yields. | Mine a small stock and feed an early millstone. |
+| Renewable carbonate | Add pointed dripstone → 1 calcite powder; dripstone block → 4 calcite powder. | A water-fed farm must control both upper and lower growth; its harvest layout is provisional. Four pointed dripstone already craft into one block, so both milling forms have the same total yield. |
+| Glass batch | Current recipe returns its soda and limestone inputs with the glass batch. | This is an intentional gameplay simplification that keeps early glass automation practical. |
+
+Use a narrowly scoped glass ingredient tag, such as `cwi:glass_calcium_carbonate_powders`, containing `kubejs:limestone_powder` and `kubejs:calcite_powder`. Calcite supplies the same required calcium-carbonate constituent without pretending it is geological limestone. Do not expand unrelated limestone recipes automatically; examine their mineral/purity requirements separately.
+
+The proposed glass quantities are balance values, not a claim of exact chemical mass ratios. They keep the current two-sand-per-batch ratio while distributing the additives across several outputs. With the current 76% success chance, a stack of 64 finished glass requires about 84.2 batches on average: about 169 sand, 22 soda powder, and 11 carbonate powder before rounding to full eight-batch runs. That is approximately 11 buckets of brine and three mined carbonate blocks at the existing average milling yield, or 11 pointed dripstone. A full set of 11 proposed recipe runs uses 176 sand, 22 soda, and 11 carbonate for 88 batches, averaging 66.88 glass. These are expectations, not guaranteed completion quantities.
+
+### Source availability and renewal
+
+Reduce the surface alkaline-lake rarity setting from 300 to **24 as an initial balance candidate**. Keep the existing biome distribution and underground placement initially. Observe successful lake generation in fresh terrain before settling the frequency: placement attempts can fail, and existing chunks do not gain new lakes automatically.
+
+For a simple renewable soda supply, make **only alkaline brine regenerate source blocks like water**, allowing a small replenishing intake pool after the player obtains two buckets. This is an explicit gameplay abstraction of an accessible mineral-brine reservoir. Source regeneration does not simulate chemical synthesis or prove that an arbitrary puddle is a real aquifer. Keep the actual production step as extraction/evaporation of sodium-carbonate-bearing brine. Do not produce soda from ordinary wood ash, salt alone, calcite plus water, or ordinary water.
+
+Installed KubeJS/Architectury bytecode exposes the per-fluid setting through `builder.createAttributes().convertToSource(true)`; there is no `FluidBuilder.canConvertToSource(...)` setter in this installed version. Apply that setting only to the alkaline-brine builder, after its existing textures, color, and other fluid settings: `createAttributes()` builds and caches attributes from those settings. Keep the fluid builder separate from its `.bucketItem` builder when making this call. Installed Create's open pipe checks whether draining a source would allow it to regenerate, which supports a small renewing intake pool. The actual fluid and intake still need an in-game test. Source renewal is distinct from Create's hose-pulley bottomless setting: the current default requires 10,000 connected source blocks and uses `ALLOW_BY_TAG`. Adding a fluid to that tag alone does not make a small lake inexhaustible. Do not lower the global threshold or make every chemical fluid renewable as part of this change.
+
+### Early dripstone harvesting
+
+The earlier floor-only harvesting proposal is incomplete. Installed vanilla 1.20.1 bytecode requires the upper tip to be able to grow before attempting either branch. The upper stalactite can eventually become obstructed, merge with lower growth, or exceed the tip-search range; retracting only the floor does not clear that condition. A sustainable farm must preserve its upper root seed while periodically clearing new hanging growth as well as harvesting lower growth.
+
+An early Create support-removal layout is a candidate, subject to the checks below. The mechanical piston has a retained recipe of wooden slab + andesite casing + piston extension pole; the pole costs planks and andesite alloy. Ordinary pointed dripstone is not automatically attached to the floor in contraption assembly, and removing its support sends neighbor updates. These facts support harvesting by moving supports, but do not prove a complete repeating farm. **Do not present the layout as working until seed preservation, upper clearing, water containment, lower harvest, and item collection have been tested together.** Vanilla pistons are explicitly removed by the pack, so a vanilla piston farm is not an available fallback.
+
+For the test layout, move the upper dripstone support block and its original hanging seed sideways together, with glue confined to that pair. New hanging growth must remain outside glue volumes and chassis ranges. Removing its connection should make the added segments fall; installed vanilla schedules that fall after two ticks, so allow them to clear before returning the seed. A separate horizontally retracting floor harvests lower growth. Confine the water above the moving support and keep the harvest shaft dry. Installed Create movement checks support this separation, but water containment, restored seed orientation/thickness, collection, and control timing remain experimental. Two moving supports add complexity; if the test is awkward or unreliable, revise the renewable route instead of describing it as easy automation.
+
+Vanilla growth is slow. At default `randomTickSpeed = 3` and 20 TPS, each eligible upper root receives about 52.7 random ticks per hour, each with growth-attempt probability `0.011377778`. That yields about 0.6 attempts per root per hour. The two branches are equally likely, so collecting only lower growth has an ideal ceiling of about 0.3 pointed dripstone per root per hour while all growth conditions remain satisfied.
+
+| Eligible Roots | Ideal Lower-Only Powder Per Hour | Expected Glass Supported Per Hour |
+| --- | ---: | ---: |
+| 16 | 4.8 | 29.2 |
+| 32 | 9.6 | 58.4 |
+
+These are estimates before travel, collection losses, harvest downtime, and growth obstruction; they are not measured farm rates. The glass column uses the proposed eight batches per carbonate powder and current 76% glass success chance. Eleven carbonate powder would take about 138 minutes from 16 roots or 69 minutes from 32 roots at those ideal lower-only rates. Successfully collecting both branches gives theoretical ceilings of about 9.6 and 19.2 powders per hour respectively, supporting about 58 and 117 expected glass per hour. The complete mechanism remains untested. Use mined limestone/calcite for initial stock and evaluate renewable farming as replenishment.
+
+The root needs a dripstone block directly above and source water above that. The upper tip search has a seven-block limit; the lower growth search checks up to ten positions. Clearance, suitable floor, non-merged tips, and absence of obstructing fluid matter. Vanilla random ticks also require appropriate chunk ticking and a nearby non-spectator player within 128 horizontal blocks of the chunk centre. Forced loading alone does not guarantee growth; leaving the area or pausing can stop production.
+
+Real stalactites and stalagmites commonly deposit calcium carbonate from mineral-bearing water. Milling their material is a reasonable carbonate extraction route. Minecraft's renewable dripstone growth abstracts the dissolved-mineral supply and geological timescale; water itself supplies no calcium. Existing vanilla growth is slow, so the low carbonate demand is deliberate. More parallel growth points provide more throughput without speeding up every random-tick process.
+
+Optional later convenience: Ratatouille's retained egg-emptying recipe supplies an egg shell and yolk. A recipe of four shells → one calcite powder would be chemically appropriate, but eggs depend on loot and establishing chickens in this pack. It should supplement, rather than replace, the reliable initial mineral route. Honey + lava → limestone exists natively in Create but should not be presented as the realistic route.
+
+### Verification before implementation is considered complete
+
+- Confirm basin evaporation and item extraction work before any glass has been made; confirm each required machine's complete ingredient chain.
+- Test the renewable brine intake, bucket collection, and pump throughput without a glass tank.
+- Test a dripstone mechanism that controls both upper and lower growth with the installed Create version, including seed preservation and water containment. Revise it before making additive consumption rely on its operation.
+- Measure dripstone-farm throughput against actual early glass demand. The estimates above assume default random ticks and fully eligible roots; they do not verify a farm's production rate.
+- Check fresh-world lake accessibility and record observed placement, without turning rarity settings into player-facing guarantees.
+- Validate ingredient counts, tag matching, and the eight-batch output in JEI and a running basin. Maintain the full evaporation byproducts in both the initial and optional culture-assisted variants.
+
+## References checked through Browser
+
+- [Coresix — chemical strengthening](https://coresix.com/processes/chemical-strengthening): potassium/sodium ion exchange and surface compression. Used for R01 and E01; not as support for its particular stated bath temperature.
+- [LibreTexts — chain-growth polymers](https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Map%3A_Organic_Chemistry_(Bruice)/29%3A_Synthetic_Polymers/29.02%3A_Chain-Growth_Polymers): radical initiation, PE routes and coordination catalysts, including the distinction between organometallic zinc reagents and zinc metal.
+- [LibreTexts — stereochemistry and Ziegler–Natta catalysts](https://chem.libretexts.org/Bookshelves/Organic_Chemistry/Map%3A_Organic_Chemistry_(Bruice)/29%3A_Synthetic_Polymers/29.03%3A_Stereochemistry_of_Polymerization__Ziegler-_Natta_Catalysts): PP tacticity and catalyst-dependent structure.
+- [CDC — chemical disinfectants](https://www.cdc.gov/infection-control/hcp/disinfection-sterilization/chemical-disinfectants.html): alcohol does not destroy bacterial spores and is not a sterilization method.
+- [Laird Plastics — PBI](https://lairdplastics.com/resources/what-is-polybenzimidazole-pbi/): conventional PBI heat resistance, lack of an ordinary melting point and solution-based fiber processing.
+- [Xu et al., Materials (2023) — magnesium refining processes](https://pmc.ncbi.nlm.nih.gov/articles/PMC10179423/): molten-salt electrolysis and suitable thermal-reduction routes. Carbon reduction exists under specialized conditions; this audit does not claim it is universally impossible.
+- [Goodfellow — constantan](https://www.goodfellow.com/usa/resources/constantan-resistance-alloy-wire-material-information/): approximately Cu55/Ni45 composition.
+- [Royal Society of Chemistry — iron](https://periodic-table.rsc.org/element/26/iron): 1538°C / 1811 K melting point.
+- [USGS — soda ash](https://www.usgs.gov/centers/national-minerals-information-center/soda-ash-statistics-and-information): natural soda ash is refined from trona or sodium-carbonate-bearing brines.
+- [National Park Service — speleothems](https://www.nps.gov/subjects/caves/speleothems.htm): stalactites are usually calcite; carbonate stalagmites deposit from mineral-bearing dripping water.
+
+Reaction-conservation findings also follow directly from the displayed inputs/outputs and the script's stated units. They do not rely on a reference asserting that the exact in-game recipe is wrong.

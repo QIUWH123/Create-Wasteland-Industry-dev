@@ -1,0 +1,103 @@
+PlayerEvents.tick(event => {
+    const player = event.player
+    if (globalTickCounter % 10) return
+
+    // Hot Item Effect
+    if (player.inventory.count('#cwi:hot_items') > 0) {
+        player.attack(player.damageSources().inFire(), 1)
+    }
+
+    // Neurotoxin
+    const neurotoxinCount = player.inventory.count('#cwi:neurotoxin') +
+        9 * player.inventory.count('#cwi:neurotoxin_lv2')
+    const currentNeurotoxinAmount = player.persistentData.neurotoxinAmount
+        ? player.persistentData.neurotoxinAmount
+        : 0
+    const nextNeurotoxinAmount = 0.85 *
+        (currentNeurotoxinAmount + Math.sqrt(neurotoxinCount) / 50)
+    const neurotoxinLevel = Math.floor(currentNeurotoxinAmount - 1.5)
+
+    if (neurotoxinLevel >= 0 && Platform.isLoaded('clanginghowl')) {
+        player.potionEffects.add('clanginghowl:neurotoxin', 11, neurotoxinLevel, true, true)
+    }
+    if (
+        neurotoxinCount === player.persistentData.neurotoxinCount &&
+        Math.abs(currentNeurotoxinAmount - nextNeurotoxinAmount) < 0.001
+    ) return
+
+    player.persistentData.neurotoxinCount = neurotoxinCount
+    player.persistentData.neurotoxinAmount = nextNeurotoxinAmount
+})
+
+// more_events_js is absent in 1.21.1; use NeoForge's fluid contact heights
+// for every living entity, including contact with flowing fluid.
+function fluidExists(id) {
+    try {
+        if (typeof Fluid.exists === 'function') return Fluid.exists(id)
+        return Platform.isLoaded(id.split(':')[0])
+    } catch (error) {
+        return false
+    }
+}
+
+const hazardMoltenFluids = [
+    'kubejs:molten_aluminum',
+    'kubejs:molten_vanadium',
+    'kubejs:molten_tin',
+    'kubejs:molten_silver',
+    'kubejs:molten_andesite_alloy',
+    'kubejs:molten_zinc',
+    'kubejs:molten_gold',
+    'kubejs:molten_iron',
+    'kubejs:molten_pig_iron',
+    'kubejs:molten_undeoxidized_steel',
+    'kubejs:molten_cast_iron',
+    'kubejs:molten_copper',
+    'kubejs:molten_brass',
+    'kubejs:molten_lead',
+    'kubejs:molten_cobalt',
+    'kubejs:molten_nickel',
+    'kubejs:molten_constantan',
+    'kubejs:molten_bronze',
+    'kubejs:molten_electrum',
+    'kubejs:molten_slag',
+    'kubejs:liquid_silicon',
+    'kubejs:molten_glass'
+].filter(fluidExists).map(id => Fluid.getType(id).getFluidType())
+
+const acidicFluids = [
+    ['kubejs:redstone_acid', 3],
+    ['kubejs:concentrated_sulfuric_acid', 5],
+    ['kubejs:nitric_acid', 4],
+    ['kubejs:muriatic_acid', 4.5],
+    ['kubejs:acetic_acid', 2],
+    ['kubejs:propionic_acid', 1],
+    ['kubejs:lactic_acid', 2],
+    ['kubejs:wood_vinegar', 0.5],
+    ['kubejs:humic_acid_slurry', 0.5],
+    ['kubejs:sulfuric_acid', 4]
+].filter(([id]) => fluidExists(id))
+    .map(([id, damage]) => [Fluid.getType(id).getFluidType(), damage])
+
+LevelEvents.tick(event => {
+    if (globalTickCounter % 10) return
+
+    event.level.getAllEntities().forEach(entity => {
+        if (!entity.isLiving() || !entity.isAlive()) return
+
+        hazardMoltenFluids.forEach(fluidType => {
+            if (entity.getFluidTypeHeight(fluidType) <= 0) return
+            entity.attack(entity.damageSources().lava(), 7)
+            entity.setSecondsOnFire(3)
+            entity.potionEffects.add('minecraft:slowness', 10, 6, true, true)
+        })
+        acidicFluids.forEach(([fluidType, damage]) => {
+            if (entity.getFluidTypeHeight(fluidType) <= 0) return
+            entity.attack(entity.damageSources().magic(), damage)
+            if (Platform.isLoaded('biomancy')) {
+                entity.potionEffects.add('biomancy:armor_shred', 100, 1, true, true)
+                entity.potionEffects.add('biomancy:corrosive', 20, 1, true, true)
+            }
+        })
+    })
+})
