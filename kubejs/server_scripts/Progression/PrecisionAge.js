@@ -53,6 +53,20 @@ ServerEvents.recipes(event => {
 // Shaped
 
     event.shaped(
+        'cwi:lava_extractor_pump_blade',
+        [
+            'ABA',
+            'BCB',
+            'ABA'
+        ],
+        {
+            A: 'kubejs:industrial_iron_sheet',
+            B: '#cwi:rubbers',
+            C: 'create:shaft'
+        }
+    )
+
+    event.shaped(
         'tfmg:brass_mechanical_pump',
         [
             'ABC'
@@ -401,6 +415,40 @@ ServerEvents.recipes(event => {
 
 // Mechanical Crafting
 
+    event.recipes.create.mechanical_crafting(
+        'cwi:incubator',
+        [
+            'CDC',
+            'BAF',
+            'GEG'
+        ],
+        {
+            A: 'create:iron_sheet',
+            B: 'minecraft:clock',
+            C: 'create:brass_sheet',
+            D: 'minecraft:glass_pane',
+            E: 'kubejs:precise_machine',
+            F: 'create_connected:control_chip',
+            G: 'kubejs:industrial_iron_spring'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'cwi:mixing_vessel',
+        [
+            'CEC',
+            'BAB',
+            'CDC'
+        ],
+        {
+            A: 'create:whisk',
+            B: '#cwi:rubbers',
+            C: 'create:copper_sheet',
+            D: 'kubejs:precise_machine',
+            E: 'create:copper_casing'
+        }
+    )
+
     if (Platform.isLoaded('naturescompass')) {
         event.recipes.create.mechanical_crafting(
             'create_power_loader:brass_chunk_loader',
@@ -522,6 +570,22 @@ ServerEvents.recipes(event => {
     )
 
     event.recipes.create.mechanical_crafting(
+        'cwi:stirling_engine',
+        [
+            'BAB',
+            'BCB',
+            'DED'
+        ],
+        {
+            A: 'kubejs:industrial_iron_sheet',
+            B: 'createdieselgenerators:engine_piston',
+            C: 'kubejs:steam_apparatus',
+            D: 'kubejs:industrial_iron_ingot',
+            E: 'minecraft:copper_block'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
         'create_sa:creative_filling_tank',
         [
             'ABA',
@@ -580,6 +644,59 @@ ServerEvents.recipes(event => {
             B: 'create:copper_sheet',
             C: '#cwi:rubbers',
             D: 'create:fluid_pipe'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'cwi:lava_extractor_head',
+        [
+            ' BAB ',
+            'BCDCB',
+            'ADEDA',
+            'BCDCB',
+            ' BAB ',
+        ],
+        {
+            A: 'tfmg:copper_frame',
+            B: 'kubejs:industrial_iron_ingot',
+            C: 'create:sturdy_sheet',
+            D: 'create:fluid_tank',
+            E: 'create:hose_pulley'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'cwi:lava_extractor_pump',
+        [
+            ' BAB ',
+            'BACAB',
+            'ACDCA',
+            'BACAB',
+            ' BAB ',
+        ],
+        {
+            A: 'kubejs:tempered_glass',
+            B: 'kubejs:industrial_iron_ingot',
+            C: '#cwi:rubbers',
+            D: 'cwi:lava_extractor_pump_blade'
+        }
+    )
+
+    event.recipes.create.mechanical_crafting(
+        'cwi:lava_extractor_stress_input',
+        [
+            ' BAB ',
+            'BCDCB',
+            'ADEDA',
+            'BCDCB',
+            ' BAB ',
+        ],
+        {
+            A: 'kubejs:industrial_iron_sheet',
+            B: 'kubejs:industrial_iron_ingot',
+            C: '#cwi:rubbers',
+            D: 'create:sturdy_sheet',
+            E: 'create:shaft'
         }
     )
 

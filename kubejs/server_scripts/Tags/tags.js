@@ -442,6 +442,7 @@ ServerEvents.tags('block', event => {
 
 // FluidContainers
     event.add('cwi:fluid_container', [
+        'cwi:mixing_vessel',
         'create:fluid_tank',
         'tfmg:aluminum_fluid_tank',
         'tfmg:cast_iron_fluid_tank',
