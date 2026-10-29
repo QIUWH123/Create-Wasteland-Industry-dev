@@ -23,7 +23,7 @@ This instance targets Minecraft 1.21.1 and NeoForge 21.1.264. The older CWI
 - Temporary harnesses and caches may disappear. Recreate needed checks from known source instead of citing an unavailable temporary file or an older run as current evidence.
 - Discover bundled Python/Node runtimes through the workspace-dependency tool when extra libraries are needed. Do not assume packages or editor command-line tools from a previous computer still exist.
 - ProbeJS 8.0.3 exposes `/probejs` to open its dump interface. Generate fresh target-instance definitions after mod changes and inspect their actual output/configuration; do not reuse the 1.20.1 definitions or assume its `/probejs dump` command still applies. The current instance has no `kubejs/jsconfig.json`; create editor configuration only as authorized work after locating fresh generated definitions.
-- The port intentionally excludes old MBD2 machine scripts and hammer server functionality. Client scripts, quests, worldgen and structures have not been ported wholesale. Documentation for those old systems is historical context, not an instruction to restore them.
+- Native CWI Core now owns machine processing, charged hammers and equipment upgrades. Production KubeJS recipes configure those systems; do not restore MBD2 runtime scripts or the old hammer release/conversion implementation alongside them. Client scripts, quests, worldgen and structures have not been ported wholesale. Keep the intentionally unimplemented arc furnace and storage-only solar behavior unchanged.
 - Review fresh `logs/kubejs/startup.log`, `server.log`, and `client.log` after a target launch. A restart is required after registration changes. Do not launch Minecraft or alter unfinished gameplay merely to make a documentation update appear validated.
 
 ## File Formatting
@@ -40,7 +40,7 @@ This instance targets Minecraft 1.21.1 and NeoForge 21.1.264. The older CWI
 - Remove trailing semicolons from JavaScript statements.
 - Use single quotes for ordinary JavaScript strings.
 - Preserve template literals and strings whose escaping or embedded content would change if the quote style changed.
-- Use `const` by default and `let` when reassignment is required.
+- Use `const` by default and `let` when reassignment is required. The installed Rhino also needs `let` at verified repeated-loop/callback sites that throw `redeclaration of var`; exercise the callback at runtime before choosing that workaround.
 - Do not introduce new `var` declarations. Do not rename existing globals solely for style.
 - Keep helper names and public global names unchanged, including `AddItem`, `AddFluid`, `global.outPutMaterial`, and `global.materialTypes`.
 - Keep KubeJS priority comments such as `// priority: 10000` as the exact first line of the file. Do not move, reword, or convert them to block comments.
@@ -121,6 +121,7 @@ This instance targets Minecraft 1.21.1 and NeoForge 21.1.264. The older CWI
 - Keep the author's accepted gameplay simplifications: returned soda/limestone in glass batches, the retained nitrate-bath abstraction, and simplified leaching/disinfection. Do not turn historical realism-review candidates into authorization to change recipes.
 - Do not restore rubber-to-resin reversal, dried Fermento/Carbofusor/Putrelys revival routes, firebox additions, removed blast-furnace diagnostics, duplicate-material bridge recipes, or new schematics.
 - Treat `forge:` and `c:` tags case by case using the installed resources and current custom tags; a namespace-wide search-and-replace is unsafe.
+- New shared tags use the verified modern common ID; pack-specific groups use `cwi:`. Do not introduce `forge:` tags or readers. `Tags/LegacyTags.js` removes legacy item, block and fluid tag definitions after other assignments; update supported data/configuration readers instead of editing Core or installed JARs.
 - Prefer data components and installed recipe-result APIs over old `.nbt`/callback examples. Prefer `NativeEvents` and NeoForge classes over obsolete Forge event bridges. Check [kubejs.md](kubejs.md) and [the schema guide](KUBEJS_RECIPE_SCHEMA_GUIDE.md) before applying old examples.
 
 ## Validation

@@ -7,9 +7,9 @@
 > Use [the current API reference](../../kubejs.md) and
 > [development standards](../../DEVELOPMENT_STANDARDS.md) instead.
 >
-> The target now contains startup/server code, while hammer server behavior,
-> MBD2 machines, client scripts, quests, worldgen and structures are not ported
-> wholesale. Startup `global` data is readable by server scripts; server scripts
+> Later work supplies native CWI Core machine, hammer and equipment-upgrade
+> recipes, plus selected client tooltips and viewer hiding. MBD2 runtime scripts,
+> custom client categories, quests, worldgen and structures remain unported. Startup `global` data is readable by server scripts; server scripts
 > must not assign new `global` values. Later decisions supersede this plan.
 
 **Goal:** Port the old CWI KubeJS startup registrations and shared globals into the 1.21.1 instance using the installed KubeJS 2101.7.2, Rhino 2101.2.7, KubeJS Create 2101.3.1, and NeoForge APIs.

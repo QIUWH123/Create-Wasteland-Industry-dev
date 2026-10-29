@@ -12,6 +12,136 @@ Forge 2001.x signatures and examples remain historical evidence, not current
 API instructions. Read [Development Standards](DEVELOPMENT_STANDARDS.md) before
 changing scripts.
 
+## Native Core Production Integration — 29 October 2026
+
+This section supersedes the earlier migration exclusions and inventory below.
+The installed CWI Core provides native serializers, machine behavior and JEI
+categories. Production balance remains in KubeJS:
+
+| Script | Production definitions |
+| --- | --- |
+| `server_scripts/Machines/BlastFurnace.js` | 10 original superheated recipes; original IDs including their `_superheated` suffix, IO, times and heat. |
+| `server_scripts/Machines/MixingVessel.js` | 12 original recipes; original IO and times. Native Core handles RPM scaling. |
+| `server_scripts/Machines/Incubator.js` | 28 cultures from startup `global.microbes`; original times, 64 RPM, feed order, yield and prepared-plate IO. |
+| `server_scripts/Recipes/Hammer.js` | 87 block and 9 depot conversions; original stages, drop counts/chances and order. The four retired Darker Depths block IDs use the existing KubeJS stone replacements. |
+| `server_scripts/Recipes/ToolArmorRecipe.js` | Restores the original small-hammer and ten material-hammer acquisition recipes, retaining patterns, ingredients and declaration order. |
+| `server_scripts/Recipes/ToolArmorUpgrade.js` | 697 original native upgrades, including 76 hammer upgrades; existing material helpers, reusable tools, caps and durability costs. |
+| `startup_scripts/Items/hammers.js` | 13 native charged material hammers with automatic models, stone's original first-charge texture and the entity-only steel pipe's manual model. Lead uses the successful `afterImpact` hook; its original neurotoxin provider is absent, so no substitute effect is invented. |
+| `server_scripts/Interactions/Hammers.js` | Keeps the steel pipe out of hammer conversion catalysts. |
+| `server_scripts/Starter.js` | Login and respawn use registered `cwi:player_spawn`; the pipe callback uses `CwiSounds.STEEL_PIPE.get()`. The pipe item remains `kubejs:steel_pipe`. |
+| `startup_scripts/RecipeRegister/BuddingCatalyze.js`, `server_scripts/Recipes/MicrobesRecipe.js` | Original water/lava/caustic-soda growth attempts and chances; simulation is read-only. Direct block writes and native sound stay in the budding block's dimension. Fermenting outputs use Core's registered infected budding blocks. Quartz remains conditional on Geode Plus; amber stays excluded. |
+| `server_scripts/Progression/IndustrialAge.js`, `PrecisionAge.js` | Restores original crafting/assembly access to the nine Core machine blocks/components, including the lava extractor and Stirling engine. |
+| `client_scripts/tooltips.js`, `client_scripts/JEI/JEIHide.js` | Material formulas, hot/no-gravity warnings and original viewer entry hiding, guarded for absent registry entries. |
+
+Use `event.create(id, 'hammer')`: the builder type is `kubejs:hammer`, while
+production item IDs remain `minecraft:<material>_hammer`. Do not register
+`cwi:hammer` or restore `global.releaseHammer`. Core performs the material
+hammer release and model lifecycle; the pipe supplies its distinct release
+callback and is excluded from conversion catalysts.
+
+Use `.texture(...)` for automatic ordinary hammer models, with
+`.chargedTexture(1, ...)` for stone's authored first-stage art. An explicit
+`.modelGenerator(...)` owns the whole model and bypasses automatic charge
+generation. Keep `.chargeModels(false)` on the steel pipe. `afterImpact`
+runs only after successful native charged entity damage; it does not replace
+the pipe's distinct `releaseUsing` callback.
+
+Native recipe factories are `event.recipes.cwi.blast_furnace_processing`,
+`mixing_vessel_mixing`, `incubating`, `block_conversion`, `depot_conversion`
+and `equipment_upgrade`. Their schemas come from Core; do not add duplicate
+schemas or copy illustrative test recipes into production. Equipment upgrades
+use native crafting and native JEI rather than shapeless result callbacks.
+Use `minecraft:sweeping_edge` directly. The installed Core JAR is the API
+authority; a concurrently rebuilt source project can contain methods and fixes
+that are not installed in this pack. Verification used
+`cwi-0.1.0-dev+1.21.1.jar`, SHA-256
+`891d70b31de86473f578cdce74ed6c5971aa7d0f5012cbbed4d5334d75232f73`.
+Core preserves upgrade enchantment order in `cwi:enchantment_order` inside
+custom data. Existing 1.21 items without stored order initialize by ID; their
+lost historical order cannot be inferred.
+
+`ItemEvents.modifyTooltips` replaces the old tooltip event. Its `add` takes a
+list of components. Live tag warnings use a `dynamicTooltips` handler because
+an unresolved empty ingredient can match every item before world tags load.
+Viewer hiding uses `RecipeViewerEvents.removeEntries('item'|'fluid', ...)`.
+
+Machine, hammer and upgrade JEI pages are native. The installed APIs do not
+provide the old `JEIAddedEvents` category registration bridge, and Core does
+not yet implement the budding-catalyst or compound-mineral custom category.
+Those two displays and the old Ponder scenes remain outstanding. Budding's
+actual spout processing is independent of that display gap. No MBD2 runtime,
+arc-furnace implementation, firebox, diagnostics, dried-microbe revival or new
+schematics are added.
+
+Current compatibility contracts:
+
+- Foundry validation accepts up to 36 item ingredient entries. The basin
+  still has four physical input slots, each holding nine items. Repeated
+  entries consume repeated items; do not merge them into unsupported counted
+  ingredient JSON. All eight andesite-alloy recipes retain their original IO.
+- Lychee block interactions use native `{}` for an empty hand. Core's schema
+  accepts and re-encodes it; keep the original scrap recipe and sneaking
+  condition. Lychee's upstream native JSON encoder cannot encode that empty
+  ingredient, so avoid using it to dump empty-hand recipes; native decoding
+  and network synchronization work.
+- Chest loot uses outer `.group(...)` for independent rolls/chances and inner
+  `.pool(...)` for isolated outputs and functions. Use `.setCount(...)`, not
+  count clamping, to preserve authored stack counts. Dark ash retains its two
+  original biome conditions; neither biome is currently ported, so that
+  alternative fails and ordinary ash remains available.
+- Industrial-iron, stainless-steel and lead material hammers still have no
+  original acquisition route. No new acquisition recipes are invented.
+  Automatic generation supplies industrial iron's charged models.
+
+Validation compares complete generated recipe data with the read-only original:
+50 machine recipes, 96 hammer conversions, 697 upgrades and 20 acquisition
+recipes. All 95 JavaScript files pass Node and installed Rhino parsing.
+Deterministic budding checks cover 2,400 scenarios; client checks cover 244
+formula pairs, absent registries and both warning tags. The original instance's
+2,383 KubeJS files retain their pre-task hashes.
+
+An isolated Java 21 dedicated server loaded exact copies of 1,879 production
+files and the installed Core JAR. All 843 native processing/conversion/upgrade
+recipes, nine machine and eleven hammer acquisition recipes, hammer tags,
+steel-pipe exclusion, mixing-vessel container tag and infected-amethyst
+fermentation outputs pass actual recipe-manager checks on initial load and
+after `/reload`. The registered spout handler was invoked in a temporary
+Nether world: wrong or insufficient fluids return zero; simulation accepts
+50 mB without changing air; a real 50 mB soda application reaches a cluster;
+a full cluster accepts zero; the same Overworld coordinates remain unchanged.
+This caught and verified the fix for the callback-local Rhino redeclaration.
+
+The server used 110 dedicated-compatible JARs from the 117 installed JARs;
+seven client-only JARs were excluded only in the temporary copy. A temporary
+verification helper inspected native loot pools and generated models; it is
+not installed in the pack. The final server stopped cleanly with zero KubeJS
+errors and zero failed recipes on initial load and resource reload. Upstream
+mod resource errors remain. No GUI, JEI rendering, audio audition or full
+production-line operation acceptance is claimed from this run.
+
+The compatibility update additionally verifies all eight alloy recipe bodies,
+including repeated ingredients, heat, time and fluid amounts. Generated ID
+suffixes are assigned by KubeJS and can differ between reloads; the test
+compares all eight complete recipe bodies. Actual scrap interaction rejects
+non-sneaking and occupied hands and converts the block only for a sneaking
+empty hand. Its drops exposed a repeated-loop Rhino error in `ItemFalling.js`;
+four loop-local declarations now use `let`, preserving effect order and timing.
+
+Native capture compares all 20 chest tables, 318 independent groups, 320 pools,
+254 chance conditions, 718 entries and every weight/count/damage function with
+the original definitions, initially and after reload. The real startup
+builders generate four models for each of 13 material hammers, preserve stone's
+first-stage art and the pipe's manual model/release callback, and resolve both
+native sound IDs. The absent neurotoxin provider safely leaves the lead hook
+inactive.
+
+The verified Core artifact retains all baseline resources and classes except
+five class entries for the foundry limit and Lychee schema. An isolated
+baseline-plus-fixes fixture passes `check` and all 101 required native GameTests,
+including ingredient consumption/capacity boundaries and empty-hand JSON,
+network and interaction contracts. Concurrent unfinished Core features were
+preserved separately and are not part of this installed artifact.
+
 ## Reviewed Files And Evidence
 
 The static audit covered:
@@ -551,8 +681,8 @@ pressed, released and tick events operate on the resulting key.
 
 `RecipeViewerEvents` has add/remove entries, complete removal, grouping,
 information, subtype registration, category removal and recipe removal. JEI,
-REI and EMI wrappers are present in the jar, but the current CWI tree has no
-active recipe-viewer script. `KubeJSGUI` and the chest-menu classes can create
+REI and EMI wrappers are present in the jar. CWI now uses entry hiding through
+these events; custom machine/hammer/upgrade categories are provided by Core. `KubeJSGUI` and the chest-menu classes can create
 server-synchronised inventories with rows, slots, click handlers, buttons,
 player slots, close handling and captured inventory state. Tooltip text actions
 support add/insert/remove/clear/dynamic changes and shift/ctrl/alt/advanced,
@@ -817,16 +947,20 @@ validity checks after the delay. Preserve `simulate` in spout handlers: inspect
 and return accepted quantity while simulating, and mutate the world only for
 the real operation.
 
-The old guide recorded a repeatedly called arrow callback failing on a
-branch-local `const` even after a successful parse, and a `Text.join` overload
-ambiguity. Those observations came from Rhino 2001, not this build. They remain
-useful reasons to execute callbacks repeatedly and test actual overloads;
-they are not a ban on `const` or a claim that Rhino 2101 has the same bug.
+The installed Rhino 2101.2.7-build.85 reproduced `redeclaration of var`
+for a `const` inside the budding catalyst's repeated loop and for the nested
+ore-loot builder callback. Those sites use `let` without changing values or
+control flow. Execute loops and callbacks repeatedly in the real engine:
+Node checks and Rhino parsing alone did not expose these failures. This is a
+verified local workaround, not a requirement to replace every `const`.
+The old guide's `Text.join` overload ambiguity remains historical; verify
+current overloads before adopting its workaround.
 
 ### Historical integration contracts worth retaining
 
 The following findings came from the old 1.20.1 audit. MBD2, FluidJS and
-KubeJS Additions are absent here, and no client scripts were ported. These
+KubeJS Additions are absent here. Selected tooltip/viewer scripts are now
+ported using current APIs; the old custom-category bridge remains absent. These
 contracts are retained for a future deliberate port; they are not current
 runnable examples or proof of compatibility with installed PonderJS 2.4.0.
 
@@ -944,6 +1078,19 @@ serializer acceptance, and actual gameplay behavior.
 Item, block and fluid tags are separate registries even when the tag ID matches.
 Do not automatically rewrite every `forge:` tag to `c:`: inspect the installed
 tag resources and current consumers, including pack-owned `cwi:` tags.
+
+The current pack removes legacy `forge:` item, block and fluid tags in
+`server_scripts/Tags/LegacyTags.js`, including nested references and tags
+automatically assigned by Core or other mods. Knife readers use `c:tools/knife`;
+steel armor blocks use `c:relocation_not_supported`. Dead legacy material and
+fuel operations were deleted rather than enabling unrelated common-tag
+behavior. The installed KubeJS stages tag edits in `PreTagKubeEvent`: direct
+map edits must be deferred through a typed `java.util.function.Consumer` in
+`event.actions`, then applied to the actual `TagKubeEvent`. `removeAll()` only
+empties a tag; deleting its key requires `event.tags.keySet().removeIf(...)`.
+See [Tag Reference](TAG_REFERENCE.md) for the current inventory and native
+reader limitations. Do not edit Core or installed JARs for tag cleanup.
+
 For loot claims, trace the real table and active modifiers; for worldgen, trace
 structure/feature/placement references and test fresh chunks. Placement attempts
 are not guaranteed deposits per chunk. Existing terrain does not regenerate
@@ -957,12 +1104,13 @@ when a datapack reloads. Preserve unrelated loot rolls and data.
 | Schema completion absent | Current `ServerEvents.recipeSchemaRegistry` or JSON schema path, exact component IDs and roles, existing plugin ownership, a fresh ProbeJS dump and editor reload. `Schema`/`simpleKey` are external helper names. |
 | Machine rejects recipe | Final serialized JSON, output nesting, item versus fluid ingredient, required `type`, amount/count, component codec, heat/timing units, sequence transitional item and step order. |
 | Callback fails after load | Actual payload class and return contract, Java overload/coercion, deferred entity validity, repeated execution and reload state. Registration success cannot execute every callback. |
-| Viewer differs from server | Compare active server JSON with category/catalyst/display transformations. The old CWI client scripts were not ported, so their custom categories are not current behavior. |
+| Viewer differs from server | Compare active server JSON with Core category/catalyst/display transformations. Budding and compound-mineral custom pages still lack a current category provider. |
 
 FluidJS, KubeJS Additions, MBD2 and the old hammer server subsystem are absent
-from the active target. Their old `FluidEvents`, `JEIAddedEvents`, `JadeEvents`
-and `event.recipes.cwi.*` examples are historical integration references, not
-available target APIs. Existing Ponder assets do not mean scenes are registered.
+from the active target. Their old `FluidEvents`, `JEIAddedEvents` and
+`JadeEvents` examples are historical. The current `event.recipes.cwi.*`
+factories instead come from native CWI Core; see the production integration
+section above. Existing Ponder assets do not mean scenes are registered.
 Future client work must recheck the installed PonderJS remaps, deferred block
 callbacks and localization keys; the old Forge inventory/NBT contracts and
 reload instructions are not verified for the current client. No new schematic
@@ -1164,12 +1312,12 @@ runtime findings; they do not establish the behavior of the 1.21.1 tree.
 | --- | --- | --- |
 | 34 startup scripts | 32 startup scripts | `SuspiciousBlock.js` and `Enchantment.js` are absent. Stones use the existing `global.stoneTypes` registration loop; no separate Darker Depths registry is needed. |
 | Old `ItemEvents.armorTierRegistry` call | No current call | Armor materials/tool tiers were simplified during the startup port; verify armor behavior separately. |
-| 63 server scripts | 55 ported scripts plus existing `Items/ItemFuel.js` | The old server surface is copied into `server_scripts/` except `Hammer/*` and `Multiblocked2/*`; interactions, progression, recipes, tags, loot and utilities were adapted for 1.21.1. |
-| 14 client scripts | 0 client scripts | Old JEI, Ponder, tooltip and custom client imports are absent. |
-| `global.releaseHammer` from `HammerInteraction.js` | Hammer server implementation excluded; startup callbacks guard its absence | Existing hammer items return `false` on use and safely skip release when the callback is unavailable. |
-| `global.blockConversions`, `depotConversions`, `upgradeRecipes` | Hammer-side server/JEI helpers excluded | The requested port intentionally leaves those hammer systems out. |
-| `blastFurnaceRecipes`, `mixingVesselRecipes` and MBD2 callbacks | MBD2 scripts excluded | Old Multiblocked2 machines are not recreated by the current scripts. |
-| `ServerEvents.tags`, `LootJS.modifiers`, progression and recipe callbacks | Active in the ported server tree | LootJS 3.7 method names and optional mod IDs were adapted to the installed 1.21.1 environment; Ponder and JEI custom scripts were not port targets. |
+| 63 server scripts | 61 current scripts | The initial 56-script port now includes native machine recipes, hammer conversions and a conditional lead hook. Old `Hammer/*` and `Multiblocked2/*` runtime files are replaced, not copied alongside Core. |
+| 14 client scripts | Selected client scripts ported | Formulas, warnings and viewer hiding use current APIs. Native Core supplies machine/hammer/upgrade JEI; budding/compound-mineral custom pages and Ponder scripts remain absent. |
+| `global.releaseHammer` from `HammerInteraction.js` | Replaced by native Core charged hammers | Preserve material data in startup; do not restore the old release implementation. The pipe retains its distinct entity-only release. |
+| `global.blockConversions`, `depotConversions`, `upgradeRecipes` | Replaced by native recipe registrations | 96 conversions and 697 upgrades are registered through native Core schemas/JEI without server writes to startup globals. |
+| `blastFurnaceRecipes`, `mixingVesselRecipes` and MBD2 callbacks | Production recipes use native Core | 50 furnace/mixer/incubator recipes retain original balance; MBD2 runtime remains excluded. |
+| `ServerEvents.tags`, `LootJS.modifiers`, progression and recipe callbacks | Active in the ported server tree | Optional mod IDs and selected LootJS calls were adapted. Native loading still rejects the legacy chest-pool API; see the validation limits above. Ponder and the two remaining custom JEI pages need separate providers. |
 | 338 old datapack files | Old datapack not ported wholesale; 14 stone data files retained | One raw-stone recipe, six block loot tables and seven stone tags remain. Old CWI worldgen, structures, archaeology tables and dimension data remain outside this port. |
 
 The `manual_only` suffix in old recipe IDs is an ID convention, not a
@@ -1179,17 +1327,20 @@ provide an equivalent. Optional references are guarded for absent Biomancy,
 Nature's Compass, Ad Astra, Clanging Howl, Construction Wand, Create RNS and
 Geode Plus. Only Darker Depths stones are registered by the pack under `kubejs`;
 nonstone registrations and their recipes, loot and interactions are excluded.
-The old source audit remains the reference for the two explicitly excluded
-subsystems.
+The old source audit remains the reference for original behavior; the native
+production integration above supersedes the old hammer/machine exclusions.
 
 ## Current CWI 1.21.1 Script Surface
 
 ### File inventory
 
-The current tree contains 1,871 files under `kubejs`:
+The earlier pre-native inventory contained 1,871 files under `kubejs`.
+Its 88 JavaScript files comprised 32 startup and 56 server scripts, with no
+client scripts. The current native integration adds three machine scripts,
+hammer conversions, a lead effect hook and two client scripts; see the
+production integration table above. The current script count is 95: 32 startup,
+61 server and 2 client scripts.
 
-- 88 JavaScript files: 32 under `startup_scripts/` and 56 under `server_scripts/`
-- no active JavaScript files under `client_scripts/`
 - 1,757 files under `assets/`, including editor metadata
 - 14 files under `data/`: one recipe, six block loot tables and seven tags
 - configuration files, README, and editor metadata
@@ -1206,9 +1357,9 @@ The 32 startup scripts are grouped as follows:
 | `startup_scripts/Fluids/` | 1 |
 | `startup_scripts/` top level | 3 |
 
-The startup source is 5,020 lines, and the ported server source is 13,745
-lines. The primary
-startup files are:
+Before native integration, the startup source was 5,020 lines and the ported
+server source was 13,745 lines. These line counts identify that older baseline,
+not the current source sizes. The primary startup files are:
 
 ```text
 startup_scripts/Preload/ImportStartup.js
@@ -1273,7 +1424,7 @@ means the file is parsed but its registration code is inside a block comment.
 | `Items/ItemModification.js` | 231 | Active, priority -10. Modifies food nutrition/effects, burn time, stack size, max damage, attack speed, armor durability, potion stack size and components through `DataComponents`. |
 | `Items/Microbes.js` | 485 | Active. Defines seven microbe species with four traits each and registers dry/powder microbes, petri dishes, species, inoculated/processing dishes and agar plates. The radiotroph item is commented out. |
 | `Items/foods.js` | 105 | Active. Registers six dry seed foods, spider/meat foods and normal/charged/enchanted apples from `global.apples`, filtering optional effects by loaded mods. |
-| `Items/hammers.js` | 76 | Active. Creates 13 sword-hammer items with charge models and use/release callbacks, plus dummy hammer variants and `steel_pipe`. Use and release callbacks guard the excluded `global.releaseHammer`; no hammer charging starts while it is absent. |
+| `Items/hammers.js` | Current native integration | Creates 13 native charged hammers with original models/balance, dummy hammer variants and the entity-only steel pipe. Core owns material release behavior. |
 | `Items/Catalysts.js` | 41 | Active. Registers eight base-colored and three two-color catalyst powders with layered models and tint colors. |
 | `Items/PlotItems.js` | 45 | Active. Registers roughly 25 plot/manual/log-note items and tags them `cwi:plot_items`. |
 | `Items/Drinks.js` | 38 | Commented-only. Contains an older potion drink item/fluid generator for six drinks; no runtime registrations occur. |
@@ -1288,7 +1439,7 @@ means the file is parsed but its registration code is inside a block comment.
 | `Fluids/fluid.js` | 406 | Active. Helper families generate molten/heavy/chemical/normal/thick/thin/special/gas fluids: approximately 33 molten metals, 7 special, 24 thick, 8 thin, 38 normal, 13 chemical and 34 gas definitions. A modification callback sets light level 12 for molten/liquid silicon. |
 | `Ores.js` | 106 | Active, priority 1. Generates compound ore deposits, ore blocks/items, flotation reagents/precipitants, crushed/powder/tailings/residues, crystal/refined outputs, heavy-leach/purified-solution fluids and extra `global.oreTypes` powders. |
 | `RecipeRegister/BlockFilling.js` | 45 | Active. Registers four Create spout block transformations for mud, mushroom and obsidian-related conversions, with amounts, random mushroom output, sounds and particles. |
-| `RecipeRegister/BuddingCatalyze.js` | 165 | Active. Create spout growth for amethyst and optional Geode Plus quartz; checks fluid amount/chance/multiplier and upgrades adjacent six-direction buds with server commands. |
+| `RecipeRegister/BuddingCatalyze.js` | Current native integration | Create spout growth for amethyst and optional Geode Plus quartz; preserves fluid amount/chance/multiplier and upgrades adjacent buds through direct writes in the target dimension. Callback-local bindings use `let` to avoid installed Rhino loop redeclarations. |
 | `RecipeRegister/Lychee.js` | 41 | Active. Registers Lychee custom conditions `can_see_sky`, `is_noon`, `is_midnight` and `beacon_condition`. |
 | `RecipeRegister/FluidInteraction.js` | 46 | Commented-only. Old Forge fluid interaction and acid-to-iron-ore generation; no callbacks run. |
 | `RecipeRegister/Radiating.js` | 64 | Commented-only. Old ender-radiator tick/block registration; references an undefined historical meteor variable but is inert. |
@@ -1298,12 +1449,13 @@ means the file is parsed but its registration code is inside a block comment.
 | `CreativeTab.js` | 80 | Active, priority -1. Creates seven CWI creative tabs and modifies the KubeJS and Create tabs, including icons, names, removals and additions. |
 | `Effects.js` | 8 | Active. Registers beneficial `reach` with the `minecraft:player.block_interaction_range` add-value attribute. |
 
-The current target has 56 server JavaScript files: 55 ported from the old CWI
-tree plus the target's existing `server_scripts/Items/ItemFuel.js`. The port
-includes interactions, LootJS modifiers, progression, tags, recipes, ore
-processing and utilities. The old `server_scripts/Hammer/` and
-`server_scripts/Multiblocked2/` directories were intentionally excluded. The
-target has no CWI-Core or Biomancy, so those optional integrations are guarded.
+The current target has 61 server JavaScript files, 32 startup files and two
+client files. The server port includes native Core machine processing, hammer
+conversions and equipment upgrades alongside interactions, progression, tags,
+recipes, ore processing and utilities. The old `server_scripts/Hammer/` and
+`server_scripts/Multiblocked2/` runtimes are replaced by Core rather than copied
+alongside it. Core is installed; Biomancy is absent and remains guarded.
+LootJS chest pools still require a separate current-API migration.
 Darker Depths is also absent. Its stone families are registered locally, with
 stone recipes retained; other Darker Depths content is excluded.
 The installed Miners Delight mod ID is `minersdelight` (without an underscore);
@@ -1400,10 +1552,11 @@ wrappers. Fluid tags are sized fluid ingredients, not fluid stacks.
 
 Other corrected incompatibilities include server writes to `global`, Rhino
 syntax failures, the creative-tab Java Set concatenation, Lychee item outputs
-and actions, and item components/result callbacks for equipment upgrades.
+and actions. Equipment upgrades now use native Core crafting instead of
+result callbacks.
 The old `.nbt` stack API and callback form of `.modifyResult(...)` are absent
-in this build. Upgrade callbacks use named `ServerEvents.modifyRecipeResult`
-handlers and data components.
+in this build. Native `cwi:equipment_upgrade` now preserves components and performs the
+upgrade result/ingredient handling in Core.
 
 The pre-cleanup compatibility audit recorded parser and mock checks for the
 shared recipe helpers, equipment upgrades, armor durability, log placement,
@@ -1420,9 +1573,9 @@ because startup scripts changed, then load a world and inspect fresh
 apply startup changes. Exercise crafting/upgrading, machine recipes, falling
 items, lockpicking and loot callbacks after the scripts load.
 
-Hammer server scripts and MBD2 machines remain excluded by request. Existing
-startup hammer item callbacks now safely do nothing while `global.releaseHammer`
-is absent.
+The old hammer server implementation and MBD2 runtime remain excluded.
+Native Core now supplies their supported behaviors using production recipe
+data; see the current production integration section above.
 
 ## Porting Rules From CWI 1.20.1
 

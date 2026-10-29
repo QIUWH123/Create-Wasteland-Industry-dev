@@ -18,6 +18,7 @@ external-game research has not been refreshed to newer releases.
 | [Development Standards](DEVELOPMENT_STANDARDS.md) | Required formatting, behavior safeguards, author decisions, privacy and validation rules for all contributors. |
 | [KubeJS 1.21.1 Reference](kubejs.md) | Current installed APIs, migration differences, helpers, debugging and practical coding lessons. This incorporates useful content from the source `KUBEJS_ULTIMATE_GUIDE.md`; use this reference instead of importing obsolete 2001.x signatures. |
 | [Recipe Schema Guide](KUBEJS_RECIPE_SCHEMA_GUIDE.md) | Mihono tutorial lessons, current schema/component registration and historical custom-helper examples. |
+| [Tag Reference](TAG_REFERENCE.md) | Current item, equipment, block, fluid and other-registry tags: assignments, native effects, ingredient uses, dormant integrations and groups without identified consumers. |
 | [Historical 2101 Port Plan](superpowers/plans/KUBEJS_2101_PORT_PLAN.md) | Earlier migration intent and constraints; not a current execution checklist or completion report. |
 
 ## Design And Production Research
@@ -50,9 +51,15 @@ for that future port. They do not create quests or establish target gameplay.
 
 ## Retained Evidence
 
-All seven JSON files retain original observations under their source-version
-scope. Hashes identify the original source snapshots; they do not certify the
-current target tree. The added `_porting` field explains applicability.
+Current target evidence: [Tag inventory](audit/TAG_INVENTORY.json) contains
+2,396 resolved server tags across 23 registries, exact memberships, inspected
+consumer notes and current input fingerprints. Its scope is explained in the
+[Tag Reference](TAG_REFERENCE.md).
+
+The seven historical JSON files below retain original observations under their
+source-version scope. Hashes identify the original source snapshots; they do
+not certify the current target tree. The added `_porting` field explains
+applicability.
 
 - [Factory improvement evidence](audit/FACTORY_IMPROVEMENTS_EVIDENCE.json)
 - [Factorio research evidence](audit/FACTORIO_DESIGN_EVIDENCE.json)
@@ -74,8 +81,11 @@ Root [AGENTS.md](../AGENTS.md) directs contributors to the current standards and
 API reference.
 
 The target uses Minecraft 1.21.1/NeoForge, KubeJS 2101, Rhino 2101 and Create 6.
-Client scripts, MBD2 machines, quests, CWI worldgen/structures and hammer server
-behavior have not been ported wholesale. A retained script or a command that
+Native CWI Core machine, hammer and equipment-upgrade recipes are now supplied
+by KubeJS. Material/warning tooltips and recipe-viewer hiding are ported; budding
+growth uses the supported spout hook. Custom budding/compound-mineral JEI pages,
+Ponder scenes, quests and CWI worldgen/structures remain unported. MBD2 runtime
+scripts remain excluded. A retained script or a command that
 requests an absent structure does not prove its feature works. Disabled source
 mods and legacy helper examples are not instructions to restore dependencies.
 Read the current KubeJS guide and verify installed serializers, registrations,
