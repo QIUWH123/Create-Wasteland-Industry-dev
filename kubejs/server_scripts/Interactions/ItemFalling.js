@@ -352,8 +352,8 @@ ServerEvents.tick(() => {
 
     let compactNeeded = false
     for (let index = trackedItems.length - 1; index >= 0; index--) {
-        const data = trackedItems[index]
-        const entity = data.entity
+        let data = trackedItems[index]
+        let entity = data.entity
 
         if (!entity || !entity.isAlive() || entity.isRemoved()) {
             trackedItems[index] = null
@@ -363,8 +363,8 @@ ServerEvents.tick(() => {
 
         if (!entity.onGround()) continue
 
-        const fallDistance = Math.abs(data.startY - entity.y)
-        const effect = selectBestEffect(data.effects, fallDistance)
+        let fallDistance = Math.abs(data.startY - entity.y)
+        let effect = selectBestEffect(data.effects, fallDistance)
         if (effect) applyEffect(entity, effect, fallDistance)
 
         trackedItems[index] = null

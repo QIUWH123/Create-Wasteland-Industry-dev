@@ -548,7 +548,7 @@ LootJS.modifiers((event) => {
         Object.values(global.variantSettings).forEach(ore => {
             const type = ore.type
             if (oreVariants[type]) {
-                const builder = event.addBlockModifier(oreVariants[type])
+                let builder = event.addBlockModifier(oreVariants[type])
 
                 builder.dropExperience(0)
                 builder.removeLoot(oreVariants[type])
