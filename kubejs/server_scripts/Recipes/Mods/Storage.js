@@ -425,7 +425,7 @@ ServerEvents.recipes(event => {
         ],
         {
             D: 'functionalstorage:fluid_1',
-            I: '#forge:obsidian'
+            I: '#c:obsidians'
         }
     ).id('cwi:crafting/fluid_drawer_void_upgrade')
 
@@ -439,7 +439,7 @@ ServerEvents.recipes(event => {
         {
             D: 'functionalstorage:fluid_1',
             E: 'minecraft:emerald',
-            G: '#forge:ingots/gold',
+            G: '#c:ingots/gold',
             P: 'minecraft:paper'
         }
     ).id('cwi:crafting/fluid_drawer_configuration_tool')

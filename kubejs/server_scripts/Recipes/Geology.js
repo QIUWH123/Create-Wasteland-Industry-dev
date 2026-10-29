@@ -53,7 +53,7 @@ ServerEvents.recipes(event => {
     event.recipes.create.mixing('createaddition:biomass', ['#minecraft:saplings', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('createaddition:biomass', ['#minecraft:flowers', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('createaddition:biomass', ['#minecraft:leaves', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
-    event.recipes.create.mixing('2x createaddition:biomass', ['#forge:crops', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
+    event.recipes.create.mixing('2x createaddition:biomass', [Ingredient.of('#c:crops'), Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('2x createaddition:biomass', ['#createaddition:plant_foods', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('kubejs:carbon-sealed_quartzite_base', ['kubejs:lapped_quartzite_base', 'kubejs:coal_powder', AddFluid('100 #cwi:water')]).heated().processingTime(1200)
 

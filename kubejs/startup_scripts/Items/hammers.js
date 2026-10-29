@@ -38,7 +38,6 @@ StartupEvents.registry('item', event => {
             .maxStage(maxStage)
             .unstackable()
             .tag('minecraft:hammers')
-            .tag('forge:tools')
             .tag('minecraft:breaks_decorated_pots')
             .texture(`kubejs:item/tools/${name}`)
 
@@ -67,7 +66,6 @@ StartupEvents.registry('item', event => {
         .chargeTime(40)
         .maxStage(3)
         .unstackable()
-        .tag('forge:tools')
         .tag('minecraft:breaks_decorated_pots')
         .releaseUsing((itemStack, level, player, durationLeft) => {
             const stage = Math.min(Math.floor((100000 - durationLeft) / 40), 3)

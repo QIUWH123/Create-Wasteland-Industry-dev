@@ -8,14 +8,6 @@ ServerEvents.recipes(event => {
     event.replaceInput({input: 'minecraft:string'}, 'minecraft:string', '#cwi:string')
     event.replaceInput({input: 'minecraft:leather'}, 'minecraft:leather', '#cwi:leathers')
     event.replaceInput({input: 'minecraft:feather'}, 'minecraft:feather', '#cwi:feathers')
-
-    Object.values(global.materialTypes).forEach(material => {
-        event.replaceInput({input: `#forge:ingots/${material.id}`}, `#forge:ingots/${material.id}`, material.items.ingot)
-        event.replaceInput({input: `#forge:plates/${material.id}`}, `#forge:plates/${material.id}`, material.items.sheet)
-        event.replaceInput({input: `#forge:nuggets/${material.id}`}, `#forge:nuggets/${material.id}`, material.items.nugget)
-        event.replaceInput({input: `#forge:dusts/${material.id}`}, `#forge:dusts/${material.id}`, material.items.powder)
-        event.replaceInput({input: `#forge:storage_blocks/${material.id}`}, `#forge:storage_blocks/${material.id}`, material.items.block)
-    })
 })
 
 const hasAccessories = Platform.isLoaded('accessories')
@@ -61,16 +53,7 @@ ServerEvents.tags('block', event => {
 ServerEvents.tags('fluid', event => {
     event.removeAll('tfmg:blast_stove_fuel')
     if (hasAdAstra) event.removeAll('ad_astra:oil')
-    event.removeAll('forge:crude_oil')
     event.removeAll('create:bottomless/deny')
-    event.removeAll('forge:molten_material')
-    event.removeAll('forge:plantoil')
-    event.removeAll('forge:diesel')
-    event.removeAll('forge:gasoline')
-    // Keep the pack's TFMG gasoline as engine fuel while excluding
-    // Create Diesel Generators' separate gasoline fluid.
-    event.add('forge:gasoline', ['kubejs:gasoline'])
-    event.add('forge:diesel', ['kubejs:diesel'])
     event.add('tfmg:gasoline', ['kubejs:gasoline'])
     event.add('tfmg:diesel', ['kubejs:diesel'])
     event.add('tfmg:naphtha', ['kubejs:naphtha'])
@@ -151,13 +134,12 @@ ServerEvents.tags('item', event => {
 
 // WrenchTools
     if (hasClangingHowl) {
-        event.add('forge:tools/wrench', 'clanginghowl:industrial_adjustable_wrench')
+        event.add('c:tools/wrench', 'clanginghowl:industrial_adjustable_wrench')
         event.add('create:chain_rideable', 'clanginghowl:industrial_adjustable_wrench')
     }
 
 // CuttingKnives
-    event.add('forge:tools', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
-    event.add('forge:tools/knives', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
+    event.add('c:tools/knife', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
     event.add('farmersdelight:tools/knives', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
     event.add('farmersdelight:straw_harvesters', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
     event.add('minecraft:breaks_decorated_pots', ['ae2:nether_quartz_cutting_knife', 'ae2:certus_quartz_cutting_knife'])
@@ -221,20 +203,6 @@ ServerEvents.tags('item', event => {
 
 // StickyMaterials
     event.add('cwi:sticky_materials', ['kubejs:sticky_resin', 'minecraft:slime_ball'])
-
-// RemoveIronPlate
-    if (hasAdAstra) event.remove('forge:plates/iron', 'ad_astra:iron_plate')
-
-// SteelComponentCleanup
-    if (hasAdAstra) {
-        event.remove('forge:rods/steel', 'ad_astra:steel_rod')
-        event.remove('forge:plates/steel', 'ad_astra:steel_plate')
-        event.remove('forge:nuggets/steel', 'ad_astra:steel_nugget')
-        event.remove('forge:ingots/steel', 'ad_astra:steel_ingot')
-    }
-    event.remove('forge:ingots/steel', 'createmetallurgy:steel_ingot')
-    event.remove('forge:storage_blocks/steel', 'createmetallurgy:steel_block')
-    if (hasAdAstra) event.remove('forge:storage_blocks/steel', 'ad_astra:steel_block')
 
 // CobbledStonesTag
     event.add('cwi:cobbled_stones', cobbledStones)
@@ -429,7 +397,7 @@ ServerEvents.tags('block', event => {
         'kubejs:steel_armor_block',
         'kubejs:steel_armor_penetrated'
     ])
-    event.add('forge:relocation_not_supported', [
+    event.add('c:relocation_not_supported', [
         'kubejs:steel_armor_safe',
         'kubejs:steel_armor_block',
         'kubejs:steel_armor_penetrated'

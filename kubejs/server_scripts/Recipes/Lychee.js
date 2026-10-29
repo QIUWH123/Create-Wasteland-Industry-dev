@@ -213,7 +213,7 @@ ServerEvents.recipes(event => {
 
     addLycheeRecipe({
         "type": "lychee:block_interacting",
-        "item_in": { "tag": "forge:tools/knives" },
+        "item_in": { "tag": "c:tools/knife" },
         "block_in": "kubejs:dead_leaves",
         "post": [
             { "type": "execute", "command": "particle minecraft:falling_dust{block_state:\"minecraft:gravel\"} ~ ~ ~ 0.4 0.3 0.4 0.03 7", "hide": true },
@@ -261,7 +261,7 @@ ServerEvents.recipes(event => {
 
     addLycheeRecipe({
         "type": "lychee:block_interacting",
-        "item_in": { "tag": "forge:tools/knives" },
+        "item_in": { "tag": "c:tools/knife" },
         "block_in": "minecraft:dead_bush",
         "post": [
             { "type": "execute", "command": "particle minecraft:smoke ~ ~ ~ 0.1 0.1 0.1 0.03 3", "hide": true },
