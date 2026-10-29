@@ -92,6 +92,20 @@ ServerEvents.recipes(event => {
     )
 
     event.shaped(
+        'kubejs:small_hammer',
+        [
+            ' AB',
+            ' CA',
+            'C  '
+        ],
+        {
+            A: 'minecraft:iron_ingot',
+            B: 'minecraft:iron_nugget',
+            C: 'minecraft:stick'
+        }
+    )
+
+    event.shaped(
         'minecraft:shears',
         [
             ' A ',
@@ -116,4 +130,142 @@ ServerEvents.recipes(event => {
         }
     )
 
+    event.shaped(
+        'minecraft:stone_hammer',
+        [
+            'AAA',
+            'ABA',
+            ' B '
+        ],
+        {
+            A: 'minecraft:cobblestone',
+            B: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:rusted_iron_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'kubejs:rusted_iron_sheet',
+            B: 'kubejs:rusted_iron_block',
+            C: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:iron_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'create:iron_sheet',
+            B: 'minecraft:iron_block',
+            C: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:brass_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'create:brass_sheet',
+            B: 'create:brass_block',
+            C: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:zinc_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'createaddition:zinc_sheet',
+            B: 'create:zinc_block',
+            C: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:copper_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'create:copper_sheet',
+            B: 'minecraft:copper_block',
+            C: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:steel_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'tfmg:heavy_plate',
+            B: 'tfmg:steel_block',
+            C: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:bronze_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'kubejs:bronze_sheet',
+            B: 'kubejs:bronze_block',
+            C: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:golden_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'create:golden_sheet',
+            B: 'minecraft:gold_block',
+            C: 'minecraft:stick',
+        }
+    )
+
+    event.shaped(
+        'minecraft:netherite_hammer',
+        [
+            'ABA',
+            ' C ',
+            ' C '
+        ],
+        {
+            A: 'kubejs:netherite_sheet',
+            B: 'minecraft:netherite_block',
+            C: 'minecraft:stick',
+        }
+    )
 })

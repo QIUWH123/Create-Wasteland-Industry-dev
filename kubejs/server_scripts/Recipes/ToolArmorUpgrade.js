@@ -1,32 +1,11 @@
-const upgradeRecipeList = []
-
-function defineEquipmentUpgradeRecipes() {
+ServerEvents.recipes(event => {
 
 // Core Register Function
 
-    let idCount = 1
-
     function registerUpgradeRecipe(inputItem, ingredients, enchantId, maxLevel, durabilityMultiplier, outputItem) {
-        const finalOutput = outputItem || inputItem
-        const id  = `cwi:equipment_upgrade/${idCount}_manual_only`
-        const ingredientObjs = []
-        for (const ing of ingredients) {
-            let id = ing.item || ing.id
-            let count = ing.count || 1
-            let consume = ing.consume !== false
-            ingredientObjs.push({ item: id, consume: consume, count: count })
-        }
-        upgradeRecipeList.push({
-            input: inputItem,
-            output: finalOutput,
-            ingredients: ingredientObjs,
-            enchantId: enchantId,
-            maxLevel: maxLevel,
-            durabilityMultiplier: durabilityMultiplier,
-            id: id.toString()
-        })
-
-        idCount++
+        const recipe = event.recipes.cwi.equipment_upgrade(inputItem, ingredients, enchantId, maxLevel, durabilityMultiplier)
+        if (outputItem) recipe.output(outputItem)
+        return recipe
     }
 
 // Material And Tool Armor Definitions
@@ -48,10 +27,11 @@ function defineEquipmentUpgradeRecipes() {
         netherite:       { tier: 4, multiplier: 0.25, tools: true,  armor: true,  prefix: 'minecraft:netherite_' }
     }
 
-    const TOOLS = ['sword', 'pickaxe', 'axe', 'shovel', 'hoe']
+    const TOOLS = ['sword', 'pickaxe', 'axe', 'shovel', 'hoe', 'hammer']
     const ARMOR = ['helmet', 'chestplate', 'leggings', 'boots']
 
     function getToolId(mat, tool) {
+        if (tool === 'hammer') return 'minecraft:' + mat + '_hammer'
         return MAT[mat].prefix + tool
     }
     function getArmorId(mat, part) {
@@ -189,16 +169,20 @@ function defineEquipmentUpgradeRecipes() {
 // Register All Recipes
 
     applyToolRecipes(SHARP_RECIPES, ['sword'], 'minecraft:sharpness')
+    applyToolRecipes(SHARP_RECIPES.slice(0, 2), ['hammer'], 'minecraft:sharpness')
+
     applyToolRecipes(EFF_RECIPES, ['pickaxe', 'axe', 'shovel', 'hoe'], 'minecraft:efficiency')
 
     applyToolRecipes(SWEEP_RECIPES, ['sword'], 'minecraft:sweeping_edge')
+
+    applyToolRecipes(KNOCKBACK_RECIPES, ['hammer'], 'minecraft:knockback')
 
     applyArmorRecipes(FEATHER_FALLING_RECIPES, ['boots'], 'minecraft:feather_falling')
 
     applyToolRecipes(UNBREAKING_RECIPES, TOOLS, 'minecraft:unbreaking')
     applyArmorRecipes(UNBREAKING_RECIPES, ARMOR, 'minecraft:unbreaking')
 
-    applyToolRecipes(SMITE_RECIPES, ['sword'], 'minecraft:smite')
+    applyToolRecipes(SMITE_RECIPES, ['sword', 'hammer'], 'minecraft:smite')
 
     applyToolRecipes(FIRE_ASPECT_RECIPES, ['sword'], 'minecraft:fire_aspect')
 
@@ -266,66 +250,4 @@ function defineEquipmentUpgradeRecipes() {
             }
         })
     }
-}
-
-// Result handlers register at script load; recipe registration can run again on /reload.
-defineEquipmentUpgradeRecipes()
-
-upgradeRecipeList.forEach(config => {
-    ServerEvents.modifyRecipeResult(config.id, event => {
-        let tool = null
-        for (let i = 0; i < event.grid.size(); i++) {
-            const stack = event.grid.getItem(i)
-            if (stack.id === config.input) {
-                tool = stack
-                break
-            }
-        }
-        if (!tool) {
-            event.item = Item.empty
-            return
-        }
-
-        const result = Item.of(config.output, tool.componentMap)
-        const enchants = result.enchantments.entrySet().toArray()
-        let targetLevel = 0, targetIndex = -1
-        for (let i = 0; i < enchants.length; i++) {
-            if (enchants[i].getKey().getRegisteredName() === config.enchantId) {
-                targetLevel = enchants[i].getIntValue()
-                targetIndex = i
-                break
-            }
-        }
-
-        if (targetLevel >= config.maxLevel) {
-            event.item = Item.empty
-            return
-        }
-
-        const maxDmg = result.maxDamage
-        const curDmg = result.getDamageValue()
-        const curDur = maxDmg - curDmg
-        if (curDur > 0) {
-            const inc = Math.max(1, Math.floor(curDur * config.durabilityMultiplier * Math.sqrt(targetIndex + 2)))
-            result.setDamageValue(Math.min(curDmg + inc, maxDmg - 1))
-        }
-
-        result.enchant(config.enchantId, targetLevel + 1)
-        event.item = result
-    })
 })
-
-ServerEvents.recipes(event => {
-    upgradeRecipeList.forEach(config => {
-        const inputs = [config.input]
-        for (const ing of config.ingredients) {
-            for (let i = 0; i < ing.count; i++) inputs.push(ing.item)
-        }
-
-        const recipe = event.shapeless(config.output, inputs).id(config.id).modifyResult(config.id)
-        for (const ing of config.ingredients) {
-            if (ing.consume === false) recipe.damageIngredient(ing.item, 1)
-        }
-    })
-})
-

@@ -53,7 +53,7 @@ PlayerEvents.loggedIn(event => {
             server.runCommandSilent(`playsound clanginghowl:electric_shock player @a ${playerX} ${playerY} ${playerZ} 2 2`)
         }
         server.runCommandSilent(`playsound minecraft:entity.generic.extinguish_fire player @a ${playerX} ${playerY} ${playerZ} 2 1`)
-        server.runCommandSilent(`playsound kubejs:player_spawn player @a ${playerX} ${playerY} ${playerZ} 2 1`)
+        server.runCommandSilent(`playsound cwi:player_spawn player @a ${playerX} ${playerY} ${playerZ} 2 1`)
         server.runCommandSilent(`particle minecraft:campfire_cosy_smoke ${playerX} ${playerY} ${playerZ} 0.3 0.1 0.3 0 10`)
         server.runCommandSilent(`particle minecraft:falling_dust{block_state:"minecraft:gravel"} ${playerX} ${playerY + 1.7} ${playerZ} 0.4 0.3 0.4 0.03 30`)
         server.runCommandSilent(`particle minecraft:smoke ${playerX} ${playerY + 0.3} ${playerZ} 0.3 0.3 0.3 0.05 5`)
@@ -76,7 +76,7 @@ PlayerEvents.respawned(event => {
     player.potionEffects.add('minecraft:weakness', 100, 0, false, false)
 
     server.runCommandSilent(`playsound block.sand.place block @a ${x} ${y + 1} ${z} 2 0.8`)
-    server.runCommandSilent(`playsound kubejs:player_spawn player @a ${x} ${y + 1} ${z} 2 1`)
+    server.runCommandSilent(`playsound cwi:player_spawn player @a ${x} ${y + 1} ${z} 2 1`)
     server.runCommandSilent(`particle minecraft:campfire_cosy_smoke ${x} ${y + 0.2} ${z} 0.6 0.3 0.6 0 20`)
     server.runCommandSilent(`particle minecraft:falling_dust{block_state:"minecraft:gravel"} ${x} ${y} ${z} 0.4 0.3 0.4 0.03 30`)
     server.runCommandSilent(`particle minecraft:smoke ${x} ${y} ${z} 0.3 0.3 0.3 0.05 5`)
