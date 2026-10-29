@@ -24,6 +24,7 @@ function addFermentingRecipes(event, ingredients, results, processingTime, heatR
 }
 
 ServerEvents.recipes(function(event) {
+    const buddingNamespace = Platform.isLoaded('cwi') ? 'cwi' : 'kubejs'
 
 // General Recipes
     addFermentingRecipes(event,
@@ -938,7 +939,7 @@ ServerEvents.recipes(function(event) {
             AddItem('kubejs:crystallum_coccus')
         ],
         [
-            AddItem('kubejs:infected_budding_amethyst')
+            AddItem(`${buddingNamespace}:infected_budding_amethyst`)
         ],
         2400, "heated", ['basin', 'bulk']
     )
@@ -951,7 +952,7 @@ ServerEvents.recipes(function(event) {
             AddItem('kubejs:crystallum_coccus')
         ],
         [
-            AddItem('kubejs:infected_budding_quartz')
+            AddItem(`${buddingNamespace}:infected_budding_quartz`)
         ],
         2400, "heated", ['basin', 'bulk']
     )
