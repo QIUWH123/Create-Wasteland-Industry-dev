@@ -1,0 +1,81 @@
+{
+	"format_version": "26.3",
+	"credit": "Made with Blockbench",
+	"parent": "create:block/large_wheels",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "kubejs:block/models/cogwheels/industrial_iron_cogwheel",
+		"particle": "kubejs:block/models/cogwheels/industrial_iron_cogwheel"
+	},
+	"elements": [
+		{
+			"name": "GearCaseInner",
+			"from": [3, 5, 3],
+			"to": [13, 11, 13],
+			"faces": {
+				"north": {"uv": [5.5, 0, 8.5, 5], "rotation": 90, "texture": "#0"},
+				"east": {"uv": [5.5, 0, 8.5, 5], "rotation": 90, "texture": "#0"},
+				"south": {"uv": [5.5, 0, 8.5, 5], "rotation": 90, "texture": "#0"},
+				"west": {"uv": [5.5, 0, 8.5, 5], "rotation": 90, "texture": "#0"},
+				"up": {"uv": [0, 0, 5, 5], "texture": "#0"},
+				"down": {"uv": [0, 0, 5, 5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Gear",
+			"from": [-1, 6, 6.5],
+			"to": [17, 10, 9.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, -0.5, 0]},
+			"faces": {
+				"north": {"uv": [0, 14, 9, 16], "texture": "#0"},
+				"east": {"uv": [7.5, 9.5, 9, 11.5], "texture": "#0"},
+				"south": {"uv": [0, 14, 9, 16], "texture": "#0"},
+				"west": {"uv": [7.5, 9.5, 9, 11.5], "texture": "#0"},
+				"up": {"uv": [0, 12, 9, 13.5], "texture": "#0"},
+				"down": {"uv": [0, 12, 9, 13.5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Gear2",
+			"from": [-1, 6, 6.5],
+			"to": [17, 10, 9.5],
+			"rotation": {"angle": 45, "axis": "y", "origin": [8, 7.5, 8]},
+			"faces": {
+				"north": {"uv": [0, 14, 9, 16], "texture": "#0"},
+				"east": {"uv": [7.5, 9.5, 9, 11.5], "texture": "#0"},
+				"south": {"uv": [0, 14, 9, 16], "texture": "#0"},
+				"west": {"uv": [7.5, 9.5, 9, 11.5], "texture": "#0"},
+				"up": {"uv": [0, 12, 9, 13.5], "texture": "#0"},
+				"down": {"uv": [0, 12, 9, 13.5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Gear3",
+			"from": [-1, 6, 6.5],
+			"to": [17, 10, 9.5],
+			"rotation": {"angle": -45, "axis": "y", "origin": [8, 7.5, 8]},
+			"faces": {
+				"north": {"uv": [0, 14, 9, 16], "texture": "#0"},
+				"east": {"uv": [7.5, 9.5, 9, 11.5], "texture": "#0"},
+				"south": {"uv": [0, 14, 9, 16], "texture": "#0"},
+				"west": {"uv": [7.5, 9.5, 9, 11.5], "texture": "#0"},
+				"up": {"uv": [0, 12, 9, 13.5], "texture": "#0"},
+				"down": {"uv": [0, 12, 9, 13.5], "texture": "#0"}
+			}
+		},
+		{
+			"name": "Gear4",
+			"from": [6.5, 6, -1],
+			"to": [9.5, 10, 17],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, -0.5, 0]},
+			"faces": {
+				"north": {"uv": [7.5, 9.5, 9, 11.5], "texture": "#0"},
+				"east": {"uv": [0, 14, 9, 16], "texture": "#0"},
+				"south": {"uv": [7.5, 9.5, 9, 11.5], "texture": "#0"},
+				"west": {"uv": [0, 14, 9, 16], "texture": "#0"},
+				"up": {"uv": [0, 12, 9, 13.5], "rotation": 90, "texture": "#0"},
+				"down": {"uv": [0, 12, 9, 13.5], "rotation": 90, "texture": "#0"}
+			}
+		}
+	]
+}
