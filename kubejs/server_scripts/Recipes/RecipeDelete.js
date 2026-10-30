@@ -140,6 +140,11 @@ ServerEvents.recipes(event => {
         'create:crushing/golden_horse_armor',
         'create:crushing/diamond_horse_armor',
         'create:crushing/leather_horse_armor',
+        'create:milling/crushed_raw_tungsten',
+        'create:milling/crushed_raw_gold',
+        'create:milling/crushed_raw_iron',
+        'create:milling/crushed_raw_copper',
+        'create:milling/crushed_raw_zinc',
         'create:filling/blaze_cake',
         'create:filling/cake',
         'create:filling/cake_mold_filled',
@@ -223,6 +228,11 @@ ServerEvents.recipes(event => {
         'create:splashing/sand',
         'create:splashing/soul_sand',
         'create:splashing/wheat_flour',
+        'create:splashing/dirty_tungsten_dust',
+        'create:splashing/dirty_gold_dust',
+        'create:splashing/dirty_iron_dust',
+        'create:splashing/dirty_copper_dust',
+        'create:splashing/dirty_zinc_dust',
 
     // Create Connected
 
