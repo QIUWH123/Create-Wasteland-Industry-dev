@@ -36,28 +36,24 @@ ServerEvents.recipes(event => {
 
     event.replaceInput({ id: 'tfmg:crafting/kinetics/fire_extinguisher' }, 'tfmg:carbon_dioxide_bucket', 'kubejs:carbon_dioxide_bucket')
 
-    event.custom({
-        type: 'create:filling',
-        ingredients: [
-            { item: 'tfmg:fire_extinguisher' },
-            { type: 'neoforge:single', fluid: 'kubejs:carbon_dioxide', amount: 1000 }
-        ],
-        results: [{ id: 'tfmg:fire_extinguisher', components: { 'tfmg:amount': 500 } }]
-    }).id('cwi:filling/fire_extinguisher')
+    event.recipes.create.filling(
+        Item.of('tfmg:fire_extinguisher', { 'tfmg:amount': 500 }),
+        ['tfmg:fire_extinguisher', Fluid.of('kubejs:carbon_dioxide', 1000)]
+    ).id('cwi:filling/fire_extinguisher')
 
 // Lubricating Oil Supply
 
 // Wax Oil Can Supply Lubricating Stock Instead Of Entering Catalytic Cracking
 // Fractionation And Lubricant Finishing Are Combined, Petroleum Mixtures Have No Unique Molecular Equation
 // Output Ratios Follow TFMG's Native Heavy Oil Distillation, With All Registered Liquid States Preserved
-    advancedDistillation(event,
-        [AddFluid('1000 kubejs:wax_oil')],
+    event.recipes.tfmg.distillation(
         [
-            AddFluid('500 kubejs:residual_oil'),
-            AddFluid('125 kubejs:lubrication_oil'),
-            AddFluid('250 kubejs:diesel'),
-            AddFluid('100 kubejs:kerosene'),
-            AddFluid('25 kubejs:naphtha')
-        ]
+            Fluid.of('kubejs:residual_oil', 500),
+            Fluid.of('kubejs:lubrication_oil', 125),
+            Fluid.of('kubejs:diesel', 250),
+            Fluid.of('kubejs:kerosene', 100),
+            Fluid.of('kubejs:naphtha', 25)
+        ],
+        [Fluid.of('kubejs:wax_oil', 1000)]
     ).id('cwi:distillation/lubrication_oil_from_wax_oil')
 })

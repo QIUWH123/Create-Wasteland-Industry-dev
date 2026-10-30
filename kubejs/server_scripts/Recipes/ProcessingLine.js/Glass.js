@@ -26,7 +26,7 @@ ServerEvents.recipes(event => {
         ],
         'kubejs:pressed_glass_blank',
         [
-            event.recipes.create.filling('kubejs:quenched_glass_blank', ['kubejs:quenched_glass_blank', AddFluid('1000 #cwi:water')])
+            event.recipes.create.filling('kubejs:quenched_glass_blank', ['kubejs:quenched_glass_blank', Fluid.sizedIngredientOf('#cwi:water', 1000)])
         ]
     )
     .transitionalItem('kubejs:quenched_glass_blank')
@@ -40,35 +40,34 @@ ServerEvents.recipes(event => {
         ],
         'kubejs:ion_exchanged_glass_blank',
         [
-            event.recipes.create.filling('kubejs:quenched_tempered_glass_blank', ['kubejs:quenched_tempered_glass_blank', AddFluid('1000 #cwi:water')])
+            event.recipes.create.filling('kubejs:quenched_tempered_glass_blank', ['kubejs:quenched_tempered_glass_blank', Fluid.sizedIngredientOf('#cwi:water', 1000)])
         ]
     )
     .transitionalItem('kubejs:quenched_tempered_glass_blank')
     .loops(1)
 
-    vatRecipe(event, null, [], ["tfmg:cast_iron_vat", "tfmg:steel_vat", "tfmg:firebrick_lined_vat"], 1,
-        [
-            AddItem('kubejs:heated_glass'),
-            AddFluid('100 kubejs:molten_saltpeter')
-        ],
-        [
-            AddItem('kubejs:ion_exchanged_glass_blank'),
-            AddFluid('100 kubejs:molten_potassium_sodium_nitrate')
-        ],
-        600
-    )
+    event.recipes.tfmg.vat_machine_recipe([
+        'kubejs:ion_exchanged_glass_blank',
+        Fluid.of('kubejs:molten_potassium_sodium_nitrate', 100)
+    ], [
+        'kubejs:heated_glass',
+        Fluid.of('kubejs:molten_saltpeter', 100)
+    ], 600)
+        .set('min_size', 1)
+        .set('allowed_vat_types', ['tfmg:cast_iron', 'tfmg:steel', 'tfmg:fireproof'])
+        .set('machines', [])
 
     if (hasBiomancy) {
-        vatRecipe(event, 'superheated', [], ["tfmg:cast_iron_vat", "tfmg:steel_vat", "tfmg:firebrick_lined_vat"], 1,
-            [
-                AddFluid('100 kubejs:molten_potassium_sodium_nitrate'),
-                AddItem('biomancy:stone_powder')
-            ],
-            [
-                AddFluid('100 kubejs:molten_saltpeter')
-            ],
-            600
-        )
+        event.recipes.tfmg.vat_machine_recipe([
+            Fluid.of('kubejs:molten_saltpeter', 100)
+        ], [
+            Fluid.of('kubejs:molten_potassium_sodium_nitrate', 100),
+            'biomancy:stone_powder'
+        ], 600)
+            .set('min_size', 1)
+            .set('allowed_vat_types', ['tfmg:cast_iron', 'tfmg:steel', 'tfmg:fireproof'])
+            .set('machines', [])
+            .set('heat_level', 3)
     }
 
     event.recipes.create.milling(['2x kubejs:glass_powder', CreateItem.of(Item.of('kubejs:glass_powder'), 0.75), CreateItem.of(Item.of('kubejs:glass_powder'), 0.25)], 'minecraft:glass')
