@@ -1,327 +1,5 @@
 // priority: 5
 
-// AddItem Helper
-function AddItem(input, chance) {
-    if (typeof input === 'string') {
-        const parts = input.trim().split(/\s+/)
-        let count = 1
-        let id
-        if (parts.length === 1) {
-            id = parts[0]
-        } else if (parts.length === 2) {
-            const num = parseInt(parts[0], 10)
-            if (!isNaN(num)) {
-                count = num
-                id = parts[1]
-            } else {
-                id = input
-            }
-        } else {
-            id = input
-        }
-
-        let obj
-        if (id.startsWith('#')) {
-            obj = { tag: id.substring(1) }
-        } else {
-            obj = { item: id }
-        }
-
-        if (count > 1) obj.count = count
-        if (chance !== undefined) obj.chance = chance
-        return obj
-    }
-    return input
-}
-
-// AddFluid Helper
-function AddFluid(input) {
-    if (typeof input === 'string') {
-        const parts = input.trim().split(/\s+/)
-        let amount
-        let id
-        if (parts.length === 1) {
-            id = parts[0]
-        } else if (parts.length === 2) {
-            const num = parseInt(parts[0], 10)
-            if (!isNaN(num)) {
-                amount = num
-                id = parts[1]
-            } else {
-                id = input
-            }
-        } else {
-            id = input
-        }
-
-        let obj
-        if (id.startsWith('#')) {
-            obj = Fluid.sizedIngredientOf(id, amount || 1000)
-        } else if (id.startsWith('fluidTag:')) {
-            obj = Fluid.sizedIngredientOf('#' + id.substring(9), amount || 1000)
-        } else if (id.startsWith('fluid:')) {
-            obj = Fluid.of(id.substring(6), amount || 1000)
-        } else {
-            obj = Fluid.of(id, amount || 1000)
-        }
-
-        return obj
-    }
-    return input
-}
-
-// Custom recipe JSON uses id for outputs; native Create builders use Item/Ingredient wrappers.
-function createRecipeOutput(output) {
-    if (typeof output === 'string') output = AddItem(output)
-    if (output && output.item) {
-        const result = { id: output.item }
-        if (output.count !== undefined) result.count = output.count
-        if (output.chance !== undefined) result.chance = output.chance
-        return result
-    }
-    return output
-}
-
-function createRecipeOutputs(outputs) {
-    return (Array.isArray(outputs) ? outputs : [outputs]).map(createRecipeOutput)
-}
-
-function createRecipeInput(input) {
-    if (input && input.item) return Item.of(input.item, input.count || 1)
-    if (input && input.tag) return Ingredient.of('#' + input.tag)
-    return input
-}
-
-function createRecipeIngredients(ingredients) {
-    const result = []
-    ;(Array.isArray(ingredients) ? ingredients : [ingredients]).forEach(ingredient => {
-        if (ingredient.item || ingredient.tag) {
-            for (let index = 0; index < (ingredient.count || 1); index++) {
-                result.push(ingredient.item ? { item: ingredient.item } : { tag: ingredient.tag })
-            }
-        } else {
-            const fluidIngredient = Fluid.sizedIngredientOf(ingredient).toFlatJson()
-            // Create's recipe schema requires the type even for NeoForge's basic fluid/tag codecs.
-            if (!fluidIngredient.has('type')) {
-                fluidIngredient.addProperty('type', fluidIngredient.has('tag') ? 'neoforge:tag' : 'neoforge:single')
-            }
-            result.push(fluidIngredient)
-        }
-    })
-    return result
-}
-
-function normalizeVatTypes(allowedVatTypes) {
-    return (allowedVatTypes || []).map(type => {
-        if (type === 'tfmg:steel_vat') return 'tfmg:steel'
-        if (type === 'tfmg:firebrick_lined_vat') return 'tfmg:fireproof'
-        if (type === 'tfmg:cast_iron_vat') return 'tfmg:cast_iron'
-        return type
-    })
-}
-
-function normalizeVatHeatLevel(heatRequirement) {
-    if (heatRequirement === 'heated') return 2
-    if (heatRequirement === 'superheated') return 3
-    if (typeof heatRequirement === 'number') return heatRequirement
-    return 0
-}
-
-// Custom Recipe Functions
-
-function chiseling(event, ingredients, results) {
-    return event.custom({
-        "type": "createdieselgenerators:hammering",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs([results])
-    })
-}
-
-function cutting(event, ingredients, results) {
-    return event.custom({
-        "type": "createdieselgenerators:wire_cutting",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs([results])
-    })
-}
-
-function rolling(event, ingredients, results) {
-    return event.custom({
-        "type": "createaddition:rolling",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs([results])
-    })
-}
-
-function centrifuging(event, ingredients, results, processingTime) {
-    return event.custom({
-        "type": "vintageimprovements:centrifugation",
-        "ingredients": createRecipeIngredients(ingredients),
-        "results": createRecipeOutputs(results),
-        "processing_time": processingTime
-    })
-}
-
-function polishing(event, speedLimits, ingredients, results, processingTime) {
-    return event.custom({
-        "type": "vintageimprovements:polishing",
-        "speed_limits": speedLimits,
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs(results),
-        "processing_time": processingTime
-    })
-}
-
-function hammering(event, hammerBlows, ingredients, results) {
-    return event.custom({
-        "type": "vintageimprovements:hammering",
-        "hammer_blows": hammerBlows,
-        "ingredients": createRecipeIngredients(ingredients),
-        "results": createRecipeOutputs(results)
-    })
-}
-
-function liquidBurning(event, ingredients, processingTime, superheated) {
-    return event.custom({
-        "type": "createaddition:liquid_burning",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": [],
-        "burn_time": processingTime,
-        "superheated": superheated
-    })
-}
-
-function charging(event, energy, maxChargeRate, ingredients, results) {
-    return event.custom({
-        "type": "createaddition:charging",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs([results]),
-        "energy": energy,
-        "max_charge_rate": maxChargeRate
-    })
-}
-
-function turning(event, ingredients, results) {
-    return event.custom({
-        "type": "vintageimprovements:turning",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs([results])
-    })
-}
-
-function demolding(event, ingredients, results) {
-    return event.custom({
-        "type": "ratatouille:demolding",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs(results)
-    })
-}
-
-function curving(event, head, ingredients, results) {
-    return event.custom({
-        "type": "vintageimprovements:curving",
-        "item_as_head": head,
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs(results)
-    })
-}
-
-function vibrating(event, ingredients, results, processingTime) {
-    return event.custom({
-        "type": "vintageimprovements:vibrating",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs(results),
-        "processing_time": processingTime
-    })
-}
-
-function coiling(event, ingredients, results, processingTime) {
-    return event.custom({
-        "type":"vintageimprovements:coiling",
-        "spring_color": "000000",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs([results]),
-        "processing_time": processingTime
-    })
-}
-
-function itemApplication(event, ingredients, results) {
-    return event.custom({
-        "type": "create:item_application",
-        "ingredients": createRecipeIngredients(ingredients),
-        "results": createRecipeOutputs(results)
-    })
-}
-
-function sandpaperPolishing(event, ingredients, results) {
-    return event.custom({
-        "type": "create:sandpaper_polishing",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "results": createRecipeOutputs([results])
-    })
-}
-
-function threshing(event, ingredients, results, processingTime) {
-    return event.custom({
-        "type": "ratatouille:threshing",
-        "ingredients": createRecipeIngredients(ingredients),
-        "results": createRecipeOutputs(results),
-        "processing_time": processingTime
-    })
-}
-
-function tableCasting(event, moldConsumed, ingredients, processingTime, results) {
-    return event.custom({
-        "type": "createmetallurgy:casting_in_table",
-        "mold_consumed": moldConsumed,
-        "ingredients": createRecipeIngredients(ingredients),
-        "processing_time": processingTime,
-        "result": { item: createRecipeOutput(results) }
-    })
-}
-
-function basinCasting(event, moldConsumed, ingredients, processingTime, results) {
-    return event.custom({
-        "type": "createmetallurgy:casting_in_basin",
-        "mold_consumed": moldConsumed,
-        "ingredients": createRecipeIngredients(ingredients),
-        "processing_time": processingTime,
-        "result": { item: createRecipeOutput(results) }
-    })
-}
-
-function melting(event, heatRequirement, ingredients, processingTime, results) {
-    return event.custom({
-        "type": "createmetallurgy:melting",
-        "heat_requirement": heatRequirement,
-        "ingredients": createRecipeIngredients([ingredients]),
-        "processing_time": processingTime,
-        "results": createRecipeOutputs([results])
-    })
-}
-
-function bulkMelting(event, minHeat, maxHeat, ingredients, processingTime, results) {
-    return event.custom({
-        "type": "createmetallurgy:bulk_melting",
-        "ingredients": createRecipeIngredients([ingredients]),
-        "maxHeatRequirement": maxHeat,
-        "minHeatRequirement": minHeat,
-        "processing_time": processingTime,
-        "results": createRecipeOutputs([results])
-    })
-}
-
-function alloying(event, heatRequirement, ingredients, processingTime, results) {
-    let recipe = {
-        "type": "createmetallurgy:alloying",
-        "ingredients": createRecipeIngredients(ingredients),
-        "processing_time": processingTime,
-        "results": createRecipeOutputs([results])
-    }
-    if (heatRequirement) recipe.heat_requirement = heatRequirement
-    return event.custom(recipe)
-}
-
 function addStoragePair(event, bigItem, smallItem, count) {
     const smallStack = count + 'x ' + smallItem
     event.shapeless(Item.of(bigItem), [smallStack])
@@ -334,53 +12,49 @@ function slabPair(event, type, block, slab) {
     if (type == 'wood') event.recipes.create.cutting(`2x ${slab}`, block)
 }
 
-function slabPairReverse(event, type, block, slab) {
-    event.shaped(block, ['A', 'A'], { A: slab })
-}
-
 ServerEvents.recipes(event => {
 
     const hasFluid = Platform.isLoaded('fluid')
     const hasGeodePlus = Platform.isLoaded('geode_plus')
 
     // Deploying
-    event.recipes.create.deploying('create:schedule', [createRecipeInput(AddItem('minecraft:paper')), createRecipeInput(AddItem('create:sturdy_sheet'))])
-    event.recipes.create.deploying('vintageimprovements:recipe_card', [createRecipeInput(AddItem('minecraft:paper')), createRecipeInput(AddItem('#cwi:leathers'))])
+    event.recipes.create.deploying('create:schedule', ['minecraft:paper', 'create:sturdy_sheet'])
+    event.recipes.create.deploying('vintageimprovements:recipe_card', ['minecraft:paper', Ingredient.of('#cwi:leathers')])
 
     // Curving
-    curving(event, 'minecraft:iron_ingot', AddItem('kubejs:clay_disk'), [AddItem('kubejs:clay_ingot_mold')])
-    curving(event, 'minecraft:iron_nugget', AddItem('kubejs:clay_disk'), [AddItem('kubejs:clay_nugget_mold')])
-    curving(event, 'create:iron_sheet', AddItem('kubejs:clay_disk'), [AddItem('kubejs:clay_sheet_mold')])
-    curving(event, 'createaddition:iron_rod', AddItem('kubejs:clay_disk'), [AddItem('kubejs:clay_rod_mold')])
+    event.recipes.vintageimprovements.curving(['kubejs:clay_ingot_mold'], 'kubejs:clay_disk').itemAsHead('minecraft:iron_ingot')
+    event.recipes.vintageimprovements.curving(['kubejs:clay_nugget_mold'], 'kubejs:clay_disk').itemAsHead('minecraft:iron_nugget')
+    event.recipes.vintageimprovements.curving(['kubejs:clay_sheet_mold'], 'kubejs:clay_disk').itemAsHead('create:iron_sheet')
+    event.recipes.vintageimprovements.curving(['kubejs:clay_rod_mold'], 'kubejs:clay_disk').itemAsHead('createaddition:iron_rod')
 
     // Turning
-    turning(event, AddItem('create:industrial_iron_block'), AddItem('vintageimprovements:w_shaped_curving_head'))
-    turning(event, AddItem('create:industrial_iron_block'), AddItem('vintageimprovements:v_shaped_curving_head'))
-    turning(event, AddItem('create:industrial_iron_block'), AddItem('vintageimprovements:concave_curving_head'))
-    turning(event, AddItem('create:industrial_iron_block'), AddItem('vintageimprovements:convex_curving_head'))
-    turning(event, AddItem('kubejs:industrial_iron_ingot'), AddItem('createdieselgenerators:engine_piston'))
-    turning(event, AddItem('kubejs:industrial_iron_ingot'), AddItem('kubejs:industrial_iron_blade'))
-    turning(event, AddItem('kubejs:industrial_iron_ingot'), AddItem('kubejs:industrial_iron_drill_head'))
-    turning(event, AddItem('create:sturdy_sheet'), AddItem('createmetallurgy:sturdy_whisk'))
-    turning(event, AddItem('minecraft:iron_ingot'), AddItem('create:whisk'))
-    turning(event, AddItem('minecraft:iron_ingot'), AddItem('create:propeller'))
-    turning(event, AddItem('create:andesite_alloy'), AddItem('kubejs:andesite_bearing'))
-    turning(event, AddItem('kubejs:fireproof_brick_disk'), AddItem('kubejs:fireproof_brick_ingot_mold'))
-    turning(event, AddItem('kubejs:fireproof_brick_disk'), AddItem('kubejs:fireproof_brick_nugget_mold'))
-    turning(event, AddItem('kubejs:fireproof_brick_disk'), AddItem('kubejs:fireproof_brick_sheet_mold'))
-    turning(event, AddItem('kubejs:fireproof_brick_disk'), AddItem('kubejs:fireproof_brick_rod_mold'))
-    turning(event, AddItem('kubejs:terracotta_disk'), AddItem('kubejs:terracotta_ingot_mold'))
-    turning(event, AddItem('kubejs:terracotta_disk'), AddItem('kubejs:terracotta_nugget_mold'))
-    turning(event, AddItem('kubejs:terracotta_disk'), AddItem('kubejs:terracotta_sheet_mold'))
-    turning(event, AddItem('kubejs:terracotta_disk'), AddItem('kubejs:terracotta_rod_mold'))
+    event.recipes.vintageimprovements.turning('vintageimprovements:w_shaped_curving_head', 'create:industrial_iron_block')
+    event.recipes.vintageimprovements.turning('vintageimprovements:v_shaped_curving_head', 'create:industrial_iron_block')
+    event.recipes.vintageimprovements.turning('vintageimprovements:concave_curving_head', 'create:industrial_iron_block')
+    event.recipes.vintageimprovements.turning('vintageimprovements:convex_curving_head', 'create:industrial_iron_block')
+    event.recipes.vintageimprovements.turning('createdieselgenerators:engine_piston', 'kubejs:industrial_iron_ingot')
+    event.recipes.vintageimprovements.turning('kubejs:industrial_iron_blade', 'kubejs:industrial_iron_ingot')
+    event.recipes.vintageimprovements.turning('kubejs:industrial_iron_drill_head', 'kubejs:industrial_iron_ingot')
+    event.recipes.vintageimprovements.turning('createmetallurgy:sturdy_whisk', 'create:sturdy_sheet')
+    event.recipes.vintageimprovements.turning('create:whisk', 'minecraft:iron_ingot')
+    event.recipes.vintageimprovements.turning('create:propeller', 'minecraft:iron_ingot')
+    event.recipes.vintageimprovements.turning('kubejs:andesite_bearing', 'create:andesite_alloy')
+    event.recipes.vintageimprovements.turning('kubejs:fireproof_brick_ingot_mold', 'kubejs:fireproof_brick_disk')
+    event.recipes.vintageimprovements.turning('kubejs:fireproof_brick_nugget_mold', 'kubejs:fireproof_brick_disk')
+    event.recipes.vintageimprovements.turning('kubejs:fireproof_brick_sheet_mold', 'kubejs:fireproof_brick_disk')
+    event.recipes.vintageimprovements.turning('kubejs:fireproof_brick_rod_mold', 'kubejs:fireproof_brick_disk')
+    event.recipes.vintageimprovements.turning('kubejs:terracotta_ingot_mold', 'kubejs:terracotta_disk')
+    event.recipes.vintageimprovements.turning('kubejs:terracotta_nugget_mold', 'kubejs:terracotta_disk')
+    event.recipes.vintageimprovements.turning('kubejs:terracotta_sheet_mold', 'kubejs:terracotta_disk')
+    event.recipes.vintageimprovements.turning('kubejs:terracotta_rod_mold', 'kubejs:terracotta_disk')
 
     // Cutting
-    cutting(event, AddItem('minecraft:dead_bush'), AddItem('2 minecraft:stick'))
-    cutting(event, AddItem('stick'), AddItem('2 createdieselgenerators:wood_chip', 0.75))
+    event.recipes.createdieselgenerators.wire_cutting('2x minecraft:stick', 'minecraft:dead_bush')
+    event.recipes.createdieselgenerators.wire_cutting(CreateItem.of(Item.of('2x createdieselgenerators:wood_chip'), 0.75), 'stick')
 
     // Chiseling
-    chiseling(event, AddItem('create:brass_sheet'), AddItem('kubejs:brass_circuit_board'))
-    chiseling(event, AddItem('minecraft:glass'), AddItem('minecraft:glass_pane'))
+    event.recipes.createdieselgenerators.hammering('kubejs:brass_circuit_board', 'create:brass_sheet')
+    event.recipes.createdieselgenerators.hammering('minecraft:glass_pane', 'minecraft:glass')
 
     // Pressing
     event.recipes.create.pressing('2x kubejs:broken_burnt_log', 'kubejs:burnt_log')
@@ -389,26 +63,26 @@ ServerEvents.recipes(event => {
     event.recipes.create.pressing('2x kubejs:stripped_broken_ash_log', 'kubejs:stripped_ash_log')
 
     // Item Application
-    itemApplication(event, [AddItem('createdieselgenerators:chip_wood_block'), AddItem('kubejs:andesite_alloy_sheet')], [AddItem('create:andesite_casing')])
-    itemApplication(event, [AddItem('createdieselgenerators:chip_wood_block'), AddItem('#cwi:rubbers')], [AddItem('kubejs:sealed_wood')])
-    itemApplication(event, [AddItem('kubejs:sealed_wood'), AddItem('create:copper_sheet')], [AddItem('create:copper_casing')])
-    itemApplication(event, [AddItem('kubejs:quality_sealed_wood'), AddItem('create:brass_sheet')], [AddItem('create:brass_casing')])
-    itemApplication(event, [AddItem('create:brass_casing'), AddItem('kubejs:industrial_iron_sheet')], [AddItem('kubejs:industrial_casing')])
-    itemApplication(event, [AddItem('kubejs:harden_wood'), AddItem('tfmg:heavy_plate')], [AddItem('tfmg:steel_casing')])
-    itemApplication(event, [AddItem('kubejs:mechanical_arm_base'), AddItem('kubejs:robot_hand')], [AddItem('create:mechanical_arm')])
-    if (hasFluid) itemApplication(event, [AddItem('kubejs:mechanical_arm_base'), AddItem('kubejs:robot_pipette')], [AddItem('fluid:pipette')])
-    itemApplication(event, [AddItem('kubejs:mechanical_arm_base'), AddItem('#cwi:chemical_sprayer')], [AddItem('createdieselgenerators:chemical_turret')])
+    event.recipes.create.item_application(['create:andesite_casing'], ['createdieselgenerators:chip_wood_block', 'kubejs:andesite_alloy_sheet'])
+    event.recipes.create.item_application(['kubejs:sealed_wood'], ['createdieselgenerators:chip_wood_block', Ingredient.of('#cwi:rubbers')])
+    event.recipes.create.item_application(['create:copper_casing'], ['kubejs:sealed_wood', 'create:copper_sheet'])
+    event.recipes.create.item_application(['create:brass_casing'], ['kubejs:quality_sealed_wood', 'create:brass_sheet'])
+    event.recipes.create.item_application(['kubejs:industrial_casing'], ['create:brass_casing', 'kubejs:industrial_iron_sheet'])
+    event.recipes.create.item_application(['tfmg:steel_casing'], ['kubejs:harden_wood', 'tfmg:heavy_plate'])
+    event.recipes.create.item_application(['create:mechanical_arm'], ['kubejs:mechanical_arm_base', 'kubejs:robot_hand'])
+    if (hasFluid) event.recipes.create.item_application(['fluid:pipette'], ['kubejs:mechanical_arm_base', 'kubejs:robot_pipette'])
+    event.recipes.create.item_application(['createdieselgenerators:chemical_turret'], ['kubejs:mechanical_arm_base', Ingredient.of('#cwi:chemical_sprayer')])
 
     // Sandpaper Polishing
-    sandpaperPolishing(event, AddItem('kubejs:sealed_wood'), AddItem('kubejs:polished_sealed_wood'))
-    if (hasGeodePlus) sandpaperPolishing(event, AddItem('geode_plus:nether_quartz_crystal_block'), AddItem('minecraft:quartz_block'))
+    event.recipes.create.sandpaper_polishing('kubejs:polished_sealed_wood', 'kubejs:sealed_wood')
+    if (hasGeodePlus) event.recipes.create.sandpaper_polishing('minecraft:quartz_block', 'geode_plus:nether_quartz_crystal_block')
 
     // Liquid Burning
-    liquidBurning(event, AddFluid('1 kubejs:gasoline'), 48, true)
-    liquidBurning(event, AddFluid('1 kubejs:diesel'), 32, true)
-    liquidBurning(event, AddFluid('1 kubejs:kerosene'), 32, false)
-    liquidBurning(event, AddFluid('1 kubejs:methane'), 16, false)
-    liquidBurning(event, AddFluid('1 createdieselgenerators:plant_oil'), 4, false)
+    event.recipes.createaddition.liquid_burning(Fluid.of('kubejs:gasoline', 1), 48, true).id('createaddition:kjs/9gtjxwxf7vjdfkn1rfjqdiex2')
+    event.recipes.createaddition.liquid_burning(Fluid.of('kubejs:diesel', 1), 32, true).id('createaddition:kjs/13vvbuh0xwaudz8bndd6im70f')
+    event.recipes.createaddition.liquid_burning(Fluid.of('kubejs:kerosene', 1), 32, false).id('createaddition:kjs/3dgbz6m9b14goerwaj9r5tuib')
+    event.recipes.createaddition.liquid_burning(Fluid.of('kubejs:methane', 1), 16, false).id('createaddition:kjs/5eddm1fsvcrvm36commt0aiqm')
+    event.recipes.createaddition.liquid_burning(Fluid.of('createdieselgenerators:plant_oil', 1), 4, false).id('createaddition:kjs/7n1zff564wb322l0nsgz11blt')
 
     // Conversion
     addStoragePair(event, 'kubejs:industrial_rubber_block', 'tfmg:rubber_sheet', 9)
@@ -419,65 +93,89 @@ ServerEvents.recipes(event => {
 
     // Slab
     slabPair(event, 'normal', 'kubejs:depleted_dirt', 'kubejs:depleted_dirt_slab')
-    slabPairReverse(event, 'normal', 'kubejs:depleted_dirt', 'kubejs:depleted_dirt_slab')
+    event.shaped('kubejs:depleted_dirt', ['A', 'A'], { A: 'kubejs:depleted_dirt_slab' })
 
     // Special Melting And Casting
-    alloying(event, 'superheated', [
-        AddItem('kubejs:andesite_powder'), AddItem('kubejs:andesite_powder'), AddItem('kubejs:andesite_powder'), AddItem('kubejs:andesite_powder'),
-        AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder')
-    ], 360, AddFluid('300 kubejs:molten_andesite_alloy'))
+    event.recipes.createmetallurgy.alloying(
+        Fluid.of('kubejs:molten_andesite_alloy', 300),
+        [
+            'kubejs:andesite_powder', 'kubejs:andesite_powder', 'kubejs:andesite_powder', 'kubejs:andesite_powder',
+            'kubejs:clay_powder', 'kubejs:clay_powder', 'kubejs:clay_powder', 'kubejs:clay_powder'
+        ]
+    ).processingTime(360).superheated()
 
-    alloying(event, 'superheated', [
-        AddItem('kubejs:andesite_powder'), AddItem('kubejs:andesite_powder'), AddItem('kubejs:andesite_powder'), AddItem('kubejs:andesite_powder'),
-        AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball')
-    ], 360, AddFluid('300 kubejs:molten_andesite_alloy'))
+    event.recipes.createmetallurgy.alloying(
+        Fluid.of('kubejs:molten_andesite_alloy', 300),
+        [
+            'kubejs:andesite_powder', 'kubejs:andesite_powder', 'kubejs:andesite_powder', 'kubejs:andesite_powder',
+            'minecraft:clay_ball', 'minecraft:clay_ball', 'minecraft:clay_ball', 'minecraft:clay_ball'
+        ]
+    ).processingTime(360).superheated()
 
-    alloying(event, 'superheated', [
-        AddItem('kubejs:andesite_gravel'),
-        AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder')
-    ], 360, AddFluid('350 kubejs:molten_andesite_alloy'))
+    event.recipes.createmetallurgy.alloying(
+        Fluid.of('kubejs:molten_andesite_alloy', 350),
+        [
+            'kubejs:andesite_gravel',
+            'kubejs:clay_powder', 'kubejs:clay_powder', 'kubejs:clay_powder', 'kubejs:clay_powder'
+        ]
+    ).processingTime(360).superheated()
 
-    alloying(event, 'superheated', [
-        AddItem('kubejs:andesite_gravel'),
-        AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball')
-    ], 360, AddFluid('350 kubejs:molten_andesite_alloy'))
+    event.recipes.createmetallurgy.alloying(
+        Fluid.of('kubejs:molten_andesite_alloy', 350),
+        [
+            'kubejs:andesite_gravel',
+            'minecraft:clay_ball', 'minecraft:clay_ball', 'minecraft:clay_ball', 'minecraft:clay_ball'
+        ]
+    ).processingTime(360).superheated()
 
-    alloying(event, 'superheated', [
-        AddItem('kubejs:cobbled_andesite'),
-        AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder')
-    ], 360, AddFluid('400 kubejs:molten_andesite_alloy'))
+    event.recipes.createmetallurgy.alloying(
+        Fluid.of('kubejs:molten_andesite_alloy', 400),
+        [
+            'kubejs:cobbled_andesite',
+            'kubejs:clay_powder', 'kubejs:clay_powder', 'kubejs:clay_powder', 'kubejs:clay_powder'
+        ]
+    ).processingTime(360).superheated()
 
-    alloying(event, 'superheated', [
-        AddItem('kubejs:cobbled_andesite'),
-        AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball')
-    ], 360, AddFluid('400 kubejs:molten_andesite_alloy'))
+    event.recipes.createmetallurgy.alloying(
+        Fluid.of('kubejs:molten_andesite_alloy', 400),
+        [
+            'kubejs:cobbled_andesite',
+            'minecraft:clay_ball', 'minecraft:clay_ball', 'minecraft:clay_ball', 'minecraft:clay_ball'
+        ]
+    ).processingTime(360).superheated()
 
-    alloying(event, 'superheated', [
-        AddItem('minecraft:andesite'),
-        AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder'), AddItem('kubejs:clay_powder')
-    ], 360, AddFluid('400 kubejs:molten_andesite_alloy'))
+    event.recipes.createmetallurgy.alloying(
+        Fluid.of('kubejs:molten_andesite_alloy', 400),
+        [
+            'minecraft:andesite',
+            'kubejs:clay_powder', 'kubejs:clay_powder', 'kubejs:clay_powder', 'kubejs:clay_powder'
+        ]
+    ).processingTime(360).superheated()
 
-    alloying(event, 'superheated', [
-        AddItem('minecraft:andesite'),
-        AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball'), AddItem('minecraft:clay_ball')
-    ], 360, AddFluid('400 kubejs:molten_andesite_alloy'))
+    event.recipes.createmetallurgy.alloying(
+        Fluid.of('kubejs:molten_andesite_alloy', 400),
+        [
+            'minecraft:andesite',
+            'minecraft:clay_ball', 'minecraft:clay_ball', 'minecraft:clay_ball', 'minecraft:clay_ball'
+        ]
+    ).processingTime(360).superheated()
 
-    basinCasting(event, false, [AddFluid('1000 kubejs:molten_slime')], 43, AddItem('minecraft:slime_block'))
-    basinCasting(event, false, [AddFluid('1000 kubejs:molten_slag')], 1482, AddItem('tfmg:slag_block'))
+    event.recipes.createmetallurgy.casting_in_basin('minecraft:slime_block', [Fluid.of('kubejs:molten_slime', 1000)]).processingTime(43).set('mold_consumed', false)
+    event.recipes.createmetallurgy.casting_in_basin('tfmg:slag_block', [Fluid.of('kubejs:molten_slag', 1000)]).processingTime(1482).set('mold_consumed', false)
 
     // Alloying Recipes
-    alloying(event, null, [AddFluid('30 kubejs:molten_gold'), AddFluid('10 kubejs:molten_silver')], 4, AddFluid('40 kubejs:molten_electrum'))
-    alloying(event, null, [AddFluid('30 kubejs:molten_copper'), AddFluid('10 kubejs:molten_nickel')], 4, AddFluid('40 kubejs:molten_constantan'))
-    alloying(event, null, [AddFluid('40 kubejs:molten_copper'), AddFluid('10 kubejs:molten_tin')], 5, AddFluid('50 kubejs:molten_bronze'))
-    alloying(event, null, [AddFluid('10 kubejs:molten_copper'), AddFluid('10 kubejs:molten_zinc')], 2, AddFluid('20 kubejs:molten_brass'))
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_electrum', 40), [Fluid.of('kubejs:molten_gold', 30), Fluid.of('kubejs:molten_silver', 10)]).processingTime(4)
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_constantan', 40), [Fluid.of('kubejs:molten_copper', 30), Fluid.of('kubejs:molten_nickel', 10)]).processingTime(4)
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_bronze', 50), [Fluid.of('kubejs:molten_copper', 40), Fluid.of('kubejs:molten_tin', 10)]).processingTime(5)
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_brass', 20), [Fluid.of('kubejs:molten_copper', 10), Fluid.of('kubejs:molten_zinc', 10)]).processingTime(2)
 
-    alloying(event, 'heated', [AddFluid('30 kubejs:molten_gold'), AddFluid('10 kubejs:molten_silver')], 4, AddFluid('40 kubejs:molten_electrum'))
-    alloying(event, 'heated', [AddFluid('30 kubejs:molten_copper'), AddFluid('10 kubejs:molten_nickel')], 4, AddFluid('40 kubejs:molten_constantan'))
-    alloying(event, 'heated', [AddFluid('40 kubejs:molten_copper'), AddFluid('10 kubejs:molten_tin')], 5, AddFluid('50 kubejs:molten_bronze'))
-    alloying(event, 'heated', [AddFluid('10 kubejs:molten_copper'), AddFluid('10 kubejs:molten_zinc')], 2, AddFluid('20 kubejs:molten_brass'))
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_electrum', 40), [Fluid.of('kubejs:molten_gold', 30), Fluid.of('kubejs:molten_silver', 10)]).processingTime(4).heated()
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_constantan', 40), [Fluid.of('kubejs:molten_copper', 30), Fluid.of('kubejs:molten_nickel', 10)]).processingTime(4).heated()
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_bronze', 50), [Fluid.of('kubejs:molten_copper', 40), Fluid.of('kubejs:molten_tin', 10)]).processingTime(5).heated()
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_brass', 20), [Fluid.of('kubejs:molten_copper', 10), Fluid.of('kubejs:molten_zinc', 10)]).processingTime(2).heated()
 
-    alloying(event, 'superheated', [AddFluid('30 kubejs:molten_gold'), AddFluid('10 kubejs:molten_silver')], 4, AddFluid('40 kubejs:molten_electrum'))
-    alloying(event, 'superheated', [AddFluid('30 kubejs:molten_copper'), AddFluid('10 kubejs:molten_nickel')], 4, AddFluid('40 kubejs:molten_constantan'))
-    alloying(event, 'superheated', [AddFluid('40 kubejs:molten_copper'), AddFluid('10 kubejs:molten_tin')], 5, AddFluid('50 kubejs:molten_bronze'))
-    alloying(event, 'superheated', [AddFluid('10 kubejs:molten_copper'), AddFluid('10 kubejs:molten_zinc')], 2, AddFluid('20 kubejs:molten_brass'))
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_electrum', 40), [Fluid.of('kubejs:molten_gold', 30), Fluid.of('kubejs:molten_silver', 10)]).processingTime(4).superheated()
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_constantan', 40), [Fluid.of('kubejs:molten_copper', 30), Fluid.of('kubejs:molten_nickel', 10)]).processingTime(4).superheated()
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_bronze', 50), [Fluid.of('kubejs:molten_copper', 40), Fluid.of('kubejs:molten_tin', 10)]).processingTime(5).superheated()
+    event.recipes.createmetallurgy.alloying(Fluid.of('kubejs:molten_brass', 20), [Fluid.of('kubejs:molten_copper', 10), Fluid.of('kubejs:molten_zinc', 10)]).processingTime(2).superheated()
 })

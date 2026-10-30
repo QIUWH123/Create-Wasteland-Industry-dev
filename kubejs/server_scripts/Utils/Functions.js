@@ -18,26 +18,6 @@ function desaturateHex(hex, amount) {
     return '#' + ((1 << 24) + (red << 16) + (green << 8) + blue).toString(16).slice(1)
 }
 
-function expandCountedIngredients(ingredients) {
-    const expanded = []
-    ;(ingredients || []).forEach(ingredient => {
-        if (ingredient && ingredient.count && !ingredient.chance) {
-            for (let index = 0; index < ingredient.count; index++) {
-                const copy = {}
-                for (const key in ingredient) {
-                    if (Object.prototype.hasOwnProperty.call(ingredient, key) && key !== 'count') {
-                        copy[key] = ingredient[key]
-                    }
-                }
-                expanded.push(copy)
-            }
-        } else {
-            expanded.push(ingredient)
-        }
-    })
-    return expanded
-}
-
 function getGlobalEntry(mapName, entryId, type, nestedKey) {
     const map = global[mapName]
     if (!map) return null
