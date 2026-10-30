@@ -1,13 +1,5 @@
 ServerEvents.recipes(event => {
 
-// Core Register Function
-
-    function registerUpgradeRecipe(inputItem, ingredients, enchantId, maxLevel, durabilityMultiplier, outputItem) {
-        const recipe = event.recipes.cwi.equipment_upgrade(inputItem, ingredients, enchantId, maxLevel, durabilityMultiplier)
-        if (outputItem) recipe.output(outputItem)
-        return recipe
-    }
-
 // Material And Tool Armor Definitions
 
     const MAT = {
@@ -142,7 +134,7 @@ ServerEvents.recipes(event => {
                     let realMax = r.fixedMax ? r.max : Math.min(r.max, d.tier)
                     if (realMax < 1) return
                     let ingredients = typeof r.ing === 'function' ? r.ing(mat) : r.ing
-                    registerUpgradeRecipe(toolId, ingredients, enchantId, realMax, d.multiplier * r.inc)
+                    event.recipes.cwi.equipment_upgrade(toolId, ingredients, enchantId, realMax, d.multiplier * r.inc)
                 })
             })
         }
@@ -160,7 +152,7 @@ ServerEvents.recipes(event => {
                     let realMax = r.fixedMax ? r.max : Math.min(r.max, d.tier)
                     if (realMax < 1) return
                     let ingredients = typeof r.ing === 'function' ? r.ing(mat) : r.ing
-                    registerUpgradeRecipe(armorId, ingredients, enchantId, realMax, d.multiplier * r.inc)
+                    event.recipes.cwi.equipment_upgrade(armorId, ingredients, enchantId, realMax, d.multiplier * r.inc)
                 })
             })
         }
@@ -204,7 +196,7 @@ ServerEvents.recipes(event => {
 
     SPECIAL_DURABILITY_ITEMS.forEach(entry => {
         let d = MAT[entry.mat]
-        registerUpgradeRecipe(entry.item, [
+        event.recipes.cwi.equipment_upgrade(entry.item, [
             { item: 'kubejs:small_hammer', consume: false },
             { item: ingot(entry.mat, false), consume: true }
         ], 'minecraft:unbreaking', Math.min(3, d.tier), d.multiplier * 0.02)
@@ -229,7 +221,7 @@ ServerEvents.recipes(event => {
                     { item: sheet(mat, false), consume: true, count: 2 },
                     { item: w, consume: true }
                 ]
-                registerUpgradeRecipe(armorId, ing, 'minecraft:protection', maxProt, d.multiplier * 0.10)
+                event.recipes.cwi.equipment_upgrade(armorId, ing, 'minecraft:protection', maxProt, d.multiplier * 0.10)
             } else {
                 LEATHER_STRINGS.forEach(str => {
                     let ingNat = [
@@ -238,14 +230,14 @@ ServerEvents.recipes(event => {
                         { item: sheet(mat, false), consume: true, count: 2 },
                         { item: str, consume: true }
                     ]
-                    registerUpgradeRecipe(armorId, ingNat, 'minecraft:protection', maxProt, d.multiplier * 0.10)
+                    event.recipes.cwi.equipment_upgrade(armorId, ingNat, 'minecraft:protection', maxProt, d.multiplier * 0.10)
                     let ingSyn = [
                         { item: 'kubejs:small_hammer', consume: false },
                         { item: rod(mat), consume: true, count: 2 },
                         { item: sheet(mat, true), consume: true, count: 2 },
                         { item: str, consume: true }
                     ]
-                    registerUpgradeRecipe(armorId, ingSyn, 'minecraft:protection', maxProt, d.multiplier * 0.10)
+                    event.recipes.cwi.equipment_upgrade(armorId, ingSyn, 'minecraft:protection', maxProt, d.multiplier * 0.10)
                 })
             }
         })
