@@ -19,6 +19,7 @@ external-game research has not been refreshed to newer releases.
 | [KubeJS API Reference](kubejs.md) | Start here: current installed integrations, lifecycle, pack helpers, generated families, FTB integration and validation workflow. Replaces the historical `KUBEJS_ULTIMATE_GUIDE.md` and obsolete 2001.x signatures. |
 | [Events And Builders](KUBEJS_EVENTS_AND_BUILDERS.md) | All current event-call paths; registry builders, components, tags, generated data, interactions, loot, tooltips and recipe viewers. |
 | [Recipe API](KUBEJS_RECIPE_API.md) | Used and useful installed recipe schemas: constructor order, fields, defaults, codecs, units and limitations. |
+| [Item And Fluid API Proposal](ITEM_FLUID_API_PROPOSAL.md) | Proposed callable recipe descriptors, native-stack boundaries, chance/weight semantics, Core adapters and migration checks; not an installed API. |
 | [CWI Core API](CWI_CORE_API.md) | Native machine/hammer/upgrade/fan schemas, events, bindings, models, shadows, tags and addon compatibility. |
 | [Recipe Schema Guide](KUBEJS_RECIPE_SCHEMA_GUIDE.md) | Mihono tutorial lessons, current 2101 schema registration, components, constructors and schema ownership. |
 | [Tag Reference](TAG_REFERENCE.md) | Current item, equipment, block, fluid and other-registry tags: assignments, native effects, ingredient uses, dormant integrations and groups without identified consumers. |
