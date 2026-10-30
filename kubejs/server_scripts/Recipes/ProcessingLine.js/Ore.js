@@ -1,5 +1,7 @@
 ServerEvents.recipes(event => {
 
+// Native Processing Outputs Preserve The Existing Chances Above One
+    const ProcessingOutput = Java.loadClass('com.simibubi.create.content.processing.recipe.ProcessingOutput')
     const processing = global.oreProcessing
 
     // Process Each Configured Ore.
@@ -70,11 +72,11 @@ ServerEvents.recipes(event => {
 
         // Vibrating Separation.
         let vibOut = [
-            AddItem(refinedMain, processing.vibratingChance),
-            AddItem(tailings, 1.0)
+            CreateItem.of(Item.of(refinedMain), processing.vibratingChance),
+            CreateItem.of(Item.of(tailings), 1.0)
         ]
-        if (sulfur) vibOut.push(AddItem('kubejs:sulfur_powder', processing.vibratingChance))
-        by.forEach(([metal, chance]) => vibOut.push(AddItem(`kubejs:refined_${metal}`, chance)))
+        if (sulfur) vibOut.push(CreateItem.of(Item.of('kubejs:sulfur_powder'), processing.vibratingChance))
+        by.forEach(([metal, chance]) => vibOut.push(CreateItem.of(Item.of(`kubejs:refined_${metal}`), chance)))
 
         // Select The Most Likely Host-Rock Powder.
         if (hostRocks.length > 0) {
@@ -82,42 +84,42 @@ ServerEvents.recipes(event => {
                 return curr[1] > prev[1] ? curr : prev
             })
             let rockPowder = getStone(best[0], 'powder')
-            if (rockPowder) vibOut.push(AddItem(rockPowder, best[1] * 0.9))
+            if (rockPowder) vibOut.push(CreateItem.of(Item.of(rockPowder), best[1] * 0.9))
         }
-        vibrating(event, AddItem(powder), vibOut, 120)
+        event.recipes.vintageimprovements.vibrating(vibOut, powder).processingTime(120)
 
         // Advanced Centrifuging.
         let centOut = [
-            AddItem(refinedMain, processing.centrifugingChance),
-            AddItem(tailings, 1.0)
+            CreateItem.of(Item.of(refinedMain), processing.centrifugingChance),
+            CreateItem.of(Item.of(tailings), 1.0)
         ]
-        if (sulfur) centOut.push(AddItem('kubejs:sulfur_powder', processing.centrifugingChance))
-        by.forEach(([metal, chance]) => centOut.push(AddItem(`kubejs:refined_${metal}`, chance * 1.4)))
+        if (sulfur) centOut.push(CreateItem.of(Item.of('kubejs:sulfur_powder'), processing.centrifugingChance))
+        by.forEach(([metal, chance]) => centOut.push(CreateItem.of(Item.of(`kubejs:refined_${metal}`), chance * 1.4)))
 
         if (hostRocks.length > 0) {
             let best = hostRocks.reduce((prev, curr) => {
                 return curr[1] > prev[1] ? curr : prev
             })
             let rockPowder = getStone(best[0], 'powder')
-            if (rockPowder) centOut.push(AddItem(rockPowder, best[1] * 1.3))
+        // Preserve Authored Host Rock Chances Above One Without Wrapper Clamping
+            if (rockPowder) centOut.push(new ProcessingOutput(Item.of(rockPowder), best[1] * 1.3))
         }
-        centrifuging(event, [AddItem(powder)], centOut, 200)
+        event.recipes.vintageimprovements.centrifugation(centOut, [powder]).processingTime(200)
 
         // Flotation.
         let flotationOut = [
-            AddItem(refinedMain, processing.flotationChance),
-            AddItem(stubborn, 1.0)
+            CreateItem.of(Item.of(refinedMain), processing.flotationChance),
+            CreateItem.of(Item.of(stubborn), 1.0)
         ]
-        by.forEach(([metal, chance]) => flotationOut.push(AddItem(`kubejs:refined_${metal}`, chance)))
-        vatRecipe(event, null, ['tfmg:mixing'], ['tfmg:steel_vat'], 1,
-            [
-                AddItem(tailings),
-                AddFluid('250 #cwi:water'),
-                AddItem('kubejs:flotation_reagent')
-            ],
+        by.forEach(([metal, chance]) => flotationOut.push(CreateItem.of(Item.of(`kubejs:refined_${metal}`), chance)))
+        event.recipes.tfmg.vat_machine_recipe(
             flotationOut,
-            150
-        )
+            [
+                tailings,
+                Fluid.sizedIngredientOf('#cwi:water', 250),
+                'kubejs:flotation_reagent'
+            ]
+        ).machines(['tfmg:mixing']).allowedVatTypes(['tfmg:steel']).minSize(1).processingTime(150)
 
         if (!canLeach) return
 
@@ -134,17 +136,9 @@ ServerEvents.recipes(event => {
 
         // Formal Leaching.
         // Powder Leaching.
-        vatRecipe(event, 'heated', ['tfmg:mixing'], ['tfmg:steel_vat'], 1,
-            [AddItem(powder), AddFluid('250 kubejs:sulfuric_acid')],
-            [AddFluid(`100 ${leachSol}`), AddItem(leachRes, 1.0)],
-            200
-        )
+        event.recipes.tfmg.vat_machine_recipe([Fluid.of(leachSol, 100), CreateItem.of(Item.of(leachRes), 1.0)], [powder, Fluid.of('kubejs:sulfuric_acid', 250)]).machines(['tfmg:mixing']).allowedVatTypes(['tfmg:steel']).minSize(1).processingTime(200).heatLevel(2)
         // Stubborn Tailings Leaching.
-        vatRecipe(event, 'heated', ['tfmg:mixing'], ['tfmg:steel_vat'], 1,
-            [AddItem(stubborn), AddFluid('300 kubejs:sulfuric_acid')],
-            [AddFluid(`80 ${leachSol}`), AddItem(leachRes, 1.0)],
-            300
-        )
+        event.recipes.tfmg.vat_machine_recipe([Fluid.of(leachSol, 80), CreateItem.of(Item.of(leachRes), 1.0)], [stubborn, Fluid.of('kubejs:sulfuric_acid', 300)]).machines(['tfmg:mixing']).allowedVatTypes(['tfmg:steel']).minSize(1).processingTime(300).heatLevel(2)
 
         // Leach Residue Washing.
         event.recipes.create.splashing(
@@ -157,27 +151,22 @@ ServerEvents.recipes(event => {
         )
 
         // Solution Purification.
-        vatRecipe(event, null, [], ['tfmg:steel_vat'], 1,
-            [AddFluid(`100 ${leachSol}`), AddFluid('50 #cwi:water')],
+        event.recipes.tfmg.vat_machine_recipe(
             [
-                AddFluid(`90 ${purifiedSol}`),
-                AddItem('kubejs:washing_residue', 0.05)
+                Fluid.of(purifiedSol, 90),
+                CreateItem.of(Item.of('kubejs:washing_residue'), 0.05)
             ],
-            120
-        )
+            [Fluid.of(leachSol, 100), Fluid.sizedIngredientOf('#cwi:water', 50)]
+        ).machines([]).allowedVatTypes(['tfmg:steel']).minSize(1).processingTime(120)
 
         // Main And Byproduct Crystallization.
         let crystalOut = [
-            AddItem(mainCrystal, 0.95)
+            CreateItem.of(Item.of(mainCrystal), 0.95)
         ]
         by.forEach(([metal, chance]) => {
-            crystalOut.push(AddItem(`kubejs:${metal}_crystal`, chance * 0.9))
+            crystalOut.push(CreateItem.of(Item.of(`kubejs:${metal}_crystal`), chance * 0.9))
         })
-        vatRecipe(event, null, [], ['tfmg:steel_vat'], 1,
-            [AddFluid(`90 ${purifiedSol}`), AddItem('kubejs:precipitant')],
-            crystalOut,
-            160
-        )
+        event.recipes.tfmg.vat_machine_recipe(crystalOut, [Fluid.of(purifiedSol, 90), 'kubejs:precipitant']).machines([]).allowedVatTypes(['tfmg:steel']).minSize(1).processingTime(160)
 
         // Electrolytic Refining Placeholder.
         // TODO

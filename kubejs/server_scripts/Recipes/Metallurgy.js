@@ -29,12 +29,12 @@ ServerEvents.recipes(event => {
                 const outputItem = mat.items[shape]
                 if (!outputItem) return
                 const amount = (shape === 'sheet' || shape === 'ingot') ? 90 : (shape === 'rod' ? 45 : 10)
-                tableCasting(event, false, [AddItem(moldItem), AddFluid(amount + ' ' + mat.fluid)], calcTime(event, mat, shape), AddItem(outputItem))
+                event.recipes.createmetallurgy.casting_in_table(outputItem, [moldItem, Fluid.of(mat.fluid, amount)]).processingTime(calcTime(event, mat, shape)).set('mold_consumed', false)
             })
         })
 
         if (mat.items.block) {
-            basinCasting(event, false, [AddFluid('810 ' + mat.fluid)], calcTime(event, mat, 'block'), AddItem(mat.items.block))
+            event.recipes.createmetallurgy.casting_in_basin(mat.items.block, [Fluid.of(mat.fluid, 810)]).processingTime(calcTime(event, mat, 'block')).set('mold_consumed', false)
         }
 
         if (mat.mp > 2400) return
@@ -50,8 +50,8 @@ ServerEvents.recipes(event => {
                 (type === 'block') ? 810 :
                 (type === 'wire' || type === 'rod' || type === 'spring') ? 45 :
                 (type === 'nugget') ? 10 : 90
-            melting(event, heat, AddItem(itemId), calcTime(event, mat, type), AddFluid(amount + ' ' + mat.fluid))
-            bulkMelting(event, bulkMin, bulkMax, AddItem(itemId), calcTime(event, mat, type), AddFluid(amount + ' ' + mat.fluid))
+            event.recipes.createmetallurgy.melting(Fluid.of(mat.fluid, amount), itemId).processingTime(calcTime(event, mat, type)).heatRequirement(heat)
+            event.recipes.createmetallurgy.bulk_melting(Fluid.of(mat.fluid, amount), itemId).processingTime(calcTime(event, mat, type)).minHeatRequirement(bulkMin).maxHeatRequirement(bulkMax)
         })
     })
 
@@ -68,12 +68,12 @@ ServerEvents.recipes(event => {
         if (items.sheet && items.powder && mat.stiffness < 400) event.recipes.create.milling(items.powder, items.sheet)
         if (items.powder && items.ingot && mat.mp < 1200) event.blasting(items.ingot, items.powder)
         if (items.powder && items.ingot && mat.mp < 800) event.smelting(items.ingot, items.powder)
-        if (items.ingot && items.rod && mat.stiffness < 400) rolling(event, AddItem(items.ingot), AddItem('2 ' + items.rod))
-        if (items.sheet && items.wire && mat.stiffness < 400) rolling(event, AddItem(items.sheet), AddItem('2 ' + items.wire))
-        if (items.wire && items.spring && mat.stiffness < 400) coiling(event, AddItem(items.wire), AddItem(items.spring), 7.5 * Math.sqrt(mat.stiffness))
-        if (items.rod && items.spring && mat.stiffness < 300) coiling(event, AddItem(items.rod), AddItem(items.spring), 10 * Math.sqrt(mat.stiffness))
-        if (items.ingot && items.rod && mat.stiffness < 100) cutting(event, AddItem(items.ingot), AddItem('2 ' + items.rod))
-        if (items.sheet && items.wire && mat.stiffness < 100) cutting(event, AddItem(items.sheet), AddItem('2 ' + items.wire))
+        if (items.ingot && items.rod && mat.stiffness < 400) event.recipes.createaddition.rolling('2x ' + items.rod, items.ingot)
+        if (items.sheet && items.wire && mat.stiffness < 400) event.recipes.createaddition.rolling('2x ' + items.wire, items.sheet)
+        if (items.wire && items.spring && mat.stiffness < 400) event.recipes.vintageimprovements.coiling(items.spring, items.wire).springColor('000000').processingTime(7.5 * Math.sqrt(mat.stiffness))
+        if (items.rod && items.spring && mat.stiffness < 300) event.recipes.vintageimprovements.coiling(items.spring, items.rod).springColor('000000').processingTime(10 * Math.sqrt(mat.stiffness))
+        if (items.ingot && items.rod && mat.stiffness < 100) event.recipes.createdieselgenerators.wire_cutting('2x ' + items.rod, items.ingot)
+        if (items.sheet && items.wire && mat.stiffness < 100) event.recipes.createdieselgenerators.wire_cutting('2x ' + items.wire, items.sheet)
         if (items.ingot && items.block && (items.ingot.startsWith('kubejs:') || items.block.startsWith('kubejs:') || items.ingot.startsWith('vintageimprovements:') || items.block.startsWith('vintageimprovements:'))) addStoragePair(event, items.block, items.ingot, 9)
         if (items.ingot && items.nugget && (items.ingot.startsWith('kubejs:') || items.nugget.startsWith('kubejs:') || items.ingot.startsWith('vintageimprovements:') || items.nugget.startsWith('vintageimprovements:'))) addStoragePair(event, items.ingot, items.nugget, 9)
     })

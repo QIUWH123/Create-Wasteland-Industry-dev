@@ -35,27 +35,27 @@ ServerEvents.recipes(event => {
 
 // Mixing
 
-    event.recipes.create.mixing('minecraft:wheat_seeds', [AddFluid('50 #cwi:water'), 'kubejs:dry_wheat_seeds']).processingTime(200)
-    event.recipes.create.mixing('minecraft:melon_seeds', [AddFluid('50 #cwi:water'), 'kubejs:dry_melon_seeds']).processingTime(200)
-    event.recipes.create.mixing('minecraft:pumpkin_seeds', [AddFluid('50 #cwi:water'), 'kubejs:dry_pumpkin_seeds']).processingTime(200)
-    event.recipes.create.mixing('minecraft:beetroot_seeds', [AddFluid('50 #cwi:water'), 'kubejs:dry_beetroot_seeds']).processingTime(200)
-    event.recipes.create.mixing('farmersdelight:tomato_seeds', [AddFluid('50 #cwi:water'), 'kubejs:dry_tomato_seeds']).processingTime(200)
-    event.recipes.create.mixing('farmersdelight:cabbage_seeds', [AddFluid('50 #cwi:water'), 'kubejs:dry_cabbage_seeds']).processingTime(200)
+    event.recipes.create.mixing('minecraft:wheat_seeds', [Fluid.sizedIngredientOf('#cwi:water', 50), 'kubejs:dry_wheat_seeds']).processingTime(200)
+    event.recipes.create.mixing('minecraft:melon_seeds', [Fluid.sizedIngredientOf('#cwi:water', 50), 'kubejs:dry_melon_seeds']).processingTime(200)
+    event.recipes.create.mixing('minecraft:pumpkin_seeds', [Fluid.sizedIngredientOf('#cwi:water', 50), 'kubejs:dry_pumpkin_seeds']).processingTime(200)
+    event.recipes.create.mixing('minecraft:beetroot_seeds', [Fluid.sizedIngredientOf('#cwi:water', 50), 'kubejs:dry_beetroot_seeds']).processingTime(200)
+    event.recipes.create.mixing('farmersdelight:tomato_seeds', [Fluid.sizedIngredientOf('#cwi:water', 50), 'kubejs:dry_tomato_seeds']).processingTime(200)
+    event.recipes.create.mixing('farmersdelight:cabbage_seeds', [Fluid.sizedIngredientOf('#cwi:water', 50), 'kubejs:dry_cabbage_seeds']).processingTime(200)
 
     event.recipes.create.mixing('farmersdelight:organic_compost', ['2x ratatouille:compost_residue', 'minecraft:dirt', Fluid.of('minecraft:water', 250)])
     if (hasBiomancy) event.recipes.create.mixing('3x minecraft:bone_meal', ['2x kubejs:bone_powder', 'biomancy:stone_powder'])
 
     event.recipes.create.mixing(Fluid.of('kubejs:molten_sticky_resin', 100), 'kubejs:sticky_resin').heated().processingTime(600)
     event.recipes.create.mixing(Fluid.of('createdieselgenerators:biodiesel', 100), [Fluid.of('createdieselgenerators:ethanol', 50), Fluid.of('createdieselgenerators:plant_oil', 50)])
-    event.recipes.create.mixing('minecraft:bamboo', ['kubejs:muddy_bamboo', AddFluid('500 #cwi:water')])
-    event.recipes.create.mixing('minecraft:sugar_cane', ['kubejs:muddy_sugar_cane', AddFluid('500 #cwi:water')])
+    event.recipes.create.mixing('minecraft:bamboo', ['kubejs:muddy_bamboo', Fluid.sizedIngredientOf('#cwi:water', 500)])
+    event.recipes.create.mixing('minecraft:sugar_cane', ['kubejs:muddy_sugar_cane', Fluid.sizedIngredientOf('#cwi:water', 500)])
     event.recipes.create.mixing('createaddition:biomass', ['#createaddition:plants', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('createaddition:biomass', ['#minecraft:saplings', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('createaddition:biomass', ['#minecraft:flowers', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('createaddition:biomass', ['#minecraft:leaves', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('2x createaddition:biomass', [Ingredient.of('#c:crops'), Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
     event.recipes.create.mixing('2x createaddition:biomass', ['#createaddition:plant_foods', Fluid.of('createdieselgenerators:plant_oil', 100)]).heated()
-    event.recipes.create.mixing('kubejs:carbon-sealed_quartzite_base', ['kubejs:lapped_quartzite_base', 'kubejs:coal_powder', AddFluid('100 #cwi:water')]).heated().processingTime(1200)
+    event.recipes.create.mixing('kubejs:carbon-sealed_quartzite_base', ['kubejs:lapped_quartzite_base', 'kubejs:coal_powder', Fluid.sizedIngredientOf('#cwi:water', 100)]).heated().processingTime(1200)
 
     event.recipes.create.mixing(Fluid.of('minecraft:lava', 100), '#cwi:cobbled_stones').superheated()
     event.recipes.create.mixing(Fluid.of('createaddition:bioethanol', 250), ['minecraft:sugar', 'createaddition:biomass', Fluid.of('kubejs:distilled_water', 250)])
@@ -118,40 +118,34 @@ ServerEvents.recipes(event => {
 
 // Distillation
 
-    distillation(event, "heated",
-        [ AddFluid('500 kubejs:wood_vinegar') ],
-        [ AddFluid('400 minecraft:water'), AddFluid('100 kubejs:methanol') ],
-        200
-    )
+    event.recipes.createdieselgenerators.distillation([ Fluid.of('minecraft:water', 400), Fluid.of('kubejs:methanol', 100) ], [ Fluid.of('kubejs:wood_vinegar', 500) ]).processingTime(200).heated()
 
 // Threshing
 
-    threshing(event,
-        [ AddItem('kubejs:depleted_dirt') ],
+    event.recipes.ratatouille.threshing(
         [
-            AddItem('2 kubejs:ash'),
-            AddItem('1 kubejs:ash', 0.5),
-            AddItem('1 minersdelight:silverfish_eggs', 0.09),
-            AddItem('1 minersdelight:arthropod', 0.03)
+            '2x kubejs:ash',
+            CreateItem.of(Item.of('kubejs:ash'), 0.5),
+            CreateItem.of(Item.of('minersdelight:silverfish_eggs'), 0.09),
+            CreateItem.of(Item.of('minersdelight:arthropod'), 0.03)
         ],
-        100
-    )
+        [ 'kubejs:depleted_dirt' ]
+    ).processingTime(100)
 
-    threshing(event,
-        [ AddItem('minersdelight:gossypium') ],
+    event.recipes.ratatouille.threshing(
         [
-            AddItem('2 rusticdelight:cotton_boll'),
-            AddItem('1 rusticdelight:cotton_boll', 0.5)
+            '2x rusticdelight:cotton_boll',
+            CreateItem.of(Item.of('rusticdelight:cotton_boll'), 0.5)
         ],
-        100
-    )
+        [ 'minersdelight:gossypium' ]
+    ).processingTime(100)
 
 // Centrifugation
 
-    centrifuging(event, [AddItem('kubejs:claystone_powder'), AddItem('kubejs:claystone_powder')], [AddItem('kubejs:stone_powder'), AddItem('kubejs:clay_powder')], 80)
-    centrifuging(event, [AddItem('kubejs:diorite_powder'), AddItem('kubejs:diorite_powder')], [AddItem('kubejs:quartz_powder'), AddItem('kubejs:stone_powder')], 80)
-    centrifuging(event, [AddItem('kubejs:andesite_powder'), AddItem('kubejs:andesite_powder')], [AddItem('kubejs:diorite_powder'), AddItem('kubejs:stone_powder')], 80)
-    centrifuging(event, [AddItem('minecraft:clay_ball')], [AddItem('kubejs:clay_powder'), AddFluid('50x minecraft:water')], 300)
+    event.recipes.vintageimprovements.centrifugation(['kubejs:stone_powder', 'kubejs:clay_powder'], ['kubejs:claystone_powder', 'kubejs:claystone_powder']).processingTime(80)
+    event.recipes.vintageimprovements.centrifugation(['kubejs:quartz_powder', 'kubejs:stone_powder'], ['kubejs:diorite_powder', 'kubejs:diorite_powder']).processingTime(80)
+    event.recipes.vintageimprovements.centrifugation(['kubejs:diorite_powder', 'kubejs:stone_powder'], ['kubejs:andesite_powder', 'kubejs:andesite_powder']).processingTime(80)
+    event.recipes.vintageimprovements.centrifugation(['kubejs:clay_powder', Fluid.of('minecraft:water', 50)], ['minecraft:clay_ball']).processingTime(300)
 
 // Sequenced Assembly
 
@@ -159,7 +153,7 @@ ServerEvents.recipes(event => {
         'kubejs:whetstone',
         'minecraft:tuff',
         [
-            polishing(event, 2, AddItem('kubejs:incomplete_whetstone'), [AddItem('kubejs:incomplete_whetstone')], 60),
+            event.recipes.vintageimprovements.polishing(['kubejs:incomplete_whetstone'], 'kubejs:incomplete_whetstone').speedLimits(2).processingTime(60),
             event.recipes.create.pressing('kubejs:incomplete_whetstone', 'kubejs:incomplete_whetstone'),
             event.recipes.create.pressing('kubejs:incomplete_whetstone', 'kubejs:incomplete_whetstone')
         ]
@@ -183,9 +177,9 @@ ServerEvents.recipes(event => {
         'kubejs:carbon-sealed_quartzite_base',
         [
             event.recipes.create.pressing('kubejs:incomplete_fine_whetstone', 'kubejs:incomplete_fine_whetstone'),
-            event.recipes.create.filling('kubejs:incomplete_fine_whetstone', ['kubejs:incomplete_fine_whetstone', AddFluid('100 #cwi:water')]),
-            event.recipes.create.filling('kubejs:incomplete_fine_whetstone', ['kubejs:incomplete_fine_whetstone', AddFluid('100 #cwi:water')]),
-            polishing(event, 2, AddItem('kubejs:incomplete_fine_whetstone'), [AddItem('kubejs:incomplete_fine_whetstone')], 60)
+            event.recipes.create.filling('kubejs:incomplete_fine_whetstone', ['kubejs:incomplete_fine_whetstone', Fluid.sizedIngredientOf('#cwi:water', 100)]),
+            event.recipes.create.filling('kubejs:incomplete_fine_whetstone', ['kubejs:incomplete_fine_whetstone', Fluid.sizedIngredientOf('#cwi:water', 100)]),
+            event.recipes.vintageimprovements.polishing(['kubejs:incomplete_fine_whetstone'], 'kubejs:incomplete_fine_whetstone').speedLimits(2).processingTime(60)
         ]
     )
     .transitionalItem('kubejs:incomplete_fine_whetstone')
@@ -234,7 +228,7 @@ ServerEvents.recipes(event => {
         ],
         'kubejs:dust-covered_seeds',
         [
-            vibrating(event, AddItem('kubejs:dust-covered_seeds'), [AddItem('kubejs:dust-covered_seeds')], 200)
+            event.recipes.vintageimprovements.vibrating(['kubejs:dust-covered_seeds'], 'kubejs:dust-covered_seeds').processingTime(200)
         ]
     )
     .transitionalItem('kubejs:dust-covered_seeds')
