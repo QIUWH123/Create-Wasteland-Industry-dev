@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
-		"side": "kubejs:block/model/building_blocks/frames/steel_eave",
-		"particle": "kubejs:block/model/building_blocks/frames/steel_eave"
+		"side": "kubejs:block/models/building_blocks/frames/steel_eave",
+		"particle": "kubejs:block/models/building_blocks/frames/steel_eave"
 	},
 	"elements": [
 		{

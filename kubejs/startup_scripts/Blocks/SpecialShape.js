@@ -74,8 +74,8 @@ StartupEvents.registry('block', event => {
             'minecraft:needs_stone_tool',
             'create:fan_transparent'
         ]
-        const panelTexture = `kubejs:block/model/building_blocks/frames/${material}_frame`
-        const eaveTexture  = `kubejs:block/model/building_blocks/frames/${material}_eave`
+        const panelTexture = `kubejs:block/models/building_blocks/frames/${material}_frame`
+        const eaveTexture  = `kubejs:block/models/building_blocks/frames/${material}_eave`
 
         // Frame Panel
         registerBlock(`tfmg:${material}_frame_panel`, {

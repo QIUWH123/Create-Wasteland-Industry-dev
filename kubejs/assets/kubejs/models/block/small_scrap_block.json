@@ -3,8 +3,8 @@
 	"credit": "NukaTeam's Work",
 	"texture_size": [128, 128],
 	"textures": {
-		"0": "kubejs:block/model/scrap_block",
-		"particle": "kubejs:block/model/scrap_block"
+		"0": "kubejs:block/models/scrap_block",
+		"particle": "kubejs:block/models/scrap_block"
 	},
 	"elements": [
 		{

@@ -2,9 +2,9 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"1": "kubejs:block/model/steel_cogwheel",
-		"2": "kubejs:block/model/heavy_machine",
-		"particle": "kubejs:block/model/steel_cogwheel"
+		"1": "kubejs:block/models/steel_cogwheel",
+		"2": "kubejs:block/models/heavy_machine",
+		"particle": "kubejs:block/models/steel_cogwheel"
 	},
 	"elements": [
 		{

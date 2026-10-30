@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "kubejs:block/model/condensed_antimatter",
-		"particle": "kubejs:block/model/condensed_antimatter"
+		"0": "kubejs:block/models/condensed_antimatter",
+		"particle": "kubejs:block/models/condensed_antimatter"
 	},
 	"elements": [
 		{

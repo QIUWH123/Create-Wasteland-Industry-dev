@@ -3,9 +3,9 @@
 	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
-		"0": "kubejs:block/model/forming_fabric",
+		"0": "kubejs:block/models/forming_fabric",
 		"1": "minecraft:item/paper",
-		"particle": "kubejs:block/model/forming_fabric"
+		"particle": "kubejs:block/models/forming_fabric"
 	},
 	"elements": [
 		{

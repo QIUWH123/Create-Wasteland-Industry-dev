@@ -965,7 +965,7 @@ global.pipePileDefinitions = [
     ['steel',     'tfmg:block/steel_pipes',     6, 7, 'metal', 'pickaxe', 'stone', 'tfmg:steel_pipe'],
     ['cast_iron', 'tfmg:block/cast_iron_pipes', 4, 6, 'metal', 'pickaxe', 'stone', 'tfmg:cast_iron_pipe'],
     ['brass',     'tfmg:block/brass_pipes',     3, 6, 'metal', 'pickaxe', 'stone', 'tfmg:brass_pipe'],
-    ['copper',    'kubejs:block/model/pipes',   3, 6, 'metal', 'pickaxe', 'stone', 'create:fluid_pipe'],
+    ['copper',    'kubejs:block/models/pipes',   3, 6, 'metal', 'pickaxe', 'stone', 'create:fluid_pipe'],
     ['aluminum',  'tfmg:block/aluminum_pipes',  3, 6, 'metal', 'pickaxe', 'stone', 'tfmg:aluminum_pipe'],
     ['plastic',   'tfmg:block/plastic_pipes',   2, 2, 'metal', 'pickaxe', 'stone', 'tfmg:plastic_pipe']
 ]

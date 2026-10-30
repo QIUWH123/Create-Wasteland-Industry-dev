@@ -7,8 +7,8 @@
 	"textures": {
 		"0": "create:block/axis_top",
 		"1": "create:block/axis",
-		"2": "kubejs:block/model/mixer_head",
-		"particle": "kubejs:block/model/mixer_head"
+		"2": "kubejs:block/models/mixer_head",
+		"particle": "kubejs:block/models/mixer_head"
 	},
 	"elements": [
 		{

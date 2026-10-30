@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
-		"1": "kubejs:block/model/clinostat",
-		"particle": "kubejs:block/model/clinostat"
+		"1": "kubejs:block/models/clinostat",
+		"particle": "kubejs:block/models/clinostat"
 	},
 	"elements": [
 		{

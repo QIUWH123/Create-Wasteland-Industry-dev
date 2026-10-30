@@ -3,12 +3,12 @@
 	"credit": "Made with Blockbench",
 	"parent": "kubejs:block/machine",
 	"textures": {
-		"0": "kubejs:block/model/precise_machine_1",
+		"0": "kubejs:block/models/precise_machine_1",
 		"3": "create:block/axis_top",
 		"4": "create:block/axis",
-		"5": "kubejs:block/model/precise_machine_2",
+		"5": "kubejs:block/models/precise_machine_2",
 		"7": "create:block/brass_casing",
-		"particle": "kubejs:block/model/precise_machine_2"
+		"particle": "kubejs:block/models/precise_machine_2"
 	},
 	"elements": [
 		{

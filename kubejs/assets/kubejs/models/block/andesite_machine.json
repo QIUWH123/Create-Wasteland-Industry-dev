@@ -6,7 +6,7 @@
 		"0": "create:block/axis",
 		"3": "create:block/axis_top",
 		"4": "create:block/andesite_casing_short",
-		"5": "kubejs:block/model/andesite_funnel_plating",
+		"5": "kubejs:block/models/andesite_funnel_plating",
 		"6": "create:block/andesite_casing",
 		"7": "create:block/andesite_casing_very_short",
 		"particle": "create:block/andesite_casing",

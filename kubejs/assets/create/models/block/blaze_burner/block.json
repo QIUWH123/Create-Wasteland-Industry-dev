@@ -4,8 +4,8 @@
 	"render_type": "cutout",
 	"texture_size": [32, 32],
 	"textures": {
-		"0": "kubejs:block/model/burner",
-		"particle": "kubejs:block/model/burner"
+		"0": "kubejs:block/models/burner",
+		"particle": "kubejs:block/models/burner"
 	},
 	"elements": [
 		{

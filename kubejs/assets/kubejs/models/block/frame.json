@@ -3,8 +3,8 @@
 	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
-		"0": "kubejs:block/model/building_blocks/frames/steel_frame",
-		"particle": "kubejs:block/model/building_blocks/frames/steel_frame"
+		"0": "kubejs:block/models/building_blocks/frames/steel_frame",
+		"particle": "kubejs:block/models/building_blocks/frames/steel_frame"
 	},
 	"elements": [
 		{

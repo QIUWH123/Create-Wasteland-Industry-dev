@@ -2,8 +2,8 @@
 	"format_version": "1.21.6",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"0": "kubejs:block/model/stirling_engine",
-		"particle": "kubejs:block/model/stirling_engine"
+		"0": "kubejs:block/models/stirling_engine",
+		"particle": "kubejs:block/models/stirling_engine"
 	},
 	"elements": [
 		{

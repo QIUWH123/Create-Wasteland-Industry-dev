@@ -1,7 +1,7 @@
 {
   "parent": "kubejs:block/frame",
   "textures": { 
-	"0": "kubejs:block/model/building_blocks/frames/aluminum_frame", 
+	"0": "kubejs:block/models/building_blocks/frames/aluminum_frame", 
 	"particle": "#0"
   }
 }
