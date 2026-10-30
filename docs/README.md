@@ -16,8 +16,11 @@ external-game research has not been refreshed to newer releases.
 | Document | Use |
 | --- | --- |
 | [Development Standards](DEVELOPMENT_STANDARDS.md) | Required formatting, behavior safeguards, author decisions, privacy and validation rules for all contributors. |
-| [KubeJS 1.21.1 Reference](kubejs.md) | Current installed APIs, migration differences, helpers, debugging and practical coding lessons. This incorporates useful content from the source `KUBEJS_ULTIMATE_GUIDE.md`; use this reference instead of importing obsolete 2001.x signatures. |
-| [Recipe Schema Guide](KUBEJS_RECIPE_SCHEMA_GUIDE.md) | Mihono tutorial lessons, current schema/component registration and historical custom-helper examples. |
+| [KubeJS API Reference](kubejs.md) | Start here: current installed integrations, lifecycle, pack helpers, generated families, FTB integration and validation workflow. Replaces the historical `KUBEJS_ULTIMATE_GUIDE.md` and obsolete 2001.x signatures. |
+| [Events And Builders](KUBEJS_EVENTS_AND_BUILDERS.md) | All current event-call paths; registry builders, components, tags, generated data, interactions, loot, tooltips and recipe viewers. |
+| [Recipe API](KUBEJS_RECIPE_API.md) | Used and useful installed recipe schemas: constructor order, fields, defaults, codecs, units and limitations. |
+| [CWI Core API](CWI_CORE_API.md) | Native machine/hammer/upgrade/fan schemas, events, bindings, models, shadows, tags and addon compatibility. |
+| [Recipe Schema Guide](KUBEJS_RECIPE_SCHEMA_GUIDE.md) | Mihono tutorial lessons, current 2101 schema registration, components, constructors and schema ownership. |
 | [Tag Reference](TAG_REFERENCE.md) | Current item, equipment, block, fluid and other-registry tags: assignments, native effects, ingredient uses, dormant integrations and groups without identified consumers. |
 | [Historical 2101 Port Plan](superpowers/plans/KUBEJS_2101_PORT_PLAN.md) | Earlier migration intent and constraints; not a current execution checklist or completion report. |
 
@@ -51,7 +54,13 @@ for that future port. They do not create quests or establish target gameplay.
 
 ## Retained Evidence
 
-Current target evidence: [Tag inventory](audit/TAG_INVENTORY.json) contains
+Current API evidence: [KubeJS API inventory](audit/KUBEJS_API_INVENTORY.json)
+records 97 scripts, 31 distinct event-call paths, 51 direct recipe factory
+types, 75 embedded schema resources, supporting JAR fingerprints and a
+documentation coverage map. It is a static source/binary audit, not a live
+registry dump or a claim that guarded branches execute.
+
+Current tag evidence: [Tag inventory](audit/TAG_INVENTORY.json) contains
 2,396 resolved server tags across 23 registries, exact memberships, inspected
 consumer notes and current input fingerprints. Its scope is explained in the
 [Tag Reference](TAG_REFERENCE.md).

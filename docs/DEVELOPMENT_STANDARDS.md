@@ -42,7 +42,7 @@ This instance targets Minecraft 1.21.1 and NeoForge 21.1.264. The older CWI
 - Preserve template literals and strings whose escaping or embedded content would change if the quote style changed.
 - Use `const` by default and `let` when reassignment is required. The installed Rhino also needs `let` at verified repeated-loop/callback sites that throw `redeclaration of var`; exercise the callback at runtime before choosing that workaround.
 - Do not introduce new `var` declarations. Do not rename existing globals solely for style.
-- Keep helper names and public global names unchanged, including `AddItem`, `AddFluid`, `global.outPutMaterial`, and `global.materialTypes`.
+- Preserve public global names, including `global.outPutMaterial` and `global.materialTypes`, and names of retained family generators. Recipe-only wrappers and their obsolete conversion helpers were intentionally removed; do not recreate them.
 - Keep KubeJS priority comments such as `// priority: 10000` as the exact first line of the file. Do not move, reword, or convert them to block comments.
 
 ## Comments
@@ -67,7 +67,10 @@ This instance targets Minecraft 1.21.1 and NeoForge 21.1.264. The older CWI
 ## Recipe Data And Helpers
 
 - Keep `event.custom(...)` JSON objects on one line with spaces when doing so remains readable and preserves the custom schema.
-- Use `AddItem` and `AddFluid` when they produce the same object shape and behavior as the original recipe data.
+- Prefer the installed `event.recipes.<mod>.<type>` schema builder. Use native item IDs/count strings, `Item.of`, `CreateItem.of`, `Fluid.of`, and `Fluid.sizedIngredientOf` according to its component contract. Do not add a wrapper that only simplifies or forwards recipe creation.
+- Prefer `Fluid.of(id, amount)` for concrete fluids. The author plans Core support for fluid tags through the same call; migrate tag inputs only after that support is installed and verified. Until then, keep `Fluid.sizedIngredientOf('#tag', amount)` for tag inputs. Fluid tags remain input choices, not concrete outputs.
+- Retain useful generators and calculations, such as material processing families, fermentation variants with optional-mod/capacity guards, and paired crafting recipes. Use `event.custom(...)` when the installed schema cannot represent the required data.
+- Verify defaults, input count expansion, typed output wrappers and generated IDs when migrating a call. Preserve repeated ingredients and explicit settings where needed for equivalence.
 - Match the installed serializer exactly. A 1.21.1 item-stack output commonly uses `{ "id": "namespace:path", "count": 2 }`, while an item ingredient uses `{ "item": "namespace:path" }`; wrappers and nesting vary by recipe type. Fluid ingredient and output layouts also differ. Do not copy the old `{ "item": ..., "count": ... }` output or `{ "fluid": ..., "amount": ... }` shape into every serializer.
 - Keep custom schemas, Java or typed objects, and multiline data when flattening or helper conversion would reduce readability or change the schema.
 - Preserve every recipe ID, namespace, path, count, chance, fluid, amount, processing time, heat requirement, stage, predicate, and output order.
@@ -140,8 +143,8 @@ For documentation-only work, validate links, filenames, JSON evidence, privacy, 
 - [ ] Only the intended files changed.
 - [ ] Formatting follows four-space indentation and has no trailing semicolons.
 - [ ] Comments follow the top-level, Title Case, no-underscore rule.
-- [ ] Priority comments, IDs, globals, helpers, and runtime paths are preserved.
+- [ ] Priority comments, IDs, globals, retained generators, and runtime paths are preserved.
 - [ ] `Item.of(...)` changes were verified against the receiving API.
 - [ ] Recipe ordering changes are limited to behavior-independent removal lists.
-- [ ] `event.custom(...)`, `AddItem`, and `AddFluid` changes preserve the same schema.
+- [ ] Schema builders and native item/fluid values preserve the serializer contract and behavior.
 - [ ] `git diff --check` and runtime or Rhino validation were completed where available.

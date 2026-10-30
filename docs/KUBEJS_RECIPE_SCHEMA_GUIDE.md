@@ -3,7 +3,8 @@
 This guide carries the useful lessons from the CWI 1.20.1
 [RecipesSchemaAdded tutorial](https://docs.mihono.cn/zh/modpack/kubejs/1.20.1/KubeJSCourse/KubeJSAdvanced/RecipesSchemaAdded)
 into the installed Minecraft 1.21.1 environment. Read [KubeJS Reference](kubejs.md)
-for the wider coding workflow and [Development Standards](DEVELOPMENT_STANDARDS.md)
+for the wider coding workflow, [Recipe API](KUBEJS_RECIPE_API.md) for the complete
+practical serializer catalogue, and [Development Standards](DEVELOPMENT_STANDARDS.md)
 for project rules. Historical helper names are identified below; they are not
 current native APIs.
 
@@ -17,13 +18,18 @@ The current API descriptions were checked against these installed files:
 - `mods/createmetallurgy-1.0.3-1.21.1.jar`
 - `mods/rhino-2101.2.7-build.85.jar`
 - `mods/ProbeJS-8.0.3.jar`
+- Installed CWI Core, Vintage Improvements, Create Addition, Create Diesel
+  Generators, TFMG, Ratatouille, Lychee, Petrochem, Rubberworks and NeoEcoAE
+  integrations catalogued in [Recipe API](KUBEJS_RECIPE_API.md)
 - Current `kubejs/server_scripts/Recipes/BasicRecipe.js` and its consumers
 
 Evidence consists of installed schema/recipe resources and Java signatures or
 bytecode for `RecipeSchemaStorage`, `RecipeSchemaRegistry`, `RecipeSchema`,
 `RecipeKey`, component types, Create wrappers, Create Metallurgy's plugin and
-ProbeJS's command registration. No schemas, helpers or recipes were installed
-by this documentation change, and no new game launch or machine test is claimed.
+ProbeJS's command registration. No new schemas or recipes were added by this
+guide. Production calls were migrated to installed schema constructors and
+[compared in an isolated runtime](kubejs.md#recipe-migration-verification).
+The schema-registration examples below remain static examples, not machine tests.
 
 The old source guide records a full reading of the article and its linked
 [prelude.js](https://github.com/Prunoideae/-recipes/blob/1.20.1/src/prelude.js),
@@ -131,7 +137,7 @@ functions before calling them.
 ## Installed Create And Create Metallurgy Schemas
 
 Prefer an installed integration before adding a new schema. KubeJS Create
-provides the 21 schema resources listed in [KubeJS Reference](kubejs.md).
+provides the 21 schema resources catalogued in [Recipe API](KUBEJS_RECIPE_API.md#create).
 For example, the installed `data/create/kubejs/recipe_schema/milling.json`
 inherits `create:base/processing_with_time`. Its parent ultimately defines:
 
@@ -169,6 +175,72 @@ therefore differ for time: always-written schema time prevents silent reliance
 on the codec's zero. Preserve explicit CWI durations. These inspected values
 are not universal defaults for every serializer.
 
+### Current Schema Ownership
+
+The installed integration takes precedence over a copied historical example.
+Core's addon compatibility layer registers a fallback only when the target
+mod is loaded and that type's schema is unknown or missing. It supplies Create
+Addition, Create Diesel Generators, TFMG and Ratatouille processing schemas,
+plus native Lychee action/predicate components and four Lychee schemas.
+Core also patches selected existing schemas: empty outputs for certain Vintage
+recipes, optional smithing templates, empty entity-melting inputs, and ID-or-tag
+Petrochem biome references. See [the exact catalogue](KUBEJS_RECIPE_API.md#core-addon-compatibility-schemas)
+and [CWI Core API](CWI_CORE_API.md) before adding a competing schema.
+
+Changing an existing schema can affect every inherited recipe, matching and
+replacement, not just the new factory caller. `event.custom(...)` can still
+be parsed through a known schema. A raw custom recipe is therefore not a
+workaround for an incorrect registered component. Confirm the final registered
+schema after installed plugins and the server schema event have run.
+
+### Registration Patterns In 2101
+
+This JSON example illustrates a schema for an already implemented hypothetical
+serializer `example:machine_processing`. It is not an installed CWI recipe
+type and must not be installed as a substitute for implementing a serializer.
+Its location would be
+`kubejs/data/example/kubejs/recipe_schema/machine_processing.json`:
+
+```json
+{
+    "keys": [
+        { "name": "result", "role": "output", "type": "item_stack" },
+        { "name": "ingredient", "role": "input", "type": "ingredient" },
+        { "name": "processing_time", "role": "input", "type": "ticks" }
+    ],
+    "constructors": [
+        { "keys": ["result", "ingredient", "processing_time"] }
+    ],
+    "unique": ["result"]
+}
+```
+
+The corresponding native script construction uses public methods present in
+the installed KubeJS JAR. Choose one registration route; do not install both
+examples for the same type:
+
+```js
+const RecipeSchema = Java.loadClass('dev.latvian.mods.kubejs.recipe.schema.RecipeSchema')
+const ItemStackComponent = Java.loadClass('dev.latvian.mods.kubejs.recipe.component.ItemStackComponent')
+const IngredientComponent = Java.loadClass('dev.latvian.mods.kubejs.recipe.component.IngredientComponent')
+const TimeComponent = Java.loadClass('dev.latvian.mods.kubejs.recipe.component.TimeComponent')
+
+ServerEvents.recipeSchemaRegistry(event => {
+    const result = ItemStackComponent.ITEM_STACK.outputKey('result')
+    const ingredient = IngredientComponent.INGREDIENT.inputKey('ingredient')
+    const time = TimeComponent.TICKS.inputKey('processing_time')
+
+    event.namespace('example').register('machine_processing',
+        new RecipeSchema(result, ingredient, time).uniqueId(result))
+})
+```
+
+These examples deliberately make duration required. They do not guess a native
+codec default. If making it optional, supply the value required by the component
+(`ticks` uses `TickDuration` in native Java construction), and decide separately
+whether to write it when omitted. The constructor signatures and JSON syntax
+were inspected; these hypothetical bindings were not game-tested.
+
 ### A Current Casting Fixture
 
 This is the installed resource
@@ -198,11 +270,12 @@ stack under `item`. These are concrete resource observations, not instructions
 to rebalance the old pack recipe to those values. Preserve CWI's intended
 amounts and timing when porting it.
 
-Current CWI `tableCasting`/`basinCasting` already use
-`result: { item: createRecipeOutput(results) }`. `createRecipeOutput` changes
-helper item outputs to serialized stacks with `id`. Native Create builders
-instead accept `CreateItem.of(Item.of(id), chance)` for chance outputs. Keep
-raw JSON and Java wrapper contracts separate.
+Current CWI calls `event.recipes.createmetallurgy.casting_in_table(...)` and
+`casting_in_basin(...)` directly. Their casting-output component accepts a
+supported stack/string argument and writes the `result.item` envelope. The
+old `tableCasting`, `basinCasting` and `createRecipeOutput` functions are
+retired. Create chance outputs use `CreateItem.of(Item.of(id), chance)`;
+casting's specialized output is a separate contract.
 
 ## Historical Tutorial And Helper Lessons
 
@@ -271,8 +344,9 @@ key signature and imports require a deliberate rewrite for 2101.
 
 1. Inspect the exact installed serializer and a known recipe; establish keys,
    ranges, optional defaults, components and input/output roles.
-2. Check native/addon support before adding a schema. In particular, the five
-   tutorial Create Metallurgy types already have installed support.
+2. Check native/addon support before adding a schema. Use existing schema
+   constructors directly; the five tutorial Create Metallurgy types already
+   have installed support. Do not add a recipe-only wrapper around them.
 3. For an unsupported serializer, first prove one exact `event.custom(...)`
    fixture, then describe that same shape with current components. Keep
    constructor order and explicit stable IDs.
@@ -287,13 +361,18 @@ key signature and imports require a deliberate rewrite for 2101.
    default-valued fields, output nesting, count spreading, chance and fluids.
 7. Exercise the recipe in its machine and check the recipe viewer. A schema
    dump, syntax check or editor completion cannot prove machine behavior.
-8. Convert an existing helper family only after proving equivalent output and
-   behavior. Preserve IDs, quantities, output order, heat, duration, mold use
-   and item component state.
+8. When replacing a recipe-only wrapper with its schema constructor, compare
+   the emitted data and preserve IDs, quantities, output order, heat,
+   duration, mold use and item component state. Preserve useful generators
+   that calculate quantities, produce related families or enforce mod and
+   capacity constraints.
 
 No native script-registration binding example is claimed as game-tested here.
-The public API and installed schema resources above establish construction
-options; a future schema change still needs serializer and gameplay checks.
-The current `AddItem`, typed `AddFluid`, `tableCasting`, `basinCasting`,
-`melting` and `alloying` helpers remain the active pack implementation until a
-separate, tested conversion is requested.
+The public API, illustrative registration patterns and installed schema
+resources establish construction options; a future schema change still needs
+serializer and gameplay checks.
+Production recipes use native item strings, `Item.of`, `CreateItem.of`,
+`Fluid.of` and `Fluid.sizedIngredientOf` with the installed schemas. The old
+`AddItem`, `AddFluid`, casting, melting and alloying wrappers are retired.
+`addFermentingRecipes`, storage/slab family generators and material/ore
+calculations retain logic beyond merely renaming a schema constructor.
