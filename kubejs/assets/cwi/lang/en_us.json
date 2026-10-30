@@ -1,32 +1,14 @@
 {
-  "block.cwi.furnace_hatch": "Furnace Hatch",
-  "block.cwi.blast_furnace": "Blast Furnace",
-  "block.cwi.mixing_vessel": "Mixing Vessel",
-  "block.cwi.stirling_engine": "Stirling Engine",
-  "block.cwi.incubator": "Incubator",
-  "block.cwi.spider_egg": "Spider Egg",
-  "block.cwi.dride_algae": "Dried Algae",
-  "block.cwi.lava_extractor_head": "Lava Extractor Head",
-  "block.cwi.lava_extractor_pump": "Lava Extractor Pump",
-  "block.cwi.lava_extractor_pump_blade": "Lava Extractor Pump Blade",
-  "block.cwi.lava_extractor_stress_input": "Lava Extractor Stress Input",
-
-  "cwi.blast_furnace_processing": "Blast Furnace Smelting",
-  "cwi.arc_furnace_processing": "Arc Furnace Smelting",
-
-  "cwi.recipe.budding_growth": "Budding Growth",
   "cwi.recipe.block_conversion": "Block Conversion",
   "cwi.recipe.depot_conversion": "Depot Conversion",
-  "cwi.recipe.incubating": "Incubating",
+  "cwi.info.blast_furnace.outputs": "Drain steel and slag into separate output storage. A full output can stop processing even when the ingredients and heat are ready.",
+  "cwi.arc_furnace_processing": "Arc Furnace Smelting",
+  "cwi.recipe.budding_growth": "Budding Growth",
   "cwi.jei.incubator.preparation": "Before sealing: feed in order",
   "cwi.jei.incubator.inoculation": "Inoculate a sterile Petri dish before the numbered feed steps.",
-  "cwi.jei.incubator.feed_step": "Feed step %s: %s ×%s",
   "cwi.jei.incubator.uncapping": "Uncap the cultured plate with a %s.",
   "cwi.jei.incubator.recovery": "After uncapping",
-  "cwi.recipe.mixing_vessel": "Mixing Vessel",
-  "cwi.recipe.equipment_upgrades": "Equipment Upgrades",
   "cwi.recipe.compound_minerals": "Compound Mineral Processing",
-
   "cwi.jei.mineral.forms": "Processing forms",
   "cwi.jei.mineral.related_forms": "Related forms",
   "cwi.jei.mineral.physical": "Physical separation products",
@@ -74,7 +56,6 @@
   "cwi.jei.mineral.route.brine_evaporation": "500 mB raw brine evaporation",
   "cwi.jei.mineral.route.brine_culture": "500 mB raw brine with Vulcan Thermus",
   "cwi.jei.mineral.route.coal_culture": "Four lignite lumps with Carbofusor Spirillum",
-
   "cwi.info.ore.powder": "Crushing or milling one ore block gives %s powder feed plus a %s%% chance of one extra. Crushed ore must be milled before separation.",
   "cwi.info.ore.average": "Average feed: %s powders per ore block.",
   "cwi.info.ore.separation": "Main product: %s. Per 100 powders, vibration averages %s concentrates; centrifugation averages %s. Both leave tailings for flotation.",
@@ -86,15 +67,11 @@
   "cwi.info.ore.stubborn_leachable": "Regrinding stubborn tailings has a %s%% chance to recover ore powder. This mineral also supports heated acid leaching; wash its solid leach residue while processing the solution separately.",
   "cwi.info.ore.stubborn_physical": "This mineral has no acid-leaching route. Regrinding stubborn tailings has a %s%% chance to recover ore powder for another separation pass.",
   "cwi.info.blast_furnace.bootstrap": "Start steel refining with air from an air intake. Oxygen is a later efficiency upgrade, not a requirement for the first steel. Supply molten pig iron, liquid silicon and flux through the furnace hatches.",
-  "cwi.info.blast_furnace.heat": "Heaters supply heat; reinforcement raises the temperature ceiling. Allow the furnace to warm up. A larger chamber increases parallel capacity, but heater power and reinforcement still limit temperature.",
-  "cwi.info.blast_furnace.outputs": "Drain steel and slag into separate output storage. A full output can stop processing even when the ingredients and heat are ready.",
   "cwi.info.glass.reusable": "The batch mixer returns soda and limestone. Filter those outputs back to the mixer while sending the glass batch onward; only the sand needs a continuous new supply for this step.",
   "cwi.info.glass.recovery": "Quenching sometimes produces cracked or devitrified glass. Mill the rejects, then compact four glass powders with heat to reclaim one sintered blank. Send it back through pressing and quenching.",
   "cwi.info.slag.casting": "Cast slag into blocks in a casting basin to free the furnace's output tank. Stonecut the blocks into slag bricks for building.",
-
   "cwi.info.byproduct.washing_residue": "This mixed refuse has no recovery recipe. Keep it separate from recoverable fines; a dedicated chute dropping into enclosed lava can dispose of unwanted stock. Filter the waste route so products cannot enter it.",
   "cwi.info.byproduct.blockless_gas": "A powered Create pump can discharge this gas through an open pipe facing replaceable air. Keep the pipe end clear. KubeJS carbon dioxide is not accepted by the native TFMG exhaust or smokestack.",
-
   "cwi.ponder.logistics_filtering.header": "Filtering A Mixed Line",
   "cwi.ponder.logistics_filtering.text_1": "A brass funnel takes only the item in its filter.",
   "cwi.ponder.logistics_filtering.text_2": "Copper passes the iron filter and continues to its own output.",
@@ -124,16 +101,12 @@
   "cwi.ponder.glass_working_stock.text_5": "These three batches used the same working powders. Add more sand rather than replacing the carbonate stock.",
   "cwi.ponder.glass_working_stock.text_6": "Pausing the chute lets glass batch accumulate in the chute and basin. Resume extraction to make room for more production.",
   "cwi.ponder.glass_working_stock.text_7": "Restart with the working powders still present. Firing, pressing, quenching, and reject recovery belong downstream of this module.",
-
   "cwi.info.byproduct.fluid_overflow": "For optional overflow disposal, seed a dedicated fluid drawer with the intended fluid and lock it with the configuration tool before installing a void upgrade. Matching fluid fills the drawer normally; only excess above capacity is discarded. Stored fluid remains available. Use empty drawers when crafting the tool or upgrade.",
   "cwi.info.byproduct.unfinished_liquid": "This liquid has no implemented processing consumer yet. Keep a reserve if wanted, then give surplus its own overflow route so it cannot block the producing line.",
-
   "cwi.info.byproduct.gas_vent": "This gas has no implemented processing consumer yet. Keep a separate reserve if wanted; a powered Create pump can discharge surplus through an open pipe facing replaceable air. Keep the pipe end clear.",
-
   "message.cwi.no_lockpick": "No Lockpick",
   "message.cwi.lockpick_success": "Lockpick Success",
   "message.cwi.lockpick_failure": "Lockpick Failure",
-
   "menu.cwi.singleplayer": "  Singleplayer",
   "menu.cwi.multiplayer": "  Multiplayer",
   "menu.cwi.option": "     Option",
