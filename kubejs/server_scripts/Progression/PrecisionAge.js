@@ -404,9 +404,9 @@ ServerEvents.recipes(event => {
 
 // Mixing
 
-    event.recipes.create.mixing(Fluid.of('kubejs:redstone_acid', 500), [AddFluid('500 #cwi:water'), '4x minecraft:redstone'])
+    event.recipes.create.mixing(Fluid.of('kubejs:redstone_acid', 500), [Fluid.sizedIngredientOf('#cwi:water', 500), '4x minecraft:redstone'])
     event.recipes.create.mixing('kubejs:heated_powdered_obsidian', [Fluid.of('minecraft:lava', 500), 'create:powdered_obsidian']).superheated()
-    event.recipes.create.mixing('3x createmetallurgy:refractory_mortar_ball', [AddFluid('100 #cwi:water'), 'minecraft:sand', 'kubejs:limestone_powder', 'minecraft:clay_ball']).heated()
+    event.recipes.create.mixing('3x createmetallurgy:refractory_mortar_ball', [Fluid.sizedIngredientOf('#cwi:water', 100), 'minecraft:sand', 'kubejs:limestone_powder', 'minecraft:clay_ball']).heated()
 
 // Compacting
 
@@ -731,9 +731,9 @@ ServerEvents.recipes(event => {
         'create:sturdy_sheet',
         'kubejs:heated_powdered_obsidian',
         [
-            rolling(event, AddItem('create:unprocessed_obsidian_sheet'), AddItem('create:unprocessed_obsidian_sheet')),
+            event.recipes.createaddition.rolling('create:unprocessed_obsidian_sheet', 'create:unprocessed_obsidian_sheet'),
             event.recipes.create.pressing('create:unprocessed_obsidian_sheet', 'create:unprocessed_obsidian_sheet'),
-            event.recipes.create.filling('create:unprocessed_obsidian_sheet', ['create:unprocessed_obsidian_sheet', AddFluid('500 #cwi:water')])
+            event.recipes.create.filling('create:unprocessed_obsidian_sheet', ['create:unprocessed_obsidian_sheet', Fluid.sizedIngredientOf('#cwi:water', 500)])
         ]
     )
     .transitionalItem('create:unprocessed_obsidian_sheet')
@@ -818,7 +818,7 @@ ServerEvents.recipes(event => {
         [
             event.recipes.create.pressing('kubejs:incomplete_industrial_iron_ingot', 'kubejs:incomplete_industrial_iron_ingot'),
             event.recipes.create.pressing('kubejs:incomplete_industrial_iron_ingot', 'kubejs:incomplete_industrial_iron_ingot'),
-            event.recipes.create.filling('kubejs:incomplete_industrial_iron_ingot', ['kubejs:incomplete_industrial_iron_ingot', AddFluid('500 #cwi:water')])
+            event.recipes.create.filling('kubejs:incomplete_industrial_iron_ingot', ['kubejs:incomplete_industrial_iron_ingot', Fluid.sizedIngredientOf('#cwi:water', 500)])
         ]
     )
     .transitionalItem('kubejs:incomplete_industrial_iron_ingot')
@@ -828,11 +828,11 @@ ServerEvents.recipes(event => {
         'kubejs:industrial_iron_blade',
         'kubejs:heated_iron_ingot',
         [
-            rolling(event, AddItem('kubejs:incomplete_industrial_iron_blade'), AddItem('kubejs:incomplete_industrial_iron_blade')),
+            event.recipes.createaddition.rolling('kubejs:incomplete_industrial_iron_blade', 'kubejs:incomplete_industrial_iron_blade'),
             event.recipes.create.cutting('kubejs:incomplete_industrial_iron_blade', 'kubejs:incomplete_industrial_iron_blade'),
             event.recipes.create.pressing('kubejs:incomplete_industrial_iron_blade', 'kubejs:incomplete_industrial_iron_blade'),
-            event.recipes.create.filling('kubejs:incomplete_industrial_iron_blade', ['kubejs:incomplete_industrial_iron_blade', AddFluid('500 #cwi:water')]),
-            polishing(event, 3, AddItem('kubejs:incomplete_industrial_iron_blade'), [AddItem('kubejs:incomplete_industrial_iron_blade')], 60)
+            event.recipes.create.filling('kubejs:incomplete_industrial_iron_blade', ['kubejs:incomplete_industrial_iron_blade', Fluid.sizedIngredientOf('#cwi:water', 500)]),
+            event.recipes.vintageimprovements.polishing(['kubejs:incomplete_industrial_iron_blade'], 'kubejs:incomplete_industrial_iron_blade').speedLimits(3).processingTime(60)
         ]
     )
     .transitionalItem('kubejs:incomplete_industrial_iron_blade')

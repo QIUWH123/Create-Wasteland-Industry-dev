@@ -21,8 +21,8 @@ ServerEvents.recipes(event => {
             const trait = variant.trait
             const agarPlate = `kubejs:${trait}_${name}_agar_plate`
 
-            curving(event, 'kubejs:capping_head', AddItem(agarPlate), [AddItem(`kubejs:sealed_${trait}_${name}_agar_plate`)])
-            curving(event, 'kubejs:capping_head', AddItem(`kubejs:cultured_${trait}_${name}_agar_plate`), [AddItem('kubejs:petri_dish'), AddItem(`${variant.count} kubejs:${name}`)])
+            event.recipes.vintageimprovements.curving([`kubejs:sealed_${trait}_${name}_agar_plate`], agarPlate).itemAsHead('kubejs:capping_head')
+            event.recipes.vintageimprovements.curving(['kubejs:petri_dish', `${variant.count}x kubejs:${name}`], `kubejs:cultured_${trait}_${name}_agar_plate`).itemAsHead('kubejs:capping_head')
 
             const steps = []
             variant.steps.forEach(step => {
