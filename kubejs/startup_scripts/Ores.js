@@ -18,7 +18,6 @@ StartupEvents.registry('block', event => {
             .tagBlock(`minecraft:needs_diamond_tool`)
             .tagBoth('cwi:ores')
             .tagBoth('cwi:ore_deposit')
-            .tagBoth('create_rns:deposit_blocks')
             .mapColor('#FFFFFF')
             .defaultCutout()
         setModel(deposit, 'kubejs:block/ore_deposit', { '1': ore.texture })
