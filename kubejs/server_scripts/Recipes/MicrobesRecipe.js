@@ -1,25 +1,26 @@
-// Fermenting Helper
+// Fermentation Variants Retain Optional-Mod Guards And The Bulk Fermenter's Nine-Slot Limit
 
 function addFermentingRecipes(event, ingredients, results, processingTime, heatRequirement, types) {
-    const optionalMods = ['biomancy', 'geode_plus']
-    const unavailableMods = optionalMods.filter(mod => !Platform.isLoaded(mod))
-    if (ingredients.some(ingredient => ingredient.item && unavailableMods.some(mod => ingredient.item.startsWith(mod + ':')))) return
-    results = results.filter(result => !result.item || !unavailableMods.some(mod => result.item.startsWith(mod + ':')))
+    const unavailableMods = ['biomancy', 'geode_plus'].filter(mod => !Platform.isLoaded(mod))
+    const ingredientIds = ingredients.map(ingredient => typeof ingredient === 'string' ? ingredient.replace(/^\d+x?\s+/, '') : String(ingredient.id || ''))
+    if (ingredientIds.some(id => unavailableMods.some(mod => id.startsWith(mod + ':')))) return
+    results = results.filter(result => {
+        const id = typeof result === 'string' ? result.replace(/^\d+x?\s+/, '') : String(result.id || '')
+        return !unavailableMods.some(mod => id.startsWith(mod + ':'))
+    })
     if (results.length === 0) return
 
-    const expandedIngredients = createRecipeIngredients(ingredients)
-    const itemInputCount = ingredients.reduce((count, ingredient) => count + (ingredient.item || ingredient.tag ? ingredient.count || 1 : 0), 0)
-    types.forEach(function(type) {
-        // The bulk fermenter has nine item slots; keep larger recipes in the basin with their original amounts.
+    const itemInputCount = ingredients.reduce((count, ingredient) => {
+        if (typeof ingredient !== 'string') return count + (ingredient.count || 0)
+        const amount = /^(\d+)x?\s+/.exec(ingredient)
+        return count + (amount ? Number(amount[1]) : 1)
+    }, 0)
+
+    types.forEach(type => {
+    // The Bulk Fermenter Has Nine Item Slots, So Larger Recipes Remain In The Basin
         if (type === 'bulk' && itemInputCount > 9) return
-        let recipe = {
-            type: "createdieselgenerators:" + type + "_fermenting",
-            ingredients: expandedIngredients,
-            processing_time: processingTime,
-            results: createRecipeOutputs(results)
-        }
-        if (heatRequirement) recipe.heat_requirement = heatRequirement
-        event.custom(recipe)
+        const recipe = event.recipes.createdieselgenerators[type + '_fermenting'](results, ingredients, processingTime)
+        if (heatRequirement) recipe.set('heat_requirement', heatRequirement)
     })
 }
 
@@ -29,97 +30,97 @@ ServerEvents.recipes(function(event) {
 // General Recipes
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:raw_soil'),
-            AddItem('tfmg:nitrate_dust'),
-            AddItem('minecraft:bone_meal'),
-            AddItem('#cwi:basic_materials'),
-            AddFluid('250 kubejs:distilled_water')
+            'kubejs:raw_soil',
+            'tfmg:nitrate_dust',
+            'minecraft:bone_meal',
+            '#cwi:basic_materials',
+            Fluid.of('kubejs:distilled_water', 250)
         ],
         [
-            AddItem('minecraft:dirt')
-        ],
-        600, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:raw_soil'),
-            AddFluid('125 kubejs:nitrate_solution'),
-            AddItem('minecraft:bone_meal'),
-            AddItem('#cwi:basic_materials'),
-            AddFluid('125 kubejs:distilled_water')
-        ],
-        [
-            AddItem('minecraft:dirt')
+            'minecraft:dirt'
         ],
         600, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:raw_soil'),
-            AddFluid('100 kubejs:nitrogen_fertilizer'),
-            AddItem('#cwi:basic_materials')
+            'kubejs:raw_soil',
+            Fluid.of('kubejs:nitrate_solution', 125),
+            'minecraft:bone_meal',
+            '#cwi:basic_materials',
+            Fluid.of('kubejs:distilled_water', 125)
         ],
         [
-            AddItem('minecraft:dirt')
+            'minecraft:dirt'
+        ],
+        600, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:raw_soil',
+            Fluid.of('kubejs:nitrogen_fertilizer', 100),
+            '#cwi:basic_materials'
+        ],
+        [
+            'minecraft:dirt'
         ],
         300, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('500 kubejs:raw_brine')
+            Fluid.of('kubejs:raw_brine', 500)
         ],
         [
-            AddItem('3 ratatouille:salt'),
-            AddItem('biomancy:stone_powder')
+            '3x ratatouille:salt',
+            'biomancy:stone_powder'
         ],
-        300, "heated", ['basin', 'bulk']
+        300, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('500 kubejs:alkaline_brine')
+            Fluid.of('kubejs:alkaline_brine', 500)
         ],
         [
-            AddItem('2 ratatouille:salt'),
-            AddItem('1 kubejs:soda_powder'),
-            AddItem('biomancy:stone_powder')
+            '2x ratatouille:salt',
+            'kubejs:soda_powder',
+            'biomancy:stone_powder'
         ],
-        300, "heated", ['basin', 'bulk']
+        300, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('500 minecraft:water')
+            Fluid.of('minecraft:water', 500)
         ],
         [
-            AddItem('ratatouille:salt', 0.13),
-            AddItem('biomancy:stone_powder', 0.6)
+            CreateItem.of(Item.of('ratatouille:salt'), 0.13),
+            { id: 'biomancy:stone_powder', chance: 0.6 }
         ],
-        300, "heated", ['basin', 'bulk']
+        300, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('500 kubejs:steam')
+            Fluid.of('kubejs:steam', 500)
         ],
         [
-            AddFluid('150 kubejs:distilled_water')
+            Fluid.of('kubejs:distilled_water', 150)
         ],
         1200, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('ratatouille:compost_mass'),
-            AddFluid('100 createdieselgenerators:plant_oil')
+            'ratatouille:compost_mass',
+            Fluid.of('createdieselgenerators:plant_oil', 100)
         ],
         [
-            AddItem('ratatouille:compost_residue'),
-            AddFluid('50 ratatouille:bio_gas'),
-            AddFluid('100 ratatouille:compost_tea')
+            'ratatouille:compost_residue',
+            Fluid.of('ratatouille:bio_gas', 50),
+            Fluid.of('ratatouille:compost_tea', 100)
         ],
         2400, undefined, ['basin', 'bulk']
     )
@@ -127,51 +128,51 @@ ServerEvents.recipes(function(event) {
 // Bulk Only
     addFermentingRecipes(event,
         [
-            AddItem('#minecraft:logs')
+            '#minecraft:logs'
         ],
         [
-            AddItem('kubejs:charcoal_powder'),
-            AddFluid('200 kubejs:wood_vinegar'),
-            AddFluid('75 ratatouille:bio_gas')
+            'kubejs:charcoal_powder',
+            Fluid.of('kubejs:wood_vinegar', 200),
+            Fluid.of('ratatouille:bio_gas', 75)
         ],
-        1800, "heated", ['bulk']
+        1800, 'heated', ['bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('createdieselgenerators:chip_wood_beam')
+            'createdieselgenerators:chip_wood_beam'
         ],
         [
-            AddItem('kubejs:dark_ash'),
-            AddItem('kubejs:dark_ash', 0.5),
-            AddFluid('60 kubejs:wood_vinegar'),
-            AddFluid('30 ratatouille:bio_gas')
+            'kubejs:dark_ash',
+            CreateItem.of(Item.of('kubejs:dark_ash'), 0.5),
+            Fluid.of('kubejs:wood_vinegar', 60),
+            Fluid.of('ratatouille:bio_gas', 30)
         ],
-        1200, "heated", ['bulk']
+        1200, 'heated', ['bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('createdieselgenerators:chip_wood_block')
+            'createdieselgenerators:chip_wood_block'
         ],
         [
-            AddItem('kubejs:dark_ash'),
-            AddFluid('30 kubejs:wood_vinegar'),
-            AddFluid('15 ratatouille:bio_gas')
+            'kubejs:dark_ash',
+            Fluid.of('kubejs:wood_vinegar', 30),
+            Fluid.of('ratatouille:bio_gas', 15)
         ],
-        900, "heated", ['bulk']
+        900, 'heated', ['bulk']
     )
 
 // Lichen
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:soaked_depleted_dirt'),
-            AddItem('minecraft:glow_lichen'),
-            AddFluid('250 kubejs:distilled_water')
+            'kubejs:soaked_depleted_dirt',
+            'minecraft:glow_lichen',
+            Fluid.of('kubejs:distilled_water', 250)
         ],
         [
-            AddItem('kubejs:raw_soil'),
-            AddItem('minecraft:glow_lichen')
+            'kubejs:raw_soil',
+            'minecraft:glow_lichen'
         ],
         1500, undefined, ['basin', 'bulk']
     )
@@ -179,65 +180,65 @@ ServerEvents.recipes(function(event) {
 // Fermento Mycetes
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:powdered_fermento_mycetes'),
-            AddItem('3x #createdieselgenerators:fermentable'),
-            AddFluid('250 kubejs:syrup'),
-            AddFluid('1000 kubejs:distilled_water')
+            'kubejs:powdered_fermento_mycetes',
+            '3x #createdieselgenerators:fermentable',
+            Fluid.of('kubejs:syrup', 250),
+            Fluid.of('kubejs:distilled_water', 1000)
         ],
         [
-            AddItem('kubejs:fermento_mycetes')
-        ],
-        1000, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:powdered_fermento_mycetes'),
-            AddItem('3x #createdieselgenerators:fermentable'),
-            AddItem('2x minecraft:sugar'),
-            AddFluid('1000 kubejs:distilled_water')
-        ],
-        [
-            AddItem('kubejs:fermento_mycetes')
+            'kubejs:fermento_mycetes'
         ],
         1000, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('#createdieselgenerators:fermentable'),
-            AddItem('kubejs:fermento_mycetes'),
-            AddFluid('500 kubejs:distilled_water')
+            'kubejs:powdered_fermento_mycetes',
+            '3x #createdieselgenerators:fermentable',
+            '2x minecraft:sugar',
+            Fluid.of('kubejs:distilled_water', 1000)
         ],
         [
-            AddFluid('500 createdieselgenerators:ethanol'),
-            AddItem('kubejs:fermento_mycetes')
+            'kubejs:fermento_mycetes'
+        ],
+        1000, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            '#createdieselgenerators:fermentable',
+            'kubejs:fermento_mycetes',
+            Fluid.of('kubejs:distilled_water', 500)
+        ],
+        [
+            Fluid.of('createdieselgenerators:ethanol', 500),
+            'kubejs:fermento_mycetes'
         ],
         600, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('1 kubejs:syrup'),
-            AddItem('kubejs:fermento_mycetes'),
-            AddFluid('5 kubejs:distilled_water')
+            Fluid.of('kubejs:syrup', 1),
+            'kubejs:fermento_mycetes',
+            Fluid.of('kubejs:distilled_water', 5)
         ],
         [
-            AddFluid('5 createdieselgenerators:ethanol'),
-            AddItem('kubejs:fermento_mycetes')
+            Fluid.of('createdieselgenerators:ethanol', 5),
+            'kubejs:fermento_mycetes'
         ],
         4, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:fermento_mycetes'),
-            AddFluid('10 createdieselgenerators:ethanol')
+            'kubejs:fermento_mycetes',
+            Fluid.of('createdieselgenerators:ethanol', 10)
         ],
         [
-            AddFluid('10 kubejs:acetic_acid'),
-            AddFluid('2 minecraft:water'),
-            AddItem('kubejs:fermento_mycetes')
+            Fluid.of('kubejs:acetic_acid', 10),
+            Fluid.of('minecraft:water', 2),
+            'kubejs:fermento_mycetes'
         ],
         50, undefined, ['basin', 'bulk']
     )
@@ -245,502 +246,502 @@ ServerEvents.recipes(function(event) {
 // Acidolys Bacillus
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:stone_powder')
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:stone_powder'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.47),
-            AddItem('kubejs:flint_powder', 0.23),
-            AddItem('biomancy:stone_powder', 0.13),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        500, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('minecraft:gravel')
-        ],
-        [
-            AddItem('kubejs:clay_powder', 0.47),
-            AddItem('kubejs:flint_powder', 0.23),
-            AddItem('biomancy:stone_powder', 0.13),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        750, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('minecraft:cobblestone')
-        ],
-        [
-            AddItem('kubejs:clay_powder', 0.47),
-            AddItem('kubejs:flint_powder', 0.23),
-            AddItem('biomancy:stone_powder', 0.13),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        1000, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:deepslate_powder')
-        ],
-        [
-            AddItem('kubejs:clay_powder', 0.67),
-            AddItem('kubejs:flint_powder', 0.33),
-            AddItem('biomancy:stone_powder', 0.17),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.47),
+            CreateItem.of(Item.of('kubejs:flint_powder'), 0.23),
+            { id: 'biomancy:stone_powder', chance: 0.13 },
+            'kubejs:acidolys_bacillus'
         ],
         500, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:deepslate_gravel')
+            'kubejs:acidolys_bacillus',
+            'minecraft:gravel'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.67),
-            AddItem('kubejs:flint_powder', 0.33),
-            AddItem('biomancy:stone_powder', 0.17),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.47),
+            CreateItem.of(Item.of('kubejs:flint_powder'), 0.23),
+            { id: 'biomancy:stone_powder', chance: 0.13 },
+            'kubejs:acidolys_bacillus'
         ],
         750, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('minecraft:cobbled_deepslate')
+            'kubejs:acidolys_bacillus',
+            'minecraft:cobblestone'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.67),
-            AddItem('kubejs:flint_powder', 0.33),
-            AddItem('biomancy:stone_powder', 0.17),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.47),
+            CreateItem.of(Item.of('kubejs:flint_powder'), 0.23),
+            { id: 'biomancy:stone_powder', chance: 0.13 },
+            'kubejs:acidolys_bacillus'
         ],
         1000, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('minecraft:deepslate')
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:deepslate_powder'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.67),
-            AddItem('kubejs:flint_powder', 0.33),
-            AddItem('biomancy:stone_powder', 0.17),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.67),
+            CreateItem.of(Item.of('kubejs:flint_powder'), 0.33),
+            { id: 'biomancy:stone_powder', chance: 0.17 },
+            'kubejs:acidolys_bacillus'
+        ],
+        500, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'kubejs:deepslate_gravel'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.67),
+            CreateItem.of(Item.of('kubejs:flint_powder'), 0.33),
+            { id: 'biomancy:stone_powder', chance: 0.17 },
+            'kubejs:acidolys_bacillus'
+        ],
+        750, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'minecraft:cobbled_deepslate'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.67),
+            CreateItem.of(Item.of('kubejs:flint_powder'), 0.33),
+            { id: 'biomancy:stone_powder', chance: 0.17 },
+            'kubejs:acidolys_bacillus'
+        ],
+        1000, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'minecraft:deepslate'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.67),
+            CreateItem.of(Item.of('kubejs:flint_powder'), 0.33),
+            { id: 'biomancy:stone_powder', chance: 0.17 },
+            'kubejs:acidolys_bacillus'
         ],
         1250, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:schist_powder')
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:schist_powder'
         ],
         [
-            AddItem('kubejs:quartz_powder', 0.50),
-            AddItem('biomancy:stone_powder', 0.20),
-            AddItem('kubejs:iron_powder', 0.15),
-            AddItem('kubejs:nickel_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.50),
+            { id: 'biomancy:stone_powder', chance: 0.20 },
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.15),
+            CreateItem.of(Item.of('kubejs:nickel_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         650, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:schist_gravel')
+            'kubejs:acidolys_bacillus',
+            'kubejs:schist_gravel'
         ],
         [
-            AddItem('kubejs:quartz_powder', 0.50),
-            AddItem('biomancy:stone_powder', 0.20),
-            AddItem('kubejs:iron_powder', 0.15),
-            AddItem('kubejs:nickel_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.50),
+            { id: 'biomancy:stone_powder', chance: 0.20 },
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.15),
+            CreateItem.of(Item.of('kubejs:nickel_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         975, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:cobbled_schist')
+            'kubejs:acidolys_bacillus',
+            'kubejs:cobbled_schist'
         ],
         [
-            AddItem('kubejs:quartz_powder', 0.50),
-            AddItem('biomancy:stone_powder', 0.20),
-            AddItem('kubejs:iron_powder', 0.15),
-            AddItem('kubejs:nickel_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.50),
+            { id: 'biomancy:stone_powder', chance: 0.20 },
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.15),
+            CreateItem.of(Item.of('kubejs:nickel_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         1300, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:schist')
+            'kubejs:acidolys_bacillus',
+            'kubejs:schist'
         ],
         [
-            AddItem('kubejs:quartz_powder', 0.50),
-            AddItem('biomancy:stone_powder', 0.20),
-            AddItem('kubejs:iron_powder', 0.15),
-            AddItem('kubejs:nickel_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.50),
+            { id: 'biomancy:stone_powder', chance: 0.20 },
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.15),
+            CreateItem.of(Item.of('kubejs:nickel_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         1625, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:gneiss_powder')
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:gneiss_powder'
         ],
         [
-            AddItem('kubejs:quartz_powder', 0.80),
-            AddItem('biomancy:stone_powder', 0.10),
-            AddItem('kubejs:iron_powder', 0.20),
-            AddItem('kubejs:nickel_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        850, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:gneiss_gravel')
-        ],
-        [
-            AddItem('kubejs:quartz_powder', 0.80),
-            AddItem('biomancy:stone_powder', 0.10),
-            AddItem('kubejs:iron_powder', 0.20),
-            AddItem('kubejs:nickel_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        1275, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:cobbled_gneiss')
-        ],
-        [
-            AddItem('kubejs:quartz_powder', 0.80),
-            AddItem('biomancy:stone_powder', 0.10),
-            AddItem('kubejs:iron_powder', 0.20),
-            AddItem('kubejs:nickel_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        1700, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:gneiss')
-        ],
-        [
-            AddItem('kubejs:quartz_powder', 0.80),
-            AddItem('biomancy:stone_powder', 0.10),
-            AddItem('kubejs:iron_powder', 0.20),
-            AddItem('kubejs:nickel_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        2125, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:rhyolite_powder')
-        ],
-        [
-            AddItem('kubejs:quartz_powder', 0.90),
-            AddItem('biomancy:stone_powder', 0.05),
-            AddItem('kubejs:lithium_powder', 0.05),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.80),
+            { id: 'biomancy:stone_powder', chance: 0.10 },
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.20),
+            CreateItem.of(Item.of('kubejs:nickel_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         850, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:rhyolite_gravel')
+            'kubejs:acidolys_bacillus',
+            'kubejs:gneiss_gravel'
         ],
         [
-            AddItem('kubejs:quartz_powder', 0.90),
-            AddItem('biomancy:stone_powder', 0.05),
-            AddItem('kubejs:lithium_powder', 0.05),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.80),
+            { id: 'biomancy:stone_powder', chance: 0.10 },
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.20),
+            CreateItem.of(Item.of('kubejs:nickel_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         1275, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:cobbled_rhyolite')
+            'kubejs:acidolys_bacillus',
+            'kubejs:cobbled_gneiss'
         ],
         [
-            AddItem('kubejs:quartz_powder', 0.90),
-            AddItem('biomancy:stone_powder', 0.05),
-            AddItem('kubejs:lithium_powder', 0.05),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.80),
+            { id: 'biomancy:stone_powder', chance: 0.10 },
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.20),
+            CreateItem.of(Item.of('kubejs:nickel_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         1700, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:rhyolite')
+            'kubejs:acidolys_bacillus',
+            'kubejs:gneiss'
         ],
         [
-            AddItem('kubejs:quartz_powder', 0.90),
-            AddItem('biomancy:stone_powder', 0.05),
-            AddItem('kubejs:lithium_powder', 0.05),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.80),
+            { id: 'biomancy:stone_powder', chance: 0.10 },
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.20),
+            CreateItem.of(Item.of('kubejs:nickel_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         2125, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:shale_powder')
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:rhyolite_powder'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.60),
-            AddItem('kubejs:quartz_powder', 0.30),
-            AddItem('kubejs:sulfur_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.90),
+            { id: 'biomancy:stone_powder', chance: 0.05 },
+            CreateItem.of(Item.of('kubejs:lithium_powder'), 0.05),
+            'kubejs:acidolys_bacillus'
+        ],
+        850, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'kubejs:rhyolite_gravel'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.90),
+            { id: 'biomancy:stone_powder', chance: 0.05 },
+            CreateItem.of(Item.of('kubejs:lithium_powder'), 0.05),
+            'kubejs:acidolys_bacillus'
+        ],
+        1275, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'kubejs:cobbled_rhyolite'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.90),
+            { id: 'biomancy:stone_powder', chance: 0.05 },
+            CreateItem.of(Item.of('kubejs:lithium_powder'), 0.05),
+            'kubejs:acidolys_bacillus'
+        ],
+        1700, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'kubejs:rhyolite'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.90),
+            { id: 'biomancy:stone_powder', chance: 0.05 },
+            CreateItem.of(Item.of('kubejs:lithium_powder'), 0.05),
+            'kubejs:acidolys_bacillus'
+        ],
+        2125, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:shale_powder'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.60),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:sulfur_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         350, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:shale_gravel')
+            'kubejs:acidolys_bacillus',
+            'kubejs:shale_gravel'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.60),
-            AddItem('kubejs:quartz_powder', 0.30),
-            AddItem('kubejs:sulfur_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.60),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:sulfur_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         525, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:cobbled_shale')
+            'kubejs:acidolys_bacillus',
+            'kubejs:cobbled_shale'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.60),
-            AddItem('kubejs:quartz_powder', 0.30),
-            AddItem('kubejs:sulfur_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.60),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:sulfur_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         700, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:shale')
+            'kubejs:acidolys_bacillus',
+            'kubejs:shale'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.60),
-            AddItem('kubejs:quartz_powder', 0.30),
-            AddItem('kubejs:sulfur_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.60),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:sulfur_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         875, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:conglomerate_powder')
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:conglomerate_powder'
         ],
         [
-            AddItem('biomancy:stone_powder', 0.50),
-            AddItem('kubejs:clay_powder', 0.30),
-            AddItem('kubejs:quartz_powder', 0.20),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        450, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:conglomerate_gravel')
-        ],
-        [
-            AddItem('biomancy:stone_powder', 0.50),
-            AddItem('kubejs:clay_powder', 0.30),
-            AddItem('kubejs:quartz_powder', 0.20),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        675, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:cobbled_conglomerate')
-        ],
-        [
-            AddItem('biomancy:stone_powder', 0.50),
-            AddItem('kubejs:clay_powder', 0.30),
-            AddItem('kubejs:quartz_powder', 0.20),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        900, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:conglomerate')
-        ],
-        [
-            AddItem('biomancy:stone_powder', 0.50),
-            AddItem('kubejs:clay_powder', 0.30),
-            AddItem('kubejs:quartz_powder', 0.20),
-            AddItem('kubejs:acidolys_bacillus')
-        ],
-        1125, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:phyllite_powder')
-        ],
-        [
-            AddItem('kubejs:clay_powder', 0.40),
-            AddItem('kubejs:quartz_powder', 0.40),
-            AddItem('kubejs:iron_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            { id: 'biomancy:stone_powder', chance: 0.50 },
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.20),
+            'kubejs:acidolys_bacillus'
         ],
         450, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:phyllite_gravel')
+            'kubejs:acidolys_bacillus',
+            'kubejs:conglomerate_gravel'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.40),
-            AddItem('kubejs:quartz_powder', 0.40),
-            AddItem('kubejs:iron_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            { id: 'biomancy:stone_powder', chance: 0.50 },
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.20),
+            'kubejs:acidolys_bacillus'
         ],
         675, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:cobbled_phyllite')
+            'kubejs:acidolys_bacillus',
+            'kubejs:cobbled_conglomerate'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.40),
-            AddItem('kubejs:quartz_powder', 0.40),
-            AddItem('kubejs:iron_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            { id: 'biomancy:stone_powder', chance: 0.50 },
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.20),
+            'kubejs:acidolys_bacillus'
         ],
         900, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:phyllite')
+            'kubejs:acidolys_bacillus',
+            'kubejs:conglomerate'
         ],
         [
-            AddItem('kubejs:clay_powder', 0.40),
-            AddItem('kubejs:quartz_powder', 0.40),
-            AddItem('kubejs:iron_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            { id: 'biomancy:stone_powder', chance: 0.50 },
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.20),
+            'kubejs:acidolys_bacillus'
         ],
         1125, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('4 kubejs:darkslate_powder')
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:phyllite_powder'
         ],
         [
-            AddItem('biomancy:stone_powder', 0.50),
-            AddItem('kubejs:clay_powder', 0.30),
-            AddItem('kubejs:iron_powder', 0.20),
-            AddItem('kubejs:copper_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.40),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.40),
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
+        ],
+        450, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'kubejs:phyllite_gravel'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.40),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.40),
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
+        ],
+        675, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'kubejs:cobbled_phyllite'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.40),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.40),
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
+        ],
+        900, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            'kubejs:phyllite'
+        ],
+        [
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.40),
+            CreateItem.of(Item.of('kubejs:quartz_powder'), 0.40),
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
+        ],
+        1125, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:acidolys_bacillus',
+            '4x kubejs:darkslate_powder'
+        ],
+        [
+            { id: 'biomancy:stone_powder', chance: 0.50 },
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.20),
+            CreateItem.of(Item.of('kubejs:copper_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         750, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:darkslate_gravel')
+            'kubejs:acidolys_bacillus',
+            'kubejs:darkslate_gravel'
         ],
         [
-            AddItem('biomancy:stone_powder', 0.50),
-            AddItem('kubejs:clay_powder', 0.30),
-            AddItem('kubejs:iron_powder', 0.20),
-            AddItem('kubejs:copper_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            { id: 'biomancy:stone_powder', chance: 0.50 },
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.20),
+            CreateItem.of(Item.of('kubejs:copper_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         1125, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:cobbled_darkslate')
+            'kubejs:acidolys_bacillus',
+            'kubejs:cobbled_darkslate'
         ],
         [
-            AddItem('biomancy:stone_powder', 0.50),
-            AddItem('kubejs:clay_powder', 0.30),
-            AddItem('kubejs:iron_powder', 0.20),
-            AddItem('kubejs:copper_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            { id: 'biomancy:stone_powder', chance: 0.50 },
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.20),
+            CreateItem.of(Item.of('kubejs:copper_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         1500, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:acidolys_bacillus'),
-            AddItem('kubejs:darkslate')
+            'kubejs:acidolys_bacillus',
+            'kubejs:darkslate'
         ],
         [
-            AddItem('biomancy:stone_powder', 0.50),
-            AddItem('kubejs:clay_powder', 0.30),
-            AddItem('kubejs:iron_powder', 0.20),
-            AddItem('kubejs:copper_powder', 0.10),
-            AddItem('kubejs:acidolys_bacillus')
+            { id: 'biomancy:stone_powder', chance: 0.50 },
+            CreateItem.of(Item.of('kubejs:clay_powder'), 0.30),
+            CreateItem.of(Item.of('kubejs:iron_powder'), 0.20),
+            CreateItem.of(Item.of('kubejs:copper_powder'), 0.10),
+            'kubejs:acidolys_bacillus'
         ],
         1875, undefined, ['basin', 'bulk']
     )
@@ -748,184 +749,184 @@ ServerEvents.recipes(function(event) {
 // Carbofusor Spirillum
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:powdered_carbofusor_spirillum'),
-            AddItem('2x kubejs:yeast_paste'),
-            AddItem('6x kubejs:coal_powder'),
-            AddFluid('250 kubejs:syrup'),
-            AddFluid('1000 kubejs:distilled_water')
+            'kubejs:powdered_carbofusor_spirillum',
+            '2x kubejs:yeast_paste',
+            '6x kubejs:coal_powder',
+            Fluid.of('kubejs:syrup', 250),
+            Fluid.of('kubejs:distilled_water', 1000)
         ],
         [
-            AddItem('kubejs:carbofusor_spirillum')
-        ],
-        3000, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:powdered_carbofusor_spirillum'),
-            AddItem('2x kubejs:yeast_paste'),
-            AddItem('6x kubejs:coal_powder'),
-            AddItem('2x minecraft:sugar'),
-            AddFluid('1000 kubejs:distilled_water')
-        ],
-        [
-            AddItem('kubejs:carbofusor_spirillum')
+            'kubejs:carbofusor_spirillum'
         ],
         3000, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:carbofusor_spirillum'),
-            AddItem('minecraft:coal'),
-            AddFluid('100 minecraft:water')
+            'kubejs:powdered_carbofusor_spirillum',
+            '2x kubejs:yeast_paste',
+            '6x kubejs:coal_powder',
+            '2x minecraft:sugar',
+            Fluid.of('kubejs:distilled_water', 1000)
         ],
         [
-            AddFluid('50 tfmg:crude_oil'),
-            AddFluid('100 kubejs:carbon_dioxide'),
-            AddItem('kubejs:carbofusor_spirillum')
+            'kubejs:carbofusor_spirillum'
+        ],
+        3000, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'kubejs:carbofusor_spirillum',
+            'minecraft:coal',
+            Fluid.of('minecraft:water', 100)
+        ],
+        [
+            Fluid.of('tfmg:crude_oil', 50),
+            Fluid.of('kubejs:carbon_dioxide', 100),
+            'kubejs:carbofusor_spirillum'
         ],
         150, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('4 kubejs:peat'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '4x kubejs:peat',
+            'kubejs:carbofusor_spirillum'
         ],
         [
-            AddItem('2 kubejs:lignite_item'),
-            AddItem('kubejs:lignite_item', 0.37),
-            AddFluid('50 kubejs:methane'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '2x kubejs:lignite_item',
+            CreateItem.of(Item.of('kubejs:lignite_item'), 0.37),
+            Fluid.of('kubejs:methane', 50),
+            'kubejs:carbofusor_spirillum'
         ],
-        1200, "heated", ['basin', 'bulk']
+        1200, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('4 kubejs:peat'),
-            AddItem('minecraft:clay'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '4x kubejs:peat',
+            'minecraft:clay',
+            'kubejs:carbofusor_spirillum'
         ],
         [
-            AddItem('2 kubejs:lignite_item'),
-            AddItem('kubejs:lignite_item', 0.75),
-            AddFluid('100 kubejs:humic_acid_slurry'),
-            AddItem('minecraft:clay'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '2x kubejs:lignite_item',
+            CreateItem.of(Item.of('kubejs:lignite_item'), 0.75),
+            Fluid.of('kubejs:humic_acid_slurry', 100),
+            'minecraft:clay',
+            'kubejs:carbofusor_spirillum'
         ],
         1200, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('4 kubejs:peat'),
-            AddItem('4 minecraft:clay'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '4x kubejs:peat',
+            '4x minecraft:clay',
+            'kubejs:carbofusor_spirillum'
         ],
         [
-            AddItem('2 kubejs:lignite_item'),
-            AddItem('kubejs:lignite_item', 0.75),
-            AddFluid('100 kubejs:humic_acid_slurry'),
-            AddItem('minecraft:clay'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '2x kubejs:lignite_item',
+            CreateItem.of(Item.of('kubejs:lignite_item'), 0.75),
+            Fluid.of('kubejs:humic_acid_slurry', 100),
+            'minecraft:clay',
+            'kubejs:carbofusor_spirillum'
         ],
         1200, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('4 kubejs:lignite_item'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '4x kubejs:lignite_item',
+            'kubejs:carbofusor_spirillum'
         ],
         [
-            AddItem('2 kubejs:bituminous_coal'),
-            AddItem('kubejs:bituminous_coal', 0.75),
-            AddItem('kubejs:carbofusor_spirillum')
+            '2x kubejs:bituminous_coal',
+            CreateItem.of(Item.of('kubejs:bituminous_coal'), 0.75),
+            'kubejs:carbofusor_spirillum'
         ],
-        1200, "heated", ['basin', 'bulk']
+        1200, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('4 kubejs:bituminous_coal'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '4x kubejs:bituminous_coal',
+            'kubejs:carbofusor_spirillum'
         ],
         [
-            AddItem('2 minecraft:coal'),
-            AddItem('minecraft:coal', 0.75),
-            AddFluid('100 kubejs:methane'),
-            AddItem('kubejs:carbofusor_spirillum')
+            '2x minecraft:coal',
+            CreateItem.of(Item.of('minecraft:coal'), 0.75),
+            Fluid.of('kubejs:methane', 100),
+            'kubejs:carbofusor_spirillum'
         ],
-        1800, "heated", ['basin', 'bulk']
+        1800, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('5 kubejs:syngas'),
-            AddItem('kubejs:carbofusor_spirillum'),
-            AddItem('kubejs:iron_catalyst')
+            Fluid.of('kubejs:syngas', 5),
+            'kubejs:carbofusor_spirillum',
+            'kubejs:iron_catalyst'
         ],
         [
-            AddFluid('5 kubejs:methanol'),
-            AddItem('kubejs:carbofusor_spirillum'),
-            AddItem('kubejs:iron_catalyst')
+            Fluid.of('kubejs:methanol', 5),
+            'kubejs:carbofusor_spirillum',
+            'kubejs:iron_catalyst'
         ],
-        12, "heated", ['basin', 'bulk']
+        12, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('5 kubejs:syngas'),
-            AddItem('kubejs:carbofusor_spirillum'),
-            AddItem('kubejs:sulfur_copper_catalyst'),
-            AddItem('kubejs:nickel_catalyst')
+            Fluid.of('kubejs:syngas', 5),
+            'kubejs:carbofusor_spirillum',
+            'kubejs:sulfur_copper_catalyst',
+            'kubejs:nickel_catalyst'
         ],
         [
-            AddFluid('5 kubejs:methanol'),
-            AddItem('kubejs:carbofusor_spirillum'),
-            AddItem('kubejs:sulfur_copper_catalyst'),
-            AddItem('kubejs:nickel_catalyst')
+            Fluid.of('kubejs:methanol', 5),
+            'kubejs:carbofusor_spirillum',
+            'kubejs:sulfur_copper_catalyst',
+            'kubejs:nickel_catalyst'
         ],
-        6, "heated", ['basin', 'bulk']
+        6, 'heated', ['basin', 'bulk']
     )
 
 // Nitrofix Rhizobium
     addFermentingRecipes(event,
         [
-            AddFluid('4 minecraft:water'),
-            AddItem('kubejs:nitrofix_rhizobium')
+            Fluid.of('minecraft:water', 4),
+            'kubejs:nitrofix_rhizobium'
         ],
         [
-            AddFluid('1 kubejs:ammonia_solution'),
-            AddItem('kubejs:nitrofix_rhizobium')
+            Fluid.of('kubejs:ammonia_solution', 1),
+            'kubejs:nitrofix_rhizobium'
         ],
         180, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('6 minecraft:water'),
-            AddFluid('1 kubejs:syrup'),
-            AddItem('kubejs:nitrofix_rhizobium')
+            Fluid.of('minecraft:water', 6),
+            Fluid.of('kubejs:syrup', 1),
+            'kubejs:nitrofix_rhizobium'
         ],
         [
-            AddFluid('3 kubejs:ammonia_solution'),
-            AddFluid('1 kubejs:carbon_dioxide'),
-            AddItem('kubejs:nitrofix_rhizobium')
+            Fluid.of('kubejs:ammonia_solution', 3),
+            Fluid.of('kubejs:carbon_dioxide', 1),
+            'kubejs:nitrofix_rhizobium'
         ],
         60, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('1 kubejs:ammonia_solution'),
-            AddItem('kubejs:nitrofix_rhizobium')
+            Fluid.of('kubejs:ammonia_solution', 1),
+            'kubejs:nitrofix_rhizobium'
         ],
         [
-            AddFluid('1 kubejs:nitrate_solution'),
-            AddItem('kubejs:nitrofix_rhizobium')
+            Fluid.of('kubejs:nitrate_solution', 1),
+            'kubejs:nitrofix_rhizobium'
         ],
         20, undefined, ['basin', 'bulk']
     )
@@ -933,142 +934,142 @@ ServerEvents.recipes(function(event) {
 // Crystallum Coccus
     addFermentingRecipes(event,
         [
-            AddFluid('1000 kubejs:redstone_acid'),
-            AddFluid('1000 kubejs:caustic_soda'),
-            AddItem('minecraft:budding_amethyst'),
-            AddItem('kubejs:crystallum_coccus')
+            Fluid.of('kubejs:redstone_acid', 1000),
+            Fluid.of('kubejs:caustic_soda', 1000),
+            'minecraft:budding_amethyst',
+            'kubejs:crystallum_coccus'
         ],
         [
-            AddItem(`${buddingNamespace}:infected_budding_amethyst`)
+            `${buddingNamespace}:infected_budding_amethyst`
         ],
-        2400, "heated", ['basin', 'bulk']
+        2400, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('1000 kubejs:redstone_acid'),
-            AddFluid('1000 kubejs:caustic_soda'),
-            AddItem('geode_plus:budding_nether_quartz'),
-            AddItem('kubejs:crystallum_coccus')
+            Fluid.of('kubejs:redstone_acid', 1000),
+            Fluid.of('kubejs:caustic_soda', 1000),
+            'geode_plus:budding_nether_quartz',
+            'kubejs:crystallum_coccus'
         ],
         [
-            AddItem(`${buddingNamespace}:infected_budding_quartz`)
+            `${buddingNamespace}:infected_budding_quartz`
         ],
-        2400, "heated", ['basin', 'bulk']
+        2400, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('100 #cwi:water'),
-            AddItem('kubejs:amethyst_powder'),
-            AddItem('kubejs:crystallum_coccus')
+            Fluid.sizedIngredientOf('#cwi:water', 100),
+            'kubejs:amethyst_powder',
+            'kubejs:crystallum_coccus'
         ],
         [
-            AddItem('minecraft:amethyst_shard'),
-            AddItem('kubejs:crystallum_coccus')
+            'minecraft:amethyst_shard',
+            'kubejs:crystallum_coccus'
         ],
         300, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('100 #cwi:water'),
-            AddItem('kubejs:quartz_powder'),
-            AddItem('kubejs:crystallum_coccus')
+            Fluid.sizedIngredientOf('#cwi:water', 100),
+            'kubejs:quartz_powder',
+            'kubejs:crystallum_coccus'
         ],
         [
-            AddItem('minecraft:quartz'),
-            AddItem('kubejs:crystallum_coccus')
-        ],
-        300, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddFluid('100 #cwi:water'),
-            AddItem('kubejs:lapis_powder'),
-            AddItem('kubejs:crystallum_coccus')
-        ],
-        [
-            AddItem('minecraft:lapis_lazuli'),
-            AddItem('kubejs:crystallum_coccus')
+            'minecraft:quartz',
+            'kubejs:crystallum_coccus'
         ],
         300, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('100 #cwi:water'),
-            AddItem('kubejs:sulfur_powder'),
-            AddItem('kubejs:crystallum_coccus')
+            Fluid.sizedIngredientOf('#cwi:water', 100),
+            'kubejs:lapis_powder',
+            'kubejs:crystallum_coccus'
         ],
         [
-            AddItem('kubejs:sulfur_item'),
-            AddItem('kubejs:crystallum_coccus')
-        ],
-        300, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddFluid('100 #cwi:water'),
-            AddItem('minecraft:redstone'),
-            AddItem('kubejs:crystallum_coccus')
-        ],
-        [
-            AddItem('kubejs:redstone'),
-            AddItem('kubejs:crystallum_coccus')
+            'minecraft:lapis_lazuli',
+            'kubejs:crystallum_coccus'
         ],
         300, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('100 #cwi:water'),
-            AddItem('kubejs:fluorite_powder'),
-            AddItem('kubejs:crystallum_coccus')
+            Fluid.sizedIngredientOf('#cwi:water', 100),
+            'kubejs:sulfur_powder',
+            'kubejs:crystallum_coccus'
         ],
         [
-            AddItem('kubejs:fluorite'),
-            AddItem('kubejs:crystallum_coccus')
-        ],
-        300, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddFluid('100 #cwi:water'),
-            AddItem('kubejs:flint_powder'),
-            AddItem('kubejs:crystallum_coccus')
-        ],
-        [
-            AddItem('minecraft:flint'),
-            AddItem('kubejs:crystallum_coccus')
+            'kubejs:sulfur_item',
+            'kubejs:crystallum_coccus'
         ],
         300, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('100 #cwi:water'),
-            AddItem('kubejs:halite_powder'),
-            AddItem('kubejs:crystallum_coccus')
+            Fluid.sizedIngredientOf('#cwi:water', 100),
+            'minecraft:redstone',
+            'kubejs:crystallum_coccus'
         ],
         [
-            AddItem('kubejs:halite_item'),
-            AddItem('kubejs:crystallum_coccus')
+            'kubejs:redstone',
+            'kubejs:crystallum_coccus'
         ],
         300, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('125 kubejs:raw_brine'),
-            AddItem('kubejs:crystallum_coccus')
+            Fluid.sizedIngredientOf('#cwi:water', 100),
+            'kubejs:fluorite_powder',
+            'kubejs:crystallum_coccus'
         ],
         [
-            AddItem('kubejs:halite_item'),
-            AddItem('kubejs:crystallum_coccus')
+            'kubejs:fluorite',
+            'kubejs:crystallum_coccus'
+        ],
+        300, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            Fluid.sizedIngredientOf('#cwi:water', 100),
+            'kubejs:flint_powder',
+            'kubejs:crystallum_coccus'
+        ],
+        [
+            'minecraft:flint',
+            'kubejs:crystallum_coccus'
+        ],
+        300, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            Fluid.sizedIngredientOf('#cwi:water', 100),
+            'kubejs:halite_powder',
+            'kubejs:crystallum_coccus'
+        ],
+        [
+            'kubejs:halite_item',
+            'kubejs:crystallum_coccus'
+        ],
+        300, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            Fluid.of('kubejs:raw_brine', 125),
+            'kubejs:crystallum_coccus'
+        ],
+        [
+            'kubejs:halite_item',
+            'kubejs:crystallum_coccus'
         ],
         300, undefined, ['basin', 'bulk']
     )
@@ -1076,56 +1077,56 @@ ServerEvents.recipes(function(event) {
 // Putrelys Sporogenes
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:powdered_putrelys_sporogenes'),
-            AddItem('2x kubejs:yeast_paste'),
-            AddItem('3x ratatouille:compost_residue'),
-            AddFluid('250 kubejs:syrup'),
-            AddFluid('1000 kubejs:distilled_water')
+            'kubejs:powdered_putrelys_sporogenes',
+            '2x kubejs:yeast_paste',
+            '3x ratatouille:compost_residue',
+            Fluid.of('kubejs:syrup', 250),
+            Fluid.of('kubejs:distilled_water', 1000)
         ],
         [
-            AddItem('kubejs:putrelys_sporogenes')
-        ],
-        3000, undefined, ['basin', 'bulk']
-    )
-
-    addFermentingRecipes(event,
-        [
-            AddItem('kubejs:powdered_putrelys_sporogenes'),
-            AddItem('2x kubejs:yeast_paste'),
-            AddItem('3x ratatouille:compost_residue'),
-            AddItem('2x minecraft:sugar'),
-            AddFluid('1000 kubejs:distilled_water')
-        ],
-        [
-            AddItem('kubejs:putrelys_sporogenes')
+            'kubejs:putrelys_sporogenes'
         ],
         3000, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('ratatouille:compost_mass'),
-            AddFluid('100 createdieselgenerators:plant_oil'),
-            AddItem('kubejs:putrelys_sporogenes')
+            'kubejs:powdered_putrelys_sporogenes',
+            '2x kubejs:yeast_paste',
+            '3x ratatouille:compost_residue',
+            '2x minecraft:sugar',
+            Fluid.of('kubejs:distilled_water', 1000)
         ],
         [
-            AddItem('ratatouille:compost_residue'),
-            AddFluid('50 ratatouille:bio_gas'),
-            AddFluid('100 ratatouille:compost_tea'),
-            AddItem('kubejs:putrelys_sporogenes')
+            'kubejs:putrelys_sporogenes'
+        ],
+        3000, undefined, ['basin', 'bulk']
+    )
+
+    addFermentingRecipes(event,
+        [
+            'ratatouille:compost_mass',
+            Fluid.of('createdieselgenerators:plant_oil', 100),
+            'kubejs:putrelys_sporogenes'
+        ],
+        [
+            'ratatouille:compost_residue',
+            Fluid.of('ratatouille:bio_gas', 50),
+            Fluid.of('ratatouille:compost_tea', 100),
+            'kubejs:putrelys_sporogenes'
         ],
         600, undefined, ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('ratatouille:compost_residue'),
-            AddItem('kubejs:putrelys_sporogenes')
+            'ratatouille:compost_residue',
+            'kubejs:putrelys_sporogenes'
         ],
         [
-            AddItem('kubejs:peat'),
-            AddFluid('25 ratatouille:bio_gas'),
-            AddItem('kubejs:putrelys_sporogenes')
+            'kubejs:peat',
+            Fluid.of('ratatouille:bio_gas', 25),
+            'kubejs:putrelys_sporogenes'
         ],
         1200, undefined, ['basin', 'bulk']
     )
@@ -1133,95 +1134,95 @@ ServerEvents.recipes(function(event) {
 // Vulcan Thermus
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:vulcan_thermus'),
-            AddFluid('10 createdieselgenerators:ethanol'),
-            AddFluid('10 kubejs:oxygen')
+            'kubejs:vulcan_thermus',
+            Fluid.of('createdieselgenerators:ethanol', 10),
+            Fluid.of('kubejs:oxygen', 10)
         ],
         [
-            AddFluid('10 kubejs:acetic_acid'),
-            AddFluid('10 minecraft:water'),
-            AddItem('kubejs:vulcan_thermus')
+            Fluid.of('kubejs:acetic_acid', 10),
+            Fluid.of('minecraft:water', 10),
+            'kubejs:vulcan_thermus'
         ],
-        5, "heated", ['basin', 'bulk']
+        5, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('minecraft:charcoal'),
-            AddFluid('100 minecraft:water'),
-            AddItem('kubejs:vulcan_thermus')
+            'minecraft:charcoal',
+            Fluid.of('minecraft:water', 100),
+            'kubejs:vulcan_thermus'
         ],
         [
-            AddFluid('100 kubejs:syngas'),
-            AddItem('kubejs:vulcan_thermus')
+            Fluid.of('kubejs:syngas', 100),
+            'kubejs:vulcan_thermus'
         ],
-        400, "heated", ['basin', 'bulk']
+        400, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:charcoal_powder'),
-            AddFluid('100 minecraft:water'),
-            AddItem('kubejs:vulcan_thermus')
+            'kubejs:charcoal_powder',
+            Fluid.of('minecraft:water', 100),
+            'kubejs:vulcan_thermus'
         ],
         [
-            AddFluid('100 kubejs:syngas'),
-            AddItem('kubejs:vulcan_thermus')
+            Fluid.of('kubejs:syngas', 100),
+            'kubejs:vulcan_thermus'
         ],
-        300, "heated", ['basin', 'bulk']
+        300, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('kubejs:sulfur_powder'),
-            AddFluid('100 kubejs:oxygen'),
-            AddItem('kubejs:vulcan_thermus')
+            'kubejs:sulfur_powder',
+            Fluid.of('kubejs:oxygen', 100),
+            'kubejs:vulcan_thermus'
         ],
         [
-            AddFluid('100 kubejs:sulfur_dioxide'),
-            AddItem('kubejs:vulcan_thermus')
+            Fluid.of('kubejs:sulfur_dioxide', 100),
+            'kubejs:vulcan_thermus'
         ],
-        200, "heated", ['basin', 'bulk']
+        200, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('100 kubejs:hydrogen_sulfide'),
-            AddFluid('150 kubejs:oxygen'),
-            AddItem('kubejs:vulcan_thermus')
+            Fluid.of('kubejs:hydrogen_sulfide', 100),
+            Fluid.of('kubejs:oxygen', 150),
+            'kubejs:vulcan_thermus'
         ],
         [
-            AddFluid('100 kubejs:sulfur_dioxide'),
-            AddFluid('100 minecraft:water'),
-            AddItem('kubejs:vulcan_thermus')
+            Fluid.of('kubejs:sulfur_dioxide', 100),
+            Fluid.of('minecraft:water', 100),
+            'kubejs:vulcan_thermus'
         ],
-        150, "heated", ['basin', 'bulk']
+        150, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('500 kubejs:raw_brine'),
-            AddItem('kubejs:vulcan_thermus')
+            Fluid.of('kubejs:raw_brine', 500),
+            'kubejs:vulcan_thermus'
         ],
         [
-            AddItem('4 ratatouille:salt'),
-            AddFluid('500 minecraft:water'),
-            AddItem('kubejs:vulcan_thermus')
+            '4x ratatouille:salt',
+            Fluid.of('minecraft:water', 500),
+            'kubejs:vulcan_thermus'
         ],
-        200, "heated", ['basin', 'bulk']
+        200, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddFluid('500 kubejs:alkaline_brine'),
-            AddItem('kubejs:vulcan_thermus')
+            Fluid.of('kubejs:alkaline_brine', 500),
+            'kubejs:vulcan_thermus'
         ],
         [
-            AddItem('3 ratatouille:salt'),
-            AddItem('1 kubejs:soda_powder'),
-            AddFluid('500 minecraft:water'),
-            AddItem('kubejs:vulcan_thermus')
+            '3x ratatouille:salt',
+            'kubejs:soda_powder',
+            Fluid.of('minecraft:water', 500),
+            'kubejs:vulcan_thermus'
         ],
-        200, "heated", ['basin', 'bulk']
+        200, 'heated', ['basin', 'bulk']
     )
 })

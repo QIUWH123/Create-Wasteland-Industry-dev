@@ -21,23 +21,23 @@ ServerEvents.recipes(event => {
             B: 'minecraft:apple'
         })
 
-        charging(event, 10000, 100, AddItem(appleItem), AddItem(chargedAppleItem))
+        event.recipes.createaddition.charging(chargedAppleItem, appleItem, 10000, 100)
 
         addFermentingRecipes(event,
             [
-                AddFluid('250 kubejs:redstone_acid'),
-                AddItem('2x kubejs:lapis_powder'),
-                AddItem('3x kubejs:amethyst_powder'),
-                AddItem(chargedAppleItem)
+                Fluid.of('kubejs:redstone_acid', 250),
+                '2x kubejs:lapis_powder',
+                '3x kubejs:amethyst_powder',
+                chargedAppleItem
             ],
             [
-                AddItem(enchantedAppleItem)
+                enchantedAppleItem
             ],
-            2400, "superheated", ['basin', 'bulk']
+            2400, 'superheated', ['basin', 'bulk']
         )
 
-        tableCasting(event, true, [AddItem('minecraft:apple'), AddFluid('720 ' + fluid)], 200, AddItem(appleItem))
-        basinCasting(event, true, [AddItem('minecraft:apple'), AddFluid('720 ' + fluid)], 200, AddItem(appleItem))
+        event.recipes.createmetallurgy.casting_in_table(appleItem, ['minecraft:apple', Fluid.of(fluid, 720)], 200).moldConsumed()
+        event.recipes.createmetallurgy.casting_in_basin(appleItem, ['minecraft:apple', Fluid.of(fluid, 720)], 200).moldConsumed()
     })
 
 })

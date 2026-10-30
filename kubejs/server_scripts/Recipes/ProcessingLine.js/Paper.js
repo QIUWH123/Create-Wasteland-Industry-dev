@@ -2,26 +2,26 @@ ServerEvents.recipes(function(event) {
 
     addFermentingRecipes(event,
         [
-            AddItem('8 createdieselgenerators:wood_chip'),
-            AddFluid('500 #cwi:water')
+            '8x createdieselgenerators:wood_chip',
+            Fluid.sizedIngredientOf('#cwi:water', 500)
         ],
         [
-            AddItem('2 create:pulp'),
-            AddItem('create:pulp', 0.5)
+            '2x create:pulp',
+            CreateItem.of(Item.of('create:pulp'), 0.5)
         ],
-        800, "heated", ['basin', 'bulk']
+        800, 'heated', ['basin', 'bulk']
     )
 
     addFermentingRecipes(event,
         [
-            AddItem('4 #create:pulpifiable'),
-            AddFluid('500 #cwi:water')
+            '4x #create:pulpifiable',
+            Fluid.sizedIngredientOf('#cwi:water', 500)
         ],
         [
-            AddItem('2 create:pulp'),
-            AddItem('create:pulp', 0.5)
+            '2x create:pulp',
+            CreateItem.of(Item.of('create:pulp'), 0.5)
         ],
-        800, "heated", ['basin', 'bulk']
+        800, 'heated', ['basin', 'bulk']
     )
 
     event.shaped(
@@ -38,7 +38,7 @@ ServerEvents.recipes(function(event) {
         }
     )
 
-    event.recipes.create.mixing(Fluid.of('kubejs:pulp', 500), ['create:pulp', AddFluid('500 #cwi:water')]).processingTime(200)
+    event.recipes.create.mixing(Fluid.of('kubejs:pulp', 500), ['create:pulp', Fluid.sizedIngredientOf('#cwi:water', 500)]).processingTime(200)
     event.recipes.create.mixing(Fluid.of('kubejs:fine_pulp', 500), Fluid.of('kubejs:pulp', 500)).processingTime(200)
 
     event.recipes.create.filling('kubejs:wet_web', ['kubejs:forming_fabric', Fluid.of('kubejs:fine_pulp', 100)])
